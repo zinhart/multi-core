@@ -1,2 +1,2 @@
-# Parralel
+# Parallel
 Cpu and Gpu Routines
