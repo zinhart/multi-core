@@ -1,2 +1,2 @@
-# Parallel
-Cpu and Gpu Routines
+# Concurrent Routines
+A Library of Cpu and Gpu Routines
