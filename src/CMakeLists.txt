@@ -4,15 +4,25 @@ if(BuildCuda)
   )
   # link with cuda lib
   cuda_add_library(concurrent_routines ${LIB_TYPE} ${concurrent_routines_lib})
+  set(concurrent_routines_lib 
+	${concurrent_routines_lib}
+	Threads:Threads
+	cpu.cc
+     )
+else()
+  set(concurrent_routines_lib 
+	${concurrent_routines_lib}
+	#	Threads:Threads
+	cpu.cc
+     )	
+     add_library(concurrent_routines ${concurrent_routines_lib})
+
 endif()
 
-set(concurrent_routines_lib 
-	${concurrent_routines_lib}
-	cpu.cc
-)
+
 
 #link cpu threading library
-target_link_libraries(concurrent_routines Threads:Threads)
+target_link_libraries(concurrent_routines ${concurrent_routines_lib})
 
 if(BuildShared)
   #install  libconcurrent_routines.a to <cmake output dir>/${CMAKE_CURRENT_DIR}/
