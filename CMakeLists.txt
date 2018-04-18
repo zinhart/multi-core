@@ -1,6 +1,7 @@
 # minimum cmake version
+cmake_minimum_required(VERSION 3.1)
+# library name
 project(concurrent_routines)
-cmake_minimum_required(VERSION 3.0)
 
 # set build type to release by default
 if (NOT CMAKE_BUILD_TYPE)
@@ -16,6 +17,21 @@ option(BuildCuda "BuildCuda" ON)
 option(BuildShared "BuildShared" OFF)
 # sanitizer support
 option(Sanitize "Sanitize" OFF)
+
+#threading options 
+option(PTHREADS "PTHREADS" ON)
+option(WIN32_THREADS "WIN32_THREADS" OFF)
+
+if(PTHREADS)
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+elseif(WIN32_THREADS)
+  set(THREADS_PREFER_WIN32_FLAG ON)
+else()
+  message(FATAL_ERROR "Choose 1 threading library")
+endif()
+
+# threading library
+find_package(Threads REQUIRED)
 
 # set lib type
 if(BuildShared)
@@ -46,6 +62,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-func
 
 # set nvcc flags for debugging
 if("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
+  #only if Building gpu support
   if(BuildCuda)
 	set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -G -Xcompiler -rdynamic -Wno-deprecated-gpu-targets")
   endif()
