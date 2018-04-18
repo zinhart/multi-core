@@ -22,6 +22,17 @@ option(Sanitize "Sanitize" OFF)
 option(PTHREADS "PTHREADS" ON)
 option(WIN32_THREADS "WIN32_THREADS" OFF)
 
+
+# set lib type
+if(BuildShared)
+  set(LIB_TYPE SHARED)
+else()
+  set(LIB_TYPE STATIC)
+endif()
+
+#set module path
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 if(PTHREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
 elseif(WIN32_THREADS)
@@ -33,12 +44,6 @@ endif()
 # threading library
 find_package(Threads REQUIRED)
 
-# set lib type
-if(BuildShared)
-  set(LIB_TYPE SHARED)
-else()
-  set(LIB_TYPE STATIC)
-endif()
 
 # find cuda package and set compute achitecture
 if(BuildCuda)
