@@ -3,12 +3,12 @@
 #include <algorithm>
 #include <thread>
 #include <vector>
-#define MAX_CPU_THREADS std::thread::hardware_concurrency();
 namespace zinhart
 { 
   void launch_cpu_threaded_saxpy(
-		const std::uint32_t n_elements, const std::uint32_t n_threads,
-		const double a, double * x, double * y
+		const double a, double * x, double * y,
+		const std::uint32_t n_elements, const std::uint32_t n_threads
+	
 		)
   { 
 	//to identify each thread
@@ -35,12 +35,12 @@ namespace zinhart
 		     );*/
 	for(thread_id = 0; thread_id < n_threads; ++thread_id)
 	{
-		threads[thread_id] = std::thread(saxpy<EXCECUTION_POLICY::PARALLEL>(), thread_id, n_threads, n_elements, a, x, y );
+//		threads[thread_id] = std::thread(saxpy<EXCECUTION_POLICY::PARALLEL>(), thread_id, n_threads, n_elements, a, x, y );
 	}
 	//for each thread wait until the thread returns
 	for(thread_id = 0; thread_id < n_threads; ++thread_id)
 	{
-		threads[thread_id].join();
+//		threads[thread_id].join();
 	}
   }
 }

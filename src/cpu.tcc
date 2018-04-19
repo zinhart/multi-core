@@ -30,7 +30,7 @@ namespace zinhart
 	  	{
 		}
 	};
-
+  //purely for comparison purposes
   template<>
 	class saxpy<EXCECUTION_POLICY::SEQUENTIAL>
 	{
