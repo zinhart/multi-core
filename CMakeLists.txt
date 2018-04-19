@@ -12,7 +12,7 @@ endif()
 # for unit tests using google test
 option(BuildTest "BuildTest" ON)
 # for cuda
-option(BuildCuda "BuildCuda" OFF)
+option(BuildCuda "BuildCuda" ON)
 # library type
 option(BuildShared "BuildShared" OFF)
 # sanitizer support
