@@ -11,7 +11,7 @@ namespace zinhart
  * */
   void saxpy(const std::uint32_t thread_id,
 		  	   const std::uint32_t n_threads, const std::uint32_t n_elements, 
-  			   const double a, double * x, double * y 
+  			   const float a, float * x, float * y 
 	  )
   {
 	//total number of operations that must be performed by each thread
@@ -27,14 +27,11 @@ namespace zinhart
 	  y[op] = a * x[op] + y[op];
 	}
   }
-  void copy(const double a, double * x, double * y)
-  {
-  }
 /*
- * CPU WRAPPERS
+ * CPU WRAPPERS IMPLEMENTATION
  * */
   void paralell_saxpy_cpu(
-		const double & a, double * x, double * y,
+		const float & a, float * x, float * y,
 		const std::uint32_t & n_elements, const std::uint32_t & n_threads
 		)
   { 
