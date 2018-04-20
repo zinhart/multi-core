@@ -6,6 +6,9 @@
 namespace zinhart
 { 
 
+/*
+ * CPU THREADED ROUTINES
+ * */
   void saxpy(const std::uint32_t thread_id,
 		  	   const std::uint32_t n_threads, const std::uint32_t n_elements, 
   			   const double a, double * x, double * y 
@@ -24,10 +27,15 @@ namespace zinhart
 	  y[op] = a * x[op] + y[op];
 	}
   }
-  void launch_cpu_threaded_saxpy(
+  void copy(const double a, double * x, double * y)
+  {
+  }
+/*
+ * CPU WRAPPERS
+ * */
+  void paralell_saxpy_cpu(
 		const double & a, double * x, double * y,
 		const std::uint32_t & n_elements, const std::uint32_t & n_threads
-	
 		)
   { 
 	//to identify each thread

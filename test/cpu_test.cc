@@ -5,7 +5,7 @@
 #include <limits>
 #include <memory>
 //using namespace zinhart;
-TEST(cpu_test, launch_cpu_threaded_saxpy)
+TEST(cpu_test, paralell_saxpy_cpu)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -38,7 +38,7 @@ TEST(cpu_test, launch_cpu_threaded_saxpy)
 							y[i] = a * x[i] + y[i];
 						  }
 						};
-  zinhart::launch_cpu_threaded_saxpy(alpha, x_parallel.get(), y_parallel.get(), n_elements);
+  zinhart::paralell_saxpy_cpu(alpha, x_parallel.get(), y_parallel.get(), n_elements);
   serial_saxpy(alpha, x_serial.get(), y_serial.get(), n_elements);
   for(i = 0; i < n_elements; ++i)
   {
