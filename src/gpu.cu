@@ -10,6 +10,8 @@ namespace zinhart
 	  return;
 	y[thread_id] = a * x[thread_id] + y[thread_id];
   }
+
+  
   // GPU WRAPPERS
   HOST int parallel_saxpy_gpu(
   		const float & a, float * x, float * y, const std::uint32_t N)
@@ -35,6 +37,4 @@ namespace zinhart
 	}
 		return 0;
   }
-
-  
 }

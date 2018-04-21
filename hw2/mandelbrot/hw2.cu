@@ -1,3 +1,42 @@
+#include "mandelbrot/hw2.hh" 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+__global__ void render(char *out, const int width, const int height, const int max_iter) 
+{
+  int x_dim = blockIdx.x*blockDim.x + threadIdx.x;
+  int y_dim = blockIdx.y*blockDim.y + threadIdx.y;
+  int index = 3*width*y_dim + x_dim*3;
+  float x_origin = ((float) x_dim/width)*3.25 - 2;
+  float y_origin = ((float) y_dim/width)*2.5 - 1.25;
+
+  float x = 0.0;
+  float y = 0.0;
+
+  int iteration = 0;
+  while(x*x + y*y <= 4 && iteration < max_iter) 
+  {
+    float xtemp = x*x - y*y + x_origin;
+    y = 2*x*y + y_origin;
+    x = xtemp;
+    iteration++;
+  }
+
+  if(iteration == max_iter) 
+  {
+    out[index] = 0;
+    out[index + 1] = 0;
+    out[index + 2] = 0;
+  } 
+  else 
+  {
+    out[index] = iteration;
+    out[index + 1] = iteration;
+    out[index + 2] = iteration;
+  }
+}
+
+
 /****************************************************************************
     bmp.c - read and write bmp images.
     Distributed with Xplanet.
@@ -17,10 +56,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ****************************************************************************/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 struct BMPHeader
 {
@@ -43,15 +78,13 @@ struct BMPHeader
                              are important */
 };
 
-int
-read_bmp(const char *filename, int *width, int *height, unsigned char *rgb)
+int read_bmp(const char *filename, int *width, int *height, unsigned char *rgb)
 {
     fprintf(stderr, "Sorry, reading of .bmp files isn't supported yet.\n");
     return(0);
 }
 
-int
-write_bmp(const char *filename, int width, int height, char *rgb)
+int write_bmp(const char *filename, int width, int height, char *rgb)
 {
     int i, j, ipos;
     int bytesPerLine;
@@ -99,7 +132,7 @@ write_bmp(const char *filename, int width, int height, char *rgb)
     fwrite(&bmph.biClrUsed, 4, 1, file);
     fwrite(&bmph.biClrImportant, 4, 1, file);
 
-    line = malloc(bytesPerLine);
+    line = (unsigned char *)malloc(bytesPerLine);
     if (line == NULL)
     {
         fprintf(stderr, "Can't allocate memory for BMP file.\n");
@@ -122,4 +155,27 @@ write_bmp(const char *filename, int width, int height, char *rgb)
     fclose(file);
 
     return(1);
+}
+
+void mandelbrot(int width, int height, int max_iter)
+{
+	// Multiply by 3 here, since we need red, green and blue for each pixel
+  size_t buffer_size = sizeof(char) * width * height * 3;
+
+	char *image;
+  cudaMalloc((void **) &image, buffer_size);
+
+  char *host_image = (char *) malloc(buffer_size);
+
+  dim3 blockDim(16, 16, 1);
+  dim3 gridDim(width / blockDim.x, height / blockDim.y, 1);
+  render<<< gridDim, blockDim, 0 >>>(image, width, height, max_iter);
+
+  cudaMemcpy(host_image, image, buffer_size, cudaMemcpyDeviceToHost);
+
+  // Now write the file
+  write_bmp("output.bmp", width, height, host_image);
+
+  cudaFree(image);
+  free(host_image);
 }

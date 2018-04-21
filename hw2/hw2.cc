@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "concurrent_routines/concurrent_routines.hh"
-#include "concurrent_routines/mandelbrot.hh"
+#include "mandelbrot/hw2.hh"
 #include <chrono>
 #include <cuda.h>
 #include <cuda_runtime_api.h>
@@ -13,7 +13,7 @@
 #include <memory>
 #include <iostream>
 #include <iomanip>
-void compare_saxpy(std::uint32_t n_elements);
+/*void compare_saxpy(std::uint32_t n_elements);
 void compare_mandelbrot(std::uint32_t width, std::uint32_t height, std::uint32_t iters);
 
 class Timer {
@@ -40,11 +40,14 @@ class Timer {
 	}
   private:
   high_resolution_clock::time_point _start;
-};
+};*/
 
 
 int main() 
 {
+  mandelbrot(7680, 7680, 8192);
+
+  /*
   compare_saxpy(16);
   compare_saxpy(128);
   compare_saxpy(1024);
@@ -55,10 +58,10 @@ int main()
   compare_mandelbrot(1024, 1024, 512);
   compare_mandelbrot(2048, 2048, 512);
   compare_mandelbrot(4096, 4096, 512);
-  compare_mandelbrot(8192, 8192, 512);
+  compare_mandelbrot(8192, 8192, 512);*/
   return 0;
 }
-
+/*
 void compare_saxpy(std::uint32_t n_elements)
 {
   auto serial_saxpy = [](const float & a, float * x, float * y,std::uint32_t n_elem)
@@ -142,4 +145,4 @@ void compare_mandelbrot(std::uint32_t width, std::uint32_t height, std::uint32_t
   auto elapsed_gpu = timer_gpu.Elapsed();
   std::cout<<"\n"<<std::fixed<<"width:" <<width<<" height: "<<height<<" iterations: "<<iters<<" gpu time: "<<elapsed_gpu.count()<<" ms";
 }
-
+*/

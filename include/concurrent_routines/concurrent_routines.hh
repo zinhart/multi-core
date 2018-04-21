@@ -21,8 +21,6 @@ namespace zinhart
   HOST T paralell_accumulate_cpu( InputIt first, InputIt last, T init,
 									const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
-
-
   template < class InputIt, class UnaryFunction >
   HOST UnaryFunction paralell_for_each_cpu(InputIt first, InputIt last, UnaryFunction f,
 	  	                              const std::uint32_t & n_threads = MAX_CPU_THREADS  );
