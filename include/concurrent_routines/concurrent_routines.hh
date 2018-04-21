@@ -18,6 +18,9 @@ namespace zinhart
   template< class InputIt, class T >
   T paralell_accumulate_cpu( InputIt first, InputIt last, T init,
 									const std::uint32_t & n_threads = MAX_CPU_THREADS);
+
+
+
   template < class InputIt, class UnaryFunction >
   UnaryFunction paralell_for_each_cpu(InputIt first, InputIt last, UnaryFunction f,
 	  	                              const std::uint32_t & n_threads = MAX_CPU_THREADS  );
@@ -28,6 +31,8 @@ namespace zinhart
   template < class ForwardIt, class Generator >
   void paralell_generate_cpu(ForwardIt first, ForwardIt last, Generator g,
 	   const std::uint32_t & n_threads = MAX_CPU_THREADS);
+
+
 #if CUDA_ENABLED == true
   //GPU WRAPPERS
   void launch_gpu_threaded_saxpy(

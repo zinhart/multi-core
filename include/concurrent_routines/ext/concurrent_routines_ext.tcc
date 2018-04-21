@@ -37,12 +37,33 @@ namespace zinhart
 	//if it's the first thread, start should be 0
 	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
 	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
-	//here stop start is how much we should increment the (output/input)_it
+	// all threads will contribute to the final value of this memory address
 	for(std::uint32_t op = start; op < stop; ++op)
 	{
 	  init = init + *(first + op);
 	}
   }  
+
+
+  template< class InputIt, class UnaryFunction >
+  void parallel_for_each(InputIt first, UnaryFunction f,
+		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
+  {
+	//total number of operations that must be performed by each thread
+  	const std::uint32_t n_ops = n_elements / n_threads; 
+	//may not divide evenly
+	const std::uint32_t remaining_ops = n_elements % n_threads;
+	//if it's the first thread, start should be 0
+	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
+	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+	//call f on each element
+	for(std::uint32_t op = start; op < stop; ++op)
+	{
+	  f( *(first + op) );
+	}
+  }
+
+
 
 
 
@@ -89,14 +110,29 @@ namespace zinhart
 	}
 	return init;
   }
- /* 
+  
   template < class InputIt, class UnaryFunction >
   UnaryFunction paralell_for_each_cpu(InputIt first, InputIt last, UnaryFunction f,
 	  	                              const std::uint32_t & n_threads = MAX_CPU_THREADS  )
   
   {
+	//to identify each thread
+	std::uint32_t thread_id = 0;
+	const std::uint32_t n_elements = std::distance(first, last);
+	std::vector<std::thread> threads(n_threads);
+	//initialize each thread
+	for(std::thread & t : threads)
+	{
+	  t = std::thread(parallel_for_each<InputIt, UnaryFunction>, std::ref(first), std::ref(f), thread_id, n_elements, n_threads );
+	  ++thread_id;
+	}
+	for(std::thread & t : threads)
+	{
+	  t.join();
+	}
+	return f;
   }
-  template < class InputIt, class OutputIt, class UnaryOperation >
+ /* template < class InputIt, class OutputIt, class UnaryOperation >
   OutputIt paralell_transform_each_cpu(InputIt first1, InputIt last1, OutputIt d_first, UnaryOperation unary_op,
 									   const std::uint32_t & n_threads = MAX_CPU_THREADS )
   {
