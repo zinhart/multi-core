@@ -17,3 +17,6 @@ debug*
 
 # IDE files:
 *.swp
+
+# Image Files
+*.bmp
