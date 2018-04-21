@@ -165,3 +165,30 @@ TEST(cpu_test, paralell_transform_cpu)
 	ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
   }
 }
+
+TEST(cpu_test, paralell_generate_cpu)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::uint32_t i = 0;
+  for(i = 0; i < n_elements; ++i )
+  {
+	float first = real_dist(mt);
+	x_serial.get()[i] = first;
+	x_parallel.get()[i] = first;
+  }
+  auto generator = [](){ return -2.0; };
+  zinhart::paralell_generate_cpu(x_parallel.get(), x_parallel.get() + n_elements, generator);
+  std::generate(x_serial.get(), x_serial.get() + n_elements, generator);
+  for(i = 0; i < n_elements; ++i)
+  {
+	ASSERT_EQ(x_parallel.get()[i], x_serial.get()[i]);
+  }
+}

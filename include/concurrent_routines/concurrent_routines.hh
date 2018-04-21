@@ -28,8 +28,8 @@ namespace zinhart
   template < class InputIt, class OutputIt, class UnaryOperation >
   OutputIt paralell_transform_cpu(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op,
 									   const std::uint32_t & n_threads = MAX_CPU_THREADS );
-  template < class ForwardIt, class Generator >
-  void paralell_generate_cpu(ForwardIt first, ForwardIt last, Generator g,
+  template < class BidirectionalIt, class Generator >
+  void paralell_generate_cpu(BidirectionalIt first, BidirectionalIt last, Generator g,
 	   const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
 
