@@ -1,4 +1,5 @@
 #include "concurrent_routines/concurrent_routines.hh"
+#include "concurrent_routines/timer.hh"
 #include <iostream>
 namespace zinhart
 {
@@ -27,14 +28,24 @@ namespace zinhart
 	block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
 	block_launch.y = 1;
 	block_launch.z = 1;
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+	cudaEventRecord(start);
 	parallel_saxpy_kernel<<<block_launch, threads_per_block >>>(a, x, y, N);
 	cudaDeviceSynchronize();
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
 	error_id = cudaGetLastError();
   	if(error_id != cudaSuccess)
 	{
 	  std::cerr<<"saxpy failed to launch with error: "<<cudaGetErrorString(error_id)<<"\n";
 	  return 1;
 	}
-		return 0;
+
+	float milliseconds = 0;
+	cudaEventElapsedTime(&milliseconds, start, stop);
+	std::cout<<"\ngpu time: "<<milliseconds;
+	return 0;
   }
 }

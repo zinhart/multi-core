@@ -1,9 +1,8 @@
-// Note: Most of the code comes from the MacResearch OpenCL podcast
-
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include "concurrent_routines/concurrent_routines.hh"
+#include "concurrent_routines/timer.hh"
 #include "mandelbrot/hw2.hh"
 #include <chrono>
 #include <cuda.h>
@@ -13,55 +12,31 @@
 #include <memory>
 #include <iostream>
 #include <iomanip>
-/*void compare_saxpy(std::uint32_t n_elements);
+void compare_saxpy(std::uint32_t n_elements);
 void compare_mandelbrot(std::uint32_t width, std::uint32_t height, std::uint32_t iters);
-
-class Timer {
-  typedef std::chrono::high_resolution_clock high_resolution_clock;
-  typedef std::chrono::milliseconds milliseconds;
-  public:
-  explicit Timer(bool run = false)
-  {
-	if (run)
-	  Reset();
-  }
-  void Reset()
-  {
-	_start = high_resolution_clock::now();
-  }
-  milliseconds Elapsed() const
-  {
-	return std::chrono::duration_cast<milliseconds>(high_resolution_clock::now() - _start);
-  }
-  template <typename T, typename Traits>
-	friend std::basic_ostream<T, Traits>& operator<<(std::basic_ostream<T, Traits>& out, const Timer& timer)
-	{
-	  return out << timer.Elapsed().count();	
-	}
-  private:
-  high_resolution_clock::time_point _start;
-};*/
-
+void serial_render ( char *out , const  int width , const  int  height  , const  int  max_iter);
 
 int main() 
 {
-  mandelbrot(7680, 7680, 8192);
-
-  /*
+  std::cout<<"All time units should be interpreted as milliseconds";
+  std::cout<<"\nSaxpy timed";
   compare_saxpy(16);
   compare_saxpy(128);
   compare_saxpy(1024);
   compare_saxpy(2048);
   compare_saxpy(8192);
   compare_saxpy(65536);
+  compare_saxpy(1000000);
 
+  std::cout<<"\nMandelbrot timed";
   compare_mandelbrot(1024, 1024, 512);
   compare_mandelbrot(2048, 2048, 512);
   compare_mandelbrot(4096, 4096, 512);
-  compare_mandelbrot(8192, 8192, 512);*/
+  compare_mandelbrot(8192, 8192, 512);
+  std::cout<<"\n";
   return 0;
 }
-/*
+
 void compare_saxpy(std::uint32_t n_elements)
 {
   auto serial_saxpy = [](const float & a, float * x, float * y,std::uint32_t n_elem)
@@ -114,17 +89,22 @@ void compare_saxpy(std::uint32_t n_elements)
 	std::cerr<<"x_device (HostToDevice) memcpy failed with error: "<<cudaGetErrorString(error_id)<<"\n";
 
   //timers here
-  Timer timer_gpu(true);
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  cudaEventRecord(start);
+  serial_saxpy(a,x_host.get(),y_host.get(),n_elements);
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  std::cout<<"\nN: "<<n_elements;
+  std::cout<<"\ncpu time: "<<milliseconds;
+
   //call kernel
   zinhart::parallel_saxpy_gpu(a, x_device, y_device, n_elements);
-  auto elapsed_gpu = timer_gpu.Elapsed();
-  Timer timer_cpu(true);
-  serial_saxpy(a,x_host.get(),y_host.get(),n_elements);
-  auto elapsed_cpu = timer_cpu.Elapsed(); 
-  std::cout<<std::fixed<<"\nN:" <<n_elements<<"\ngpu time"<<elapsed_gpu.count()<<"ms "<<"cpu time"<<elapsed_cpu.count()<<"ms";
 
- 
-  //copy memory back to host
+   //copy memory back to host
   error_id = cudaMemcpy( y_host_copy.get(), y_device, std::uint32_t(n_elements) * sizeof(float), cudaMemcpyDeviceToHost);
   //check for errors
   if(error_id != cudaSuccess)
@@ -140,9 +120,60 @@ void compare_saxpy(std::uint32_t n_elements)
 }
 void compare_mandelbrot(std::uint32_t width, std::uint32_t height, std::uint32_t iters)
 {
-  Timer timer_gpu(true);
+  std::cout<<"\nwidth: "<<width<< " height: " <<height<<" iterations: "<<iters;
   mandelbrot(width, height, iters);
-  auto elapsed_gpu = timer_gpu.Elapsed();
-  std::cout<<"\n"<<std::fixed<<"width:" <<width<<" height: "<<height<<" iterations: "<<iters<<" gpu time: "<<elapsed_gpu.count()<<" ms";
+  size_t buffer_size = sizeof(char) * width * height * 3;
+  char *host_image = (char *) malloc(buffer_size);
+/*
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  cudaEventRecord(start);
+  serial_render(host_image, width, height, buffer_size);
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  std::cout<<"\ncpu time: "<<milliseconds;
+  write_bmp("output_serial.bmp", width, height, host_image);
+  free(host_image);
+  */
 }
-*/
+
+void serial_render ( char *out , const  int width , const  int  height  , const  int  max_iter)
+{
+  float  x_origin , y_origin , xtemp , x, y;
+  int  iteration , index;
+  for(int i = 0; i < width; i++)
+  {
+   	for(int j = 0; j < height; j++)
+	{
+	  index = 3* width*j + i*3;
+	  iteration = 0;
+	  x = 0.0f;
+	  y = 0.0f;
+	  x_origin = (( float) i/width)*3.25f  -2.0f;
+	  y_origin = (( float) j/width)*2.5f - 1.25f;
+	  while(x*x + y*y  <= 4 &&  iteration  < max_iter)
+	  {
+	  xtemp = x*x - y*y + x_origin;
+	  y = 2*x*y + y_origin;
+	  x = xtemp;
+	  iteration ++;
+	  }
+	  if(iteration == max_iter)
+	  {
+		out[index] = 0;
+		out[index + 1] = 0;
+		out[index + 2] = 0;
+	  }
+	  else
+	  {
+		out[index] = iteration;
+		out[index + 1] = iteration;
+		out[index + 2] = iteration;
+	  }
+	}
+  }
+}
+

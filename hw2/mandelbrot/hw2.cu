@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 __global__ void render(char *out, const int width, const int height, const int max_iter) 
 {
   int x_dim = blockIdx.x*blockDim.x + threadIdx.x;
@@ -169,8 +170,18 @@ void mandelbrot(int width, int height, int max_iter)
 
   dim3 blockDim(16, 16, 1);
   dim3 gridDim(width / blockDim.x, height / blockDim.y, 1);
-  render<<< gridDim, blockDim, 0 >>>(image, width, height, max_iter);
 
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  cudaEventRecord(start);
+  render<<< gridDim, blockDim, 0 >>>(image, width, height, max_iter);
+  cudaDeviceSynchronize();
+  cudaEventRecord(stop);
+  cudaEventSynchronize(stop);
+  float milliseconds = 0;
+  cudaEventElapsedTime(&milliseconds, start, stop);
+  std::cout<<"\ngpu time: "<<milliseconds;
   cudaMemcpy(host_image, image, buffer_size, cudaMemcpyDeviceToHost);
 
   // Now write the file
