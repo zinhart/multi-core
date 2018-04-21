@@ -4,6 +4,10 @@
 #include <thread>
 #include <cstdint>
 #define MAX_CPU_THREADS std::thread::hardware_concurrency()
+#if CUDA_ENABLED == true
+#include <cuda.h>
+#include <builtin_types.h>
+#endif
 namespace zinhart
 {
 
@@ -33,13 +37,10 @@ namespace zinhart
 	   const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
 
-#if CUDA_ENABLED == true
+//#if CUDA_ENABLED == true
   //GPU WRAPPERS
-  void launch_gpu_threaded_saxpy(
-		const double & a, double * x, double * y,
-		const std::uint32_t & n_elements 
-	  );
-#endif
+  int parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
+//#endif
 }
 #include "ext/concurrent_routines_ext.tcc"
 #endif
