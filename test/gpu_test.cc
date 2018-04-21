@@ -46,6 +46,7 @@ TEST(gpu_test, parrallel_saxpy_gpu)
   {
 	x_host.get()[i] = real_dist(mt);
 	y_host.get()[i] = real_dist(mt);
+	y_host_copy.get()[i] = y_host.get()[i];
 	y_host.get()[i] = serial_saxpy(a, x_host.get()[i], y_host.get()[i]);
   }
 

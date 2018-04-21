@@ -18,4 +18,7 @@
 #define SHARED
 #endif
 
+#include <cuda.h>
+#include <builtin_types.h>
+
 #endif
