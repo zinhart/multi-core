@@ -64,6 +64,23 @@ namespace zinhart
   }
 
 
+  template<class InputIt, class OutputIt, class UnaryOperation>
+  void parallel_transform(InputIt input_it, OutputIt output_it, UnaryOperation unary_op,
+		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
+  {
+	//total number of operations that must be performed by each thread
+  	const std::uint32_t n_ops = n_elements / n_threads; 
+	//may not divide evenly
+	const std::uint32_t remaining_ops = n_elements % n_threads;
+	//if it's the first thread, start should be 0
+	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
+	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+	//same deal as copy really
+	for(std::uint32_t op = start; op < stop; ++op)
+	{
+	  *(output_it + op) = unary_op( *(input_it + op) );
+	}
+  }
 
 
 
@@ -113,7 +130,7 @@ namespace zinhart
   
   template < class InputIt, class UnaryFunction >
   UnaryFunction paralell_for_each_cpu(InputIt first, InputIt last, UnaryFunction f,
-	  	                              const std::uint32_t & n_threads = MAX_CPU_THREADS  )
+	  	                              const std::uint32_t & n_threads )
   
   {
 	//to identify each thread
@@ -132,12 +149,24 @@ namespace zinhart
 	}
 	return f;
   }
- /* template < class InputIt, class OutputIt, class UnaryOperation >
-  OutputIt paralell_transform_each_cpu(InputIt first1, InputIt last1, OutputIt d_first, UnaryOperation unary_op,
-									   const std::uint32_t & n_threads = MAX_CPU_THREADS )
+  template < class InputIt, class OutputIt, class UnaryOperation >
+  OutputIt paralell_transform_cpu(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op, const std::uint32_t & n_threads )
   {
+	//to identify each thread
+	std::uint32_t thread_id = 0;
+	const std::uint32_t n_elements = std::distance(first, last);
+	std::vector<std::thread> threads(n_threads);
+	//initialize each thread
+	for(std::thread & t : threads)
+	{
+	  t = std::thread(parallel_transform<InputIt,OutputIt,UnaryOperation>, std::ref(first), std::ref(output_first), std::ref(unary_op), thread_id, n_elements, n_threads );
+	  ++thread_id;
+	}
+	for(std::thread & t : threads)
+	  t.join();
+	return output_first;
   }
-  template < class ForwardIt, class Generator >
+ /* template < class ForwardIt, class Generator >
   void paralell_generate_cpu(ForwardIt first, ForwardIt last, Generator g,
 	   const std::uint32_t & n_threads = MAX_CPU_THREADS)
   {
