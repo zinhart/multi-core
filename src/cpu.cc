@@ -1,26 +1,30 @@
 #include "concurrent_routines/concurrent_routines.hh"
-//#include "concurrent_routines/concurrent_routines_cpu_ext.hh"
 #include <algorithm>
 #include <thread>
 #include <vector>
 namespace zinhart
 { 
-
-/*
- * CPU THREADED ROUTINES
- * */
-  void saxpy(const std::uint32_t thread_id,
-		  	   const std::uint32_t n_threads, const std::uint32_t n_elements, 
-  			   const float a, float * x, float * y 
-	  )
+  //this function is used by each thread to determine what pieces of data it will operate on
+  HOST void partition(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop)
   {
 	//total number of operations that must be performed by each thread
   	const std::uint32_t n_ops = n_elements / n_threads; 
 	//may not divide evenly
 	const std::uint32_t remaining_ops = n_elements % n_threads;
 	//if it's the first thread, start should be 0
-	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+	start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
+	stop = n_ops * (thread_id + 1) + remaining_ops;
+  }
+/*
+ * CPU THREADED ROUTINES
+ * */
+  HOST void saxpy(const std::uint32_t thread_id,
+		  	   const std::uint32_t n_threads, const std::uint32_t n_elements, 
+  			   const float a, float * x, float * y 
+	  )
+  {
+	std::uint32_t start = 0, stop = 0;
+	partition(thread_id, n_threads, n_elements, start, stop);
 	//operate on y's elements from start to stop
 	for(std::uint32_t op = start; op < stop; ++op)
 	{
@@ -30,7 +34,7 @@ namespace zinhart
 /*
  * CPU WRAPPERS IMPLEMENTATION
  * */
-  void paralell_saxpy_cpu(
+  HOST void paralell_saxpy_cpu(
 		const float & a, float * x, float * y,
 		const std::uint32_t & n_elements, const std::uint32_t & n_threads
 		)

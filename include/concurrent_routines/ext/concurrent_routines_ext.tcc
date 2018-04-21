@@ -9,16 +9,12 @@ namespace zinhart
  * */
 
   template<class InputIt, class OutputIt>
-  void parallel_copy(InputIt input_it, OutputIt output_it,
+  HOST void parallel_copy(InputIt input_it, OutputIt output_it,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
   {
-	//total number of operations that must be performed by each thread
-  	const std::uint32_t n_ops = n_elements / n_threads; 
-	//may not divide evenly
-	const std::uint32_t remaining_ops = n_elements % n_threads;
-	//if it's the first thread, start should be 0
-	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+
+	std::uint32_t start = 0, stop = 0;
+	partition(thread_id, n_threads, n_elements, start, stop);
 	//here stop start is how much we should increment the (output/input)_it
 	for(std::uint32_t op = start; op < stop; ++op)
 	{
@@ -27,16 +23,12 @@ namespace zinhart
   }
  
   template< class InputIt, class T >
-  void parallel_accumulate(InputIt first, T & init,
+  HOST void parallel_accumulate(InputIt first, T & init,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
   {
-	//total number of operations that must be performed by each thread
-  	const std::uint32_t n_ops = n_elements / n_threads; 
-	//may not divide evenly
-	const std::uint32_t remaining_ops = n_elements % n_threads;
-	//if it's the first thread, start should be 0
-	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+
+	std::uint32_t start = 0, stop = 0;
+	partition(thread_id, n_threads, n_elements, start, stop);
 	// all threads will contribute to the final value of this memory address
 	for(std::uint32_t op = start; op < stop; ++op)
 	{
@@ -46,16 +38,12 @@ namespace zinhart
 
 
   template< class InputIt, class UnaryFunction >
-  void parallel_for_each(InputIt first, UnaryFunction f,
+  HOST void parallel_for_each(InputIt first, UnaryFunction f,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
   {
-	//total number of operations that must be performed by each thread
-  	const std::uint32_t n_ops = n_elements / n_threads; 
-	//may not divide evenly
-	const std::uint32_t remaining_ops = n_elements % n_threads;
-	//if it's the first thread, start should be 0
-	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+
+	std::uint32_t start = 0, stop = 0;
+	partition(thread_id, n_threads, n_elements, start, stop);
 	//call f on each element
 	for(std::uint32_t op = start; op < stop; ++op)
 	{
@@ -65,16 +53,12 @@ namespace zinhart
 
 
   template<class InputIt, class OutputIt, class UnaryOperation>
-  void parallel_transform(InputIt input_it, OutputIt output_it, UnaryOperation unary_op,
+  HOST void parallel_transform(InputIt input_it, OutputIt output_it, UnaryOperation unary_op,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
   {
-	//total number of operations that must be performed by each thread
-  	const std::uint32_t n_ops = n_elements / n_threads; 
-	//may not divide evenly
-	const std::uint32_t remaining_ops = n_elements % n_threads;
-	//if it's the first thread, start should be 0
-	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+
+	std::uint32_t start = 0, stop = 0;
+	partition(thread_id, n_threads, n_elements, start, stop);
 	//same deal as copy really
 	for(std::uint32_t op = start; op < stop; ++op)
 	{
@@ -84,16 +68,12 @@ namespace zinhart
 
 
   template< class BidirectionalIt, class Generator >
-  void parallel_generate(BidirectionalIt first, Generator g,
+  HOST void parallel_generate(BidirectionalIt first, Generator g,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
   {
-	//total number of operations that must be performed by each thread
-  	const std::uint32_t n_ops = n_elements / n_threads; 
-	//may not divide evenly
-	const std::uint32_t remaining_ops = n_elements % n_threads;
-	//if it's the first thread, start should be 0
-	const std::uint32_t start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-	const std::uint32_t stop = n_ops * (thread_id + 1) + remaining_ops;
+
+	std::uint32_t start = 0, stop = 0;
+	partition(thread_id, n_threads, n_elements, start, stop);
 	//call f on each element
 	for(std::uint32_t op = start; op < stop; ++op)
 	{
@@ -101,14 +81,11 @@ namespace zinhart
 	}
   }
 
-
-
-
 /*
  * CPU WRAPPERS IMPLEMENTATION
  * */
   template<class InputIt, class OutputIt>
-  OutputIt paralell_copy_cpu(InputIt first, InputIt last, OutputIt output_first, const std::uint32_t & n_threads)
+  HOST OutputIt paralell_copy_cpu(InputIt first, InputIt last, OutputIt output_first, const std::uint32_t & n_threads)
   {
 	//to identify each thread
 	std::uint32_t thread_id = 0;
@@ -126,7 +103,7 @@ namespace zinhart
   }
   
   template< class InputIt, class T >
-  T paralell_accumalute_cpu( InputIt first, InputIt last, T init,
+  HOST T paralell_accumalute_cpu( InputIt first, InputIt last, T init,
 									const std::uint32_t & n_threads = MAX_CPU_THREADS	  )
   {
 
@@ -148,7 +125,7 @@ namespace zinhart
   }
   
   template < class InputIt, class UnaryFunction >
-  UnaryFunction paralell_for_each_cpu(InputIt first, InputIt last, UnaryFunction f,
+  HOST UnaryFunction paralell_for_each_cpu(InputIt first, InputIt last, UnaryFunction f,
 	  	                              const std::uint32_t & n_threads )
   
   {
@@ -169,8 +146,9 @@ namespace zinhart
 	return f;
   }
   template < class InputIt, class OutputIt, class UnaryOperation >
-  OutputIt paralell_transform_cpu(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op, const std::uint32_t & n_threads )
+  HOST OutputIt paralell_transform_cpu(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op, const std::uint32_t & n_threads )
   {
+	
 	//to identify each thread
 	std::uint32_t thread_id = 0;
 	const std::uint32_t n_elements = std::distance(first, last);
@@ -186,7 +164,7 @@ namespace zinhart
 	return output_first;
   }
   template < class BidirectionalIt, class Generator >
-  void paralell_generate_cpu(BidirectionalIt first, BidirectionalIt last, Generator g,
+  HOST void paralell_generate_cpu(BidirectionalIt first, BidirectionalIt last, Generator g,
 	   const std::uint32_t & n_threads)
   {
 	//to identify each thread

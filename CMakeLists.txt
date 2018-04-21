@@ -80,7 +80,7 @@ endif()
 
 # add src directory
 add_subdirectory(src)
-add_subdirectory(hw2)
+#add_subdirectory(hw2)
 
 #enable testing and add test directory
 if(BuildTest)

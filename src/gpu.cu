@@ -11,7 +11,7 @@ namespace zinhart
 	y[thread_id] = a * x[thread_id] + y[thread_id];
   }
   // GPU WRAPPERS
-  int parallel_saxpy_gpu(
+  HOST int parallel_saxpy_gpu(
   		const float & a, float * x, float * y, const std::uint32_t N)
   {
 	cudaError_t error_id;
