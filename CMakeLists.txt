@@ -22,6 +22,8 @@ option(Sanitize "Sanitize" OFF)
 option(PTHREADS "PTHREADS" ON)
 option(WIN32_THREADS "WIN32_THREADS" OFF)
 
+option (BuildHw2 "BuildHw2" OFF)
+
 
 # set lib type
 if(BuildShared)
@@ -80,7 +82,10 @@ endif()
 
 # add src directory
 add_subdirectory(src)
-add_subdirectory(hw2)
+
+if(BuildHw2)
+  add_subdirectory(hw2)
+endif()
 
 #enable testing and add test directory
 if(BuildTest)

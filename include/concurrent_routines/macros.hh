@@ -9,6 +9,8 @@
 #define DEVICE __device__
 #define CONSTANT __constant__
 #define SHARED __shared_
+#include <cuda.h>
+#include <builtin_types.h>
 #else
 #define CUDA_ENABLED false
 #define CUDA_CALLABLE_MEMBER
@@ -18,7 +20,5 @@
 #define SHARED
 #endif
 
-#include <cuda.h>
-#include <builtin_types.h>
 
 #endif

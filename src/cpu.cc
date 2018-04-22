@@ -34,7 +34,7 @@ namespace zinhart
 /*
  * CPU WRAPPERS IMPLEMENTATION
  * */
-  HOST void paralell_saxpy_cpu(
+  HOST void paralell_saxpy(
 		const float & a, float * x, float * y,
 		const std::uint32_t & n_elements, const std::uint32_t & n_threads
 		)
