@@ -26,7 +26,6 @@ namespace zinhart
 				if(pred( *(first + op) ))
 					*(output_it + op) = *(first + op);
 		}
-  //new	
 	template< class ForwardIt, class T >
 		HOST void parallel_replace_init( ForwardIt first, const T & old_value, const T & new_value, 
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
@@ -37,15 +36,14 @@ namespace zinhart
 				if(*(first + op) == old_value)
 					*(first + op) = new_value;
 		}
-	//new	
 	template< class ForwardIt, class UnaryPredicate, class T >
-		HOST void parallel_replace_if_init( ForwardIt first, UnaryPredicate p, const T & new_value, 
-		const std::uint32_t & thread_id, const std::uint32_t & n_elements,const std::uint32_t & n_threads )
+		HOST void parallel_replace_if_init( ForwardIt first, UnaryPredicate unary_predicate, const T & new_value, 
+		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
 			partition(thread_id, n_threads, n_elements, start, stop);
-			for(std::uint32_t op = start; op < start; ++op)
-				if( p( *(first + op) ) )
+			for(std::uint32_t op = start; op < stop; ++op)
+				if( unary_predicate( *(first + op) ) )
 					*(first + op) = new_value;
 		}
 	//new
@@ -55,7 +53,7 @@ namespace zinhart
 		{
 			std::uint32_t start = 0, stop = 0;
 			partition(thread_id, n_threads, n_elements, start, stop);
-			for(std::uint32_t op = start; op < start; ++op)
+			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = (  *(first + op) == old_value) ? new_value : *(first + op);
 		}
 	//new
@@ -65,7 +63,7 @@ namespace zinhart
 		{
 			std::uint32_t start = 0, stop = 0;
 			partition(thread_id, n_threads, n_elements, start, stop);
-			for(std::uint32_t op = start; op < start; ++op)
+			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = ( pred( *(first + op) ) ) ? new_value : *(first + op);
 		}
 	//to do
@@ -185,7 +183,6 @@ namespace zinhart
 			return output_first;
 		}
 	
-	//new
   template<class InputIt, class OutputIt, class UnaryPredicate>
 		HOST OutputIt paralell_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate pred,const std::uint32_t & n_threads)
 		{
@@ -203,7 +200,6 @@ namespace zinhart
 				t.join();
 			return output_it;
 		}
-  //new	
 	template< class ForwardIt, class T >
 		HOST void parallel_replace( ForwardIt first, ForwardIt last, const T & old_value, const T & new_value, const std::uint32_t & n_threads )
 		{
@@ -220,15 +216,38 @@ namespace zinhart
 			for(std::thread & t : threads)
 				t.join();
 		}
-	//new	
 	template< class ForwardIt, class UnaryPredicate, class T >
-		HOST void parallel_replace_if( ForwardIt first, ForwardIt last,UnaryPredicate p, const T& new_value, const std::uint32_t & n_threads )
+		HOST void parallel_replace_if( ForwardIt first, ForwardIt last, UnaryPredicate unary_predicate, const T& new_value, const std::uint32_t & n_threads )
 		{
+			//to identify each thread
+			std::uint32_t thread_id = 0;
+			const std::uint32_t n_elements = std::distance(first, last);
+			std::vector<std::thread> threads(n_threads);
+			//initialize each thread
+			for(std::thread & t : threads)
+			{
+				t = std::thread(parallel_replace_if_init<ForwardIt, UnaryPredicate, T>, std::ref(first), std::ref(unary_predicate), std::ref(new_value), thread_id, n_elements, n_threads );
+				++thread_id;
+			}
+			for(std::thread & t : threads)
+				t.join();
 		}
-	//new
 	template< class InputIt, class OutputIt, class T >
-		HOST OutputIt parallel_replace_copy( InputIt first, InputIt last, OutputIt d_first, const T& old_value, const T& new_value, const std::uint32_t & n_threads )
+		HOST OutputIt parallel_replace_copy( InputIt first, InputIt last, OutputIt output_it, const T & old_value, const T & new_value, const std::uint32_t & n_threads )
 		{
+			//to identify each thread
+			std::uint32_t thread_id = 0;
+			const std::uint32_t n_elements = std::distance(first, last);
+			std::vector<std::thread> threads(n_threads);
+			//initialize each thread
+			for(std::thread & t : threads)
+			{
+				t = std::thread(parallel_replace_copy_init<InputIt, OutputIt, T>, std::ref(first), std::ref(output_it), std::ref(old_value), std::ref(new_value), thread_id, n_elements, n_threads );
+				++thread_id;
+			}
+			for(std::thread & t : threads)
+				t.join();
+			return output_it;
 		}
 	//new
 	template< class InputIt, class OutputIt, class UnaryPredicate, class T >

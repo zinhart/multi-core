@@ -18,21 +18,20 @@ namespace zinhart
   template<class InputIt, class OutputIt>
 		HOST OutputIt paralell_copy(InputIt first, InputIt last, OutputIt output_it, const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
-	//new
   template<class InputIt, class OutputIt, class UnaryPredicate>
 		HOST OutputIt paralell_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate pred, const std::uint32_t & n_threads = MAX_CPU_THREADS);
-  //new	
+
 	template< class ForwardIt, class T >
-	HOST void parallel_replace( ForwardIt first, ForwardIt last,const T& old_value, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
-	//new	
+		HOST void parallel_replace( ForwardIt first, ForwardIt last,const T& old_value, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
+
 	template< class ForwardIt, class UnaryPredicate, class T >
-		HOST void parallel_replace_if( ForwardIt first, ForwardIt last,UnaryPredicate p, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
+		HOST void parallel_replace_if( ForwardIt first, ForwardIt last, UnaryPredicate p, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
 	//new
 	template< class InputIt, class OutputIt, class T >
-		HOST OutputIt parallel_replace_copy( InputIt first, InputIt last, OutputIt d_first, const T& old_value, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
+		HOST OutputIt parallel_replace_copy( InputIt first, InputIt last, OutputIt output_it, const T& old_value, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
 	//new
 	template< class InputIt, class OutputIt, class UnaryPredicate, class T >
-		HOST OutputIt parallel_replace_copy_if( InputIt first, InputIt last, OutputIt d_first, UnaryPredicate p, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
+		HOST OutputIt parallel_replace_copy_if( InputIt first, InputIt last, OutputIt output_it, UnaryPredicate p, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
 	//new
 	template< class PopulationIterator, class SampleIterator,class Distance, class UniformRandomBitGenerator >
 		HOST SampleIterator parallel_sample( PopulationIterator first, PopulationIterator last,SampleIterator out, Distance n, UniformRandomBitGenerator&& g, const std::uint32_t & n_threads = MAX_CPU_THREADS);
