@@ -26,42 +26,33 @@ namespace zinhart
 
 	template< class ForwardIt, class UnaryPredicate, class T >
 		HOST void parallel_replace_if( ForwardIt first, ForwardIt last, UnaryPredicate p, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
-	//new
+
 	template< class InputIt, class OutputIt, class T >
 		HOST OutputIt parallel_replace_copy( InputIt first, InputIt last, OutputIt output_it, const T& old_value, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
-	//new
+
 	template< class InputIt, class OutputIt, class UnaryPredicate, class T >
 		HOST OutputIt parallel_replace_copy_if( InputIt first, InputIt last, OutputIt output_it, UnaryPredicate p, const T& new_value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
-	//new
-	template< class PopulationIterator, class SampleIterator,class Distance, class UniformRandomBitGenerator >
-		HOST SampleIterator parallel_sample( PopulationIterator first, PopulationIterator last,SampleIterator out, Distance n, UniformRandomBitGenerator&& g, const std::uint32_t & n_threads = MAX_CPU_THREADS);
-	//new
+
 	template< class InputIt1, class InputIt2, class T >
 		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
-	//new
+
 	template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2>
 		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1, BinaryOperation2 op2, const std::uint32_t & n_threads = MAX_CPU_THREADS );
-	//new
-	template <class InputIt1, class InputIt2, class T, class BinaryOp1, class BinaryOp2>
-		HOST T parallel_transform_reduce(InputIt1 first1, InputIt1 last1, InputIt2 first2, T init, BinaryOp1 binary_op1, BinaryOp2 binary_op2, const std::uint32_t & n_threads = MAX_CPU_THREADS);
-	//new
-	template<class InputIt, class T, class BinaryOp, class UnaryOp>
-		HOST T parallel_transform_reduce(InputIt first, InputIt last, T init, BinaryOp binop, UnaryOp unary_op, const std::uint32_t & n_threads = MAX_CPU_THREADS);	
 	 
-  template< class InputIt, class T >
-  HOST T paralell_accumulate( InputIt first, InputIt last, T init,
-									const std::uint32_t & n_threads = MAX_CPU_THREADS);
+	template< class InputIt, class T >
+	HOST T paralell_accumulate( InputIt first, InputIt last, T init,
+									  const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
-  template < class InputIt, class UnaryFunction >
-  HOST UnaryFunction paralell_for_each(InputIt first, InputIt last, UnaryFunction f,
-	  	                              const std::uint32_t & n_threads = MAX_CPU_THREADS  );
-  
-  template < class InputIt, class OutputIt, class UnaryOperation >
-  HOST OutputIt paralell_transform(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op,
-									   const std::uint32_t & n_threads = MAX_CPU_THREADS );
-  template < class BidirectionalIt, class Generator >
-  HOST void paralell_generate(BidirectionalIt first, BidirectionalIt last, Generator g,
-	   const std::uint32_t & n_threads = MAX_CPU_THREADS);
+	template < class InputIt, class UnaryFunction >
+	HOST UnaryFunction paralell_for_each(InputIt first, InputIt last, UnaryFunction f,
+										const std::uint32_t & n_threads = MAX_CPU_THREADS  );
+	
+	template < class InputIt, class OutputIt, class UnaryOperation >
+	HOST OutputIt paralell_transform(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op,
+										 const std::uint32_t & n_threads = MAX_CPU_THREADS );
+	template < class BidirectionalIt, class Generator >
+	HOST void paralell_generate(BidirectionalIt first, BidirectionalIt last, Generator g,
+		 const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
 
 //#if CUDA_ENABLED == true

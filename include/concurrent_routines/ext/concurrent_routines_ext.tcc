@@ -64,12 +64,6 @@ namespace zinhart
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = ( pred( *(first + op) ) ) ? new_value : *(first + op);
 		}
-	//to do
-	template< class PopulationIterator, class SampleIterator,class Distance, class UniformRandomBitGenerator >
-		HOST void parallel_sample_init( PopulationIterator first, PopulationIterator last,SampleIterator out, Distance n, UniformRandomBitGenerator&& g,
-		const std::uint32_t & thread_id, const std::uint32_t & n_elements,	const std::uint32_t & n_threads)
-		{
-		}
 	template< class InputIt1, class InputIt2, class T >
 		HOST void parallel_inner_product_init( InputIt1 first1, InputIt2 first2, T & value,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
@@ -90,18 +84,6 @@ namespace zinhart
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
 				value = op1(value, op2( *(first1 + op) ,  *(first2 + op) ));
-		}
-	//to do
-	template <class InputIt1, class InputIt2, class T, class BinaryOp1, class BinaryOp2>
-		HOST void parallel_transform_reduce_init(InputIt1 first1, InputIt1 last1, InputIt2 first2, T init, BinaryOp1 binary_op1, BinaryOp2 binary_op2,
-		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
-		{
-		}
-	//to do
-	template<class InputIt, class T, class BinaryOp, class UnaryOp>
-		HOST void parallel_transform_reduce_init(InputIt first, InputIt last, T init, BinaryOp binop, UnaryOp unary_op,
-		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
-		{
 		}
  
   template< class InputIt, class T >
@@ -264,12 +246,7 @@ namespace zinhart
 				t.join();
 		  return output_it;
 		}
-	//new
-	template< class PopulationIterator, class SampleIterator,class Distance, class UniformRandomBitGenerator >
-		HOST SampleIterator parallel_sample( PopulationIterator first, PopulationIterator last,SampleIterator out, Distance n, UniformRandomBitGenerator&& g, const std::uint32_t & n_threads)
-		{
-		}
-	//new
+
 	template< class InputIt, class OutputIt, class T >
 		HOST T parallel_inner_product( InputIt first, InputIt last, OutputIt output_it, T value, const std::uint32_t & n_threads )
 		{
@@ -294,17 +271,6 @@ namespace zinhart
 		{
 			return value;
 		}
-	//new
-	template <class InputIt1, class InputIt2, class T, class BinaryOp1, class BinaryOp2>
-		HOST T parallel_transform_reduce(InputIt1 first1, InputIt1 last1, InputIt2 first2, T init, BinaryOp1 binary_op1, BinaryOp2 binary_op2, const std::uint32_t & n_threads)
-		{
-		}
-	//new
-	template<class InputIt, class T, class BinaryOp, class UnaryOp>
-		HOST T parallel_transform_reduce(InputIt first, InputIt last, T init, BinaryOp binop, UnaryOp unary_op, const std::uint32_t & n_threads)
-		{
-		}
-
   template< class InputIt, class T >
 		HOST T paralell_accumalute( InputIt first, InputIt last, T init,
 									const std::uint32_t & n_threads = MAX_CPU_THREADS	  )
