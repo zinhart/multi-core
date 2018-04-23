@@ -244,13 +244,40 @@ TEST(cpu_test, parallel_sample)
 
 
 }
+*/
 
-
-TEST(cpu_test, parallel_inner_product)
+TEST(cpu_test, parallel_inner_product_first_overload)
 {
-
+ 	std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::uint32_t i = 0;
 }
 
+TEST(cpu_test, parallel_inner_product_second_overload)
+{
+ 	std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::uint32_t i = 0;
+}
+/*
 //to do
 TEST(cpu_test, parallel_transform_reduce)
 {

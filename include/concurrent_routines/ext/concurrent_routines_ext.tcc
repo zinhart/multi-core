@@ -271,14 +271,29 @@ namespace zinhart
 		{
 		}
 	//new
-	template< class InputIt1, class InputIt2, class T >
-		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, const std::uint32_t & n_threads )
+	template< class InputIt, class OutputIt, class T >
+		HOST T parallel_inner_product( InputIt first, InputIt last, OutputIt output_it, T value, const std::uint32_t & n_threads )
 		{
+			//to identify each thread
+			std::uint32_t thread_id = 0;
+			const std::uint32_t n_elements = std::distance(first, last);
+			std::vector<std::thread> threads(n_threads);
+			//initialize each thread
+			for(std::thread & t : threads)
+			{
+				t = std::thread(parallel_inner_product_init<InputIt, OutputIt, T>, std::ref(first), std::ref(output_it), std::ref(value), thread_id, n_elements, n_threads );
+				++thread_id;
+			}
+			for(std::thread & t : threads)
+				t.join();
+
+			return value;
 		}
 	//new
 	template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2>
 		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1,BinaryOperation2 op2, const std::uint32_t & n_threads )
 		{
+			return value;
 		}
 	//new
 	template <class InputIt1, class InputIt2, class T, class BinaryOp1, class BinaryOp2>
