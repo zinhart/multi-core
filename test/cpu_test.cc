@@ -5,6 +5,7 @@
 #include <random>
 #include <limits>
 #include <memory>
+#include <functional>
 
 TEST(cpu_test, paralell_saxpy)
 {
@@ -274,7 +275,7 @@ TEST(cpu_test, parallel_inner_product_first_overload)
   serial_ret = std::inner_product(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), init);
   ASSERT_EQ(parallel_ret, serial_ret); 
 }
-/*
+
 TEST(cpu_test, parallel_inner_product_second_overload)
 {
   std::random_device rd;
@@ -289,7 +290,21 @@ TEST(cpu_test, parallel_inner_product_second_overload)
   std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
   std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
   std::uint32_t i = 0;
-}*/
+  float first, second, init = real_dist(mt), parallel_ret, serial_ret;
+  for(i = 0; i < n_elements; ++i )
+  {
+	first = real_dist(mt);
+	second = real_dist(mt);
+	x_serial.get()[i] = first;
+	y_serial.get()[i] = second;
+	x_parallel.get()[i] = first;
+	y_parallel.get()[i] = second;
+  }
+  parallel_ret =  zinhart::parallel_inner_product(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), init, std::plus<float>(), std::equal_to<float>());
+  serial_ret = std::inner_product(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), init,
+	  std::plus<float>(), std::equal_to<float>());
+  ASSERT_EQ(parallel_ret, serial_ret);
+}
 /*
 //to do
 TEST(cpu_test, parallel_transform_reduce)

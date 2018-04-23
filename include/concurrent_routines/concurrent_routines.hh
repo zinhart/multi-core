@@ -40,7 +40,7 @@ namespace zinhart
 		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, const std::uint32_t & n_threads = MAX_CPU_THREADS );
 	//new
 	template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2>
-		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1,BinaryOperation2 op2, const std::uint32_t & n_threads = MAX_CPU_THREADS );
+		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1, BinaryOperation2 op2, const std::uint32_t & n_threads = MAX_CPU_THREADS );
 	//new
 	template <class InputIt1, class InputIt2, class T, class BinaryOp1, class BinaryOp2>
 		HOST T parallel_transform_reduce(InputIt1 first1, InputIt1 last1, InputIt2 first2, T init, BinaryOp1 binary_op1, BinaryOp2 binary_op2, const std::uint32_t & n_threads = MAX_CPU_THREADS);

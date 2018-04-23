@@ -70,7 +70,6 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements,	const std::uint32_t & n_threads)
 		{
 		}
-	//new
 	template< class InputIt1, class InputIt2, class T >
 		HOST void parallel_inner_product_init( InputIt1 first1, InputIt2 first2, T & value,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
