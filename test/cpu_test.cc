@@ -205,13 +205,40 @@ TEST(cpu_test, parallel_replace_copy)
   }
 }
 
-/*
+
 TEST(cpu_test, parallel_replace_copy_if)
 {
-
+ 	std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::uint32_t i = 0;
+	float old_value = real_dist(mt);
+	float new_value = real_dist(mt);
+	auto unary_predicate = [](float & init){return (init == 0.0) ? true : false;};
+	//effectively force a replace on all elements
+  for(i = 0; i < n_elements; ++i )
+  {
+		x_serial.get()[i] = old_value;
+		x_parallel.get()[i] = old_value;
+  }
+  zinhart::parallel_replace_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate, new_value);
+  std::replace_copy_if(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary_predicate, new_value);
+  //double check we have the new value 
+  for(i = 0; i < n_elements; ++i)
+  {
+		ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
+  }
 }
 
-
+/*
 TEST(cpu_test, parallel_sample)
 {
 
