@@ -1,13 +1,15 @@
 #include "concurrent_routines/concurrent_routines.hh"
 #include "gtest/gtest.h"
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <builtin_types.h>
 #include <random>
 #include <limits>
 #include <iostream>
 TEST(gpu_test, parrallel_saxpy_gpu)
 {
+#if CUDA_ENABLED
+  std::cout<<"CUDA ENABLEs\n";
+#else
+  std::cout<<"Cuda Disabled\n";
+#endif
   cudaError_t error_id;
   std::random_device rd;
   std::mt19937 mt(rd());

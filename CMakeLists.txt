@@ -2,7 +2,6 @@
 cmake_minimum_required(VERSION 3.1)
 # library name
 project(concurrent_routines)
-
 # set build type to release by default
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type provided, so project will be build without debug flags")
@@ -39,7 +38,7 @@ if(PTHREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
 elseif(WIN32_THREADS)
   set(THREADS_PREFER_WIN32_FLAG ON)
-else()
+elseif(PTHREADS AND WIN32_THREADS)
   message(FATAL_ERROR "Choose 1 threading library")
 endif()
 
@@ -51,10 +50,12 @@ find_package(Threads REQUIRED)
 if(BuildCuda)
   find_package(CUDA REQUIRED)
   set(CUDA_ARCH -gencode arch = compute_61, code = sm_61)
+  # set macro for conditional gpu code
+  add_definitions(-DCUDA_ENABLED)
 endif()
 
 # set include paths
-include_directories( . include ${CUDA_INCLUDE_DIRS})
+include_directories( . include ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
 
 # set cxx standard
 set(CMAKE_CXX_STANDARD 11)
