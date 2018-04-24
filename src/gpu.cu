@@ -11,7 +11,13 @@ namespace zinhart
 	  return;
 	y[thread_id] = a * x[thread_id] + y[thread_id];
   }
-
+  template<class Precision_Type>
+  __global__ void naive_matrix_product(const std::uint32_t & N, Precision_Type * A, Precision_Type * B, Precision_Type * C)
+  {
+  	std::uint32_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;
+	if(thread_id > N)
+	  return;
+  }
   
   // GPU WRAPPERS
   HOST int parallel_saxpy_gpu(

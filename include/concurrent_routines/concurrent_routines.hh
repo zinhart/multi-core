@@ -8,7 +8,7 @@
 namespace zinhart
 {
   //this function is used by each thread to determine what pieces of data it will operate on
-  HOST void partition(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop);
+  HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop);
  
   //CPU WRAPPERS
   HOST void paralell_saxpy(
@@ -61,9 +61,9 @@ namespace zinhart
 	//primary
 	
 	template<std::uint32_t Grid_Dim>
-	  class grid{};
+	  class grid;
 	template<>
-	  class grid<1U>
+	  class grid<1>
 	  {
 		public:
 		  //assuming you only got 1 gpu
@@ -83,7 +83,7 @@ namespace zinhart
 	  };
 	//to do
 	template<>
-	  class grid<2U>
+	  class grid<2>
 	  {
 		public:
 		  void operator()(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
@@ -92,7 +92,7 @@ namespace zinhart
 	  };
 	//to do
 	template<>
-	  class grid<3U>
+	  class grid<3>
 	  {
 		public:
 		  void operator()(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)

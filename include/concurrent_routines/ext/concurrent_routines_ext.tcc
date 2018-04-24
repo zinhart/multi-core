@@ -11,7 +11,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			//here stop start is how much we should increment the (output/input)_it
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = *(input_it + op);
@@ -21,7 +21,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				if(pred( *(first + op) ))
 					*(output_it + op) = *(first + op);
@@ -31,7 +31,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				if(*(first + op) == old_value)
 					*(first + op) = new_value;
@@ -41,7 +41,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				if( unary_predicate( *(first + op) ) )
 					*(first + op) = new_value;
@@ -51,7 +51,7 @@ namespace zinhart
 			const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = (  *(first + op) == old_value) ? new_value : *(first + op);
 		}
@@ -60,7 +60,7 @@ namespace zinhart
 	  const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = ( pred( *(first + op) ) ) ? new_value : *(first + op);
 		}
@@ -69,7 +69,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
 				value = value + *(first1 + op) * *(first2 + op);
@@ -80,7 +80,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
 				value = op1(value, op2( *(first1 + op) ,  *(first2 + op) ));
@@ -91,7 +91,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
 			{
@@ -105,7 +105,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			//call f on each element
 			for(std::uint32_t op = start; op < stop; ++op)
 			{
@@ -119,7 +119,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			//same deal as copy really
 			for(std::uint32_t op = start; op < stop; ++op)
 			{
@@ -133,7 +133,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			partition(thread_id, n_threads, n_elements, start, stop);
+			map(thread_id, n_threads, n_elements, start, stop);
 			//call f on each element
 			for(std::uint32_t op = start; op < stop; ++op)
 			{
@@ -356,7 +356,8 @@ namespace zinhart
 		std::uint32_t threads_per_block;
 		dim3 block_launch;
 		//get grid paramemters
-		grid(N, threads_per_block, dim3.x, dim3.y, dim3.z, 0);
+		grid<1U> g;
+		g(N, threads_per_block, block_launch.x, block_launch.y, block_launch.z, 0);
 		//call kernel
 		return 0;
 	  }

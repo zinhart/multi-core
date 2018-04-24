@@ -8,7 +8,7 @@
 #define HOST __host__
 #define DEVICE __device__
 #define CONSTANT __constant__
-#define SHARED __shared_
+#define SHARED __shared__
 #include <cuda.h>
 #include <builtin_types.h>
 #include <cuda_runtime_api.h>
@@ -20,7 +20,8 @@
 #define CONSTANT
 #define SHARED
 #endif
-
+//without these lines will not compile so make a macro using cmake
+//that is defined when find cuda is true instead of depending on the __CUDAACC__
 #include <cuda.h>
 #include <builtin_types.h>
 #include <cuda_runtime_api.h>
