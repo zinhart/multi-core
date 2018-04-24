@@ -44,14 +44,18 @@ endif()
 
 # threading library
 find_package(Threads REQUIRED)
+# lapacke for matrix multiplications
+find_package(LAPACK REQUIRED)
 
 
 # find cuda package and set compute achitecture
 if(BuildCuda)
   find_package(CUDA REQUIRED)
   set(CUDA_ARCH -gencode arch = compute_61, code = sm_61)
-  # set macro for conditional gpu code
-  add_definitions(-DCUDA_ENABLED)
+  # set macro to conditional include headers define functions etc w.r.t gpu code
+  add_definitions(-DCUDA_ENABLED=true)
+else()
+	add_definitions(-DCUDA_ENABLED=false)
 endif()
 
 # set include paths
@@ -106,10 +110,10 @@ message(STATUS " Sanitize Flags		  : ${Sanitize}")
 if(BuildCuda)
   message(STATUS " Found CUDA			  : ${CUDA_FOUND}")
 endif()
-message(STATUS " CMAKE_CXX_FLAGS		  : ${Sanitize}")
+message(STATUS " CMAKE_CXX_FLAGS		  : ${CMAKE_CXX_FLAGS}")
 if("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
-  message(STATUS " CMAKE_CXX_FLAGS		  : ${CMAKE_CXX_FLAGS_RELEASE}")
+	message(STATUS " CMAKE_CXX_RELEASE_FLAGS		  : ${CMAKE_CXX_FLAGS_RELEASE}")
 elseif("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
-  message(STATUS " CMAKE_CXX_FLAGS_DEBUG  : ${CMAKE_CXX_FLAGS_DEBUG}")
+  message(STATUS " CMAKE_CXX_FLAGS_DEBUG         : ${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 message(STATUS "")

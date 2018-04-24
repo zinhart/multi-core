@@ -55,7 +55,7 @@ namespace zinhart
 		 const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
 
-#if CUDA_ENABLED 
+#if CUDA_ENABLED == 1
 	// GPU HELPERS
 	 
 	template<std::uint32_t Grid_Dim>

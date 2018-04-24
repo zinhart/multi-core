@@ -347,7 +347,7 @@ namespace zinhart
 /*
  * GPU TEMPLATE WRAPPERS
  * */
-#if CUDA_ENABLED
+#if CUDA_ENABLED == true
 	template <class PrecisionType>
 	  HOST int paralell_naive_matrix_product_gpu(const std::uint32_t & N, PrecisionType * A, PrecisionType * B, PrecisionType * C)
 	  {
