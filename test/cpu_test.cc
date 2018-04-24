@@ -305,13 +305,6 @@ TEST(cpu_test, parallel_inner_product_second_overload)
 	  std::plus<float>(), std::equal_to<float>());
   ASSERT_EQ(parallel_ret, serial_ret);
 }
-/*
-//to do
-TEST(cpu_test, parallel_transform_reduce)
-{
-
-}
-*/
 
 TEST(cpu_test, paralell_accumulate)
 {

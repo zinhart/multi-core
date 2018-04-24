@@ -56,8 +56,62 @@ namespace zinhart
 
 
 //#if CUDA_ENABLED == true
-  //GPU WRAPPERS
-  HOST int parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
+	// GPU HELPERS
+	 
+	//primary
+	
+	template<std::uint32_t Grid_Dim>
+	  class grid{};
+	template<>
+	  class grid<1U>
+	  {
+		public:
+		  //assuming you only got 1 gpu
+		  void operator()(const std::uint32_t & N, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
+		  {
+			cudaDeviceProp properties;
+			cudaGetDeviceProperties(&properties, 0);
+			dim3 block_launch;
+			std::uint32_t warp_size = properties.warpSize;
+			threads_per_block = (N + warp_size -1) / warp_size * warp_size;
+			if(threads_per_block > 4 * warp_size)
+			  threads_per_block = 4 * warp_size;
+			x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
+			y = 1;
+			z = 1;
+		  }
+	  };
+	//to do
+	template<>
+	  class grid<2U>
+	  {
+		public:
+		  void operator()(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
+		  {
+		  }
+	  };
+	//to do
+	template<>
+	  class grid<3U>
+	  {
+		public:
+		  void operator()(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
+		  {
+		  }
+	  };
+	//GPU WRAPPERS
+	HOST int parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
+	template <class Precision_Type>
+	  HOST int paralell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * C);
+	
+	template <class Precision_Type>
+	  HOST int paralell_matrix_product(Precision_Type * A, Precision_Type * B, Precision_Type * C);
+	  
+	template <class Precision_Type>
+	  HOST int paralell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * C);
+
+	template <class Precision_Type>
+	  HOST int paralell_matrix_product_gpu(Precision_Type * A, Precision_Type * B, Precision_Type * C);
 //#endif
 }
 #include "ext/concurrent_routines_ext.tcc"

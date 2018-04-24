@@ -345,5 +345,35 @@ namespace zinhart
 			{
 				t.join();
 			}
-  }
+		}
+/*
+ * GPU TEMPLATE WRAPPERS
+ * */
+
+	template <class PrecisionType>
+	  HOST int paralell_naive_matrix_product_gpu(const std::uint32_t & N, PrecisionType * A, PrecisionType * B, PrecisionType * C)
+	  {
+		std::uint32_t threads_per_block;
+		dim3 block_launch;
+		//get grid paramemters
+		grid(N, threads_per_block, dim3.x, dim3.y, dim3.z, 0);
+		//call kernel
+		return 0;
+	  }
+	template <class PrecisionType>
+	  HOST int paralell_matrix_product(PrecisionType * A, PrecisionType * B, PrecisionType * C)
+	  {
+		return 0;
+	  }
+	template <class PrecisionType>
+	  HOST int paralell_naive_matrix_transpose_gpu(PrecisionType * A, PrecisionType * B, PrecisionType * C)
+	  {
+		return 0;
+	  }
+	template <class PrecisionType>
+	  HOST int paralell_matrix_transpose_gpu(PrecisionType * A, PrecisionType * B, PrecisionType * C)
+	  {
+		return 0;
+	  }
 }
+

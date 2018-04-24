@@ -11,6 +11,7 @@
 #define SHARED __shared_
 #include <cuda.h>
 #include <builtin_types.h>
+#include <cuda_runtime_api.h>
 #else
 #define CUDA_ENABLED false
 #define CUDA_CALLABLE_MEMBER
@@ -20,5 +21,8 @@
 #define SHARED
 #endif
 
+#include <cuda.h>
+#include <builtin_types.h>
+#include <cuda_runtime_api.h>
 
 #endif
