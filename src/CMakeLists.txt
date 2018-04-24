@@ -2,6 +2,7 @@ if(BuildCuda)
   set(concurrent_routines_lib
 	  gpu.cu
 	  cpu.cc
+		thread_pool.cc
   )
   # link with cuda lib
   cuda_add_library(concurrent_routines ${LIB_TYPE} ${concurrent_routines_lib})
@@ -25,6 +26,7 @@ if(BuildCuda)
 else()
   set(concurrent_routines_lib 
 	cpu.cc
+	thread_pool.cc
      )	
    add_library(concurrent_routines cpu.cc)
    
