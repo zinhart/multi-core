@@ -1,6 +1,5 @@
 #include "../concurrent_routines.hh"
 #include <vector>
-#include <future>
 namespace zinhart
 {
 /*
@@ -265,7 +264,6 @@ namespace zinhart
 
 			return value;
 		}
-	//new
 	template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2>
 		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1,BinaryOperation2 op2, const std::uint32_t & n_threads )
 		{
@@ -349,7 +347,7 @@ namespace zinhart
 /*
  * GPU TEMPLATE WRAPPERS
  * */
-
+#if CUDA_ENABLED
 	template <class PrecisionType>
 	  HOST int paralell_naive_matrix_product_gpu(const std::uint32_t & N, PrecisionType * A, PrecisionType * B, PrecisionType * C)
 	  {
@@ -376,5 +374,6 @@ namespace zinhart
 	  {
 		return 0;
 	  }
+#endif
 }
 

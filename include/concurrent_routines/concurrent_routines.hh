@@ -100,6 +100,7 @@ namespace zinhart
 		  }
 	  };
 	//GPU WRAPPERS
+	#if CUDA_ENABLED
 	HOST int parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
 	template <class Precision_Type>
 	  HOST int paralell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * C);
@@ -112,7 +113,7 @@ namespace zinhart
 
 	template <class Precision_Type>
 	  HOST int paralell_matrix_product_gpu(Precision_Type * A, Precision_Type * B, Precision_Type * C);
-//#endif
+	#endif
 }
 #include "ext/concurrent_routines_ext.tcc"
 #endif
