@@ -1,6 +1,7 @@
 #ifndef THREAD_POOL_HH
 #define THREAD_POOL_HH
-#include "macros"
+#include "macros.hh"
+#include "thread_safe_queue.hh"
 #include <thread>
 #include <cstdint>
 #include <future>
