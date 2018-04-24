@@ -55,11 +55,9 @@ namespace zinhart
 		 const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
 
-//#if CUDA_ENABLED == true
+#if CUDA_ENABLED 
 	// GPU HELPERS
 	 
-	//primary
-	
 	template<std::uint32_t Grid_Dim>
 	  class grid;
 	template<>
@@ -100,7 +98,6 @@ namespace zinhart
 		  }
 	  };
 	//GPU WRAPPERS
-	#if CUDA_ENABLED
 	HOST int parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
 	template <class Precision_Type>
 	  HOST int paralell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * C);
