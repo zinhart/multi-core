@@ -9,17 +9,19 @@ namespace zinhart
 		{
 			private:
 				mutex lock;
+				std::queue<T> queue;
 			public:
-				//disable everthing
-				HOST thread_safe_queue() = delete;
+				HOST thread_safe_queue() = default;
+				//disable everthing that requires synchonization
 				HOST thread_safe_queue(const thread_safe_queue&) = delete;
 				HOST thread_safe_queue(thread_safe_queue&&) = delete;
 				HOST thread_safe_queue & operator =(const thread_safe_queue&) = delete;
 				HOST thread_safe_queue & operator =(thread_safe_queue&&) = delete;
-					void push(const T & item);
-					void pop(T & item);
-					void size();
-					bool empty();
+				HOST ~thread_safe_queue() = default;
+				HOST void push(const T & task);
+				HOST bool void pop(T & task);
+				HOST std::uint32_t size();
+				HOST bool empty();
 
 		};
 }
