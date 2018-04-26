@@ -13,4 +13,11 @@ namespace zinhart
 			//initialize each thread
 		}
 	}	
+	HOST void shutdown()
+	{
+	}
+	HOST auto add_task()
+	{
+	}
+
 };
