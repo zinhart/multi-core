@@ -53,7 +53,7 @@ namespace zinhart
 	{
 	  //Since the cv is locked upon -> std::unique_lock
   	  std::unique_lock<std::mutex> local_lock(lock);
-	  //basically block the current thread until the destructor is called (queue goes out of scope) or an item is available 
+	  //basically block the current thread until the destructor is called (queue goes out of scope) or an item is available further wait conditions can be added here 
 	  cv.wait(lock, [this](){ return current_state() == queue_state::INACTIVE || queue.size() > 0 ;}   );
 	  // so that all threads can exit
 	  if(current_state() == queue_state::INACTIVE)
@@ -70,7 +70,7 @@ namespace zinhart
 	  return queue.size();
 	}
   template<class T>
-	HOST bool thread_safe_queue<T>::empty()const
+	HOST bool thread_safe_queue<T>::empty()
 	{
 	  std::lock_guard<std::mutex> local_lock(lock);
 	  return queue.empty();

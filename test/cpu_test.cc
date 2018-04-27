@@ -424,8 +424,117 @@ TEST(cpu_test, paralell_generate)
   }
 }
 
-TEST(cpu_test, thread_safe_queue)
+TEST(thread_safe_queue, call_size_on_empty_queue)
 {
-  zinhart::thread_safe_queue<int> test_queue;
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  auto call_size = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue)
+  {
+	ASSERT_EQ(0, init_queue.size());
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  //called from the main thread
+  call_size(test_queue);
+  ASSERT_EQ(0, test_queue.size());
+  //call size from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_size, std::ref(test_queue) );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+}
+TEST(thread_safe_queue, call_empty_on_empty_queue)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  auto call_empty = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue)
+  {
+	ASSERT_EQ(true, init_queue.empty());
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  //called from the main thread
+  call_empty(test_queue);
+  ASSERT_EQ(true, test_queue.empty());
+  //call empty from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_empty, std::ref(test_queue) );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+}
+TEST(thread_safe_queue_call, clear_on_empty_queue)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  auto call_clear = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue)
+  {
+	init_queue.clear();
+	//since these were already tested
+	ASSERT_EQ(true, init_queue.empty());
+	ASSERT_EQ(0, init_queue.size());
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  //called from the main thread
+  call_clear(test_queue);
+  ASSERT_EQ(true, test_queue.empty());
+  ASSERT_EQ(0, test_queue.size());
+  //call clear from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_clear, std::ref(test_queue) );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+}
 
+TEST(thread_safe_queue, call_push)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  //to be called from each thread
+  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  {
+	std::uint32_t old_size = init_queue.size();
+	init_queue.push(item);
+	ASSERT_TRUE( init_queue.size() >=  old_size);
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  call_push(test_queue, 0);
+  ASSERT_EQ(false, test_queue.empty());
+  ASSERT_EQ(1, test_queue.size());
+  //call push from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+  //should be the queue size
+  ASSERT_EQ( n_threads + 1, test_queue.size());
 }
