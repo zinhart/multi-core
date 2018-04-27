@@ -34,7 +34,7 @@ namespace zinhart
 	  cv.notify_one();
 	}
   template<class T>
-	HOST bool thread_safe_queue<T>::try_pop(T & item)
+	HOST bool thread_safe_queue<T>::pop(T & item)
 	{
 	  std::lock_guard<std::mutex> local_lock(lock);
 	  //don't call pop on an empty queue
@@ -49,7 +49,7 @@ namespace zinhart
 	  return true;
 	}
   template<class T>
-	HOST bool thread_safe_queue<T>::wait_pop(T & item)
+	HOST bool thread_safe_queue<T>::blocking_pop(T & item)
 	{
 	  //Since the cv is locked upon -> std::unique_lock
   	  std::unique_lock<std::mutex> local_lock(lock);
@@ -76,7 +76,7 @@ namespace zinhart
 	  return queue.empty();
 	}
   template<class T>
-	HOST void clear()
+	HOST void thread_safe_queue<T>::clear()
 	{
 	  std::lock_guard<std::mutex> local_lock(lock);
 	  while(queue.size() > 0)

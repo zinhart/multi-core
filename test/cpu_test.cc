@@ -1,4 +1,5 @@
 #include "concurrent_routines/concurrent_routines.hh"
+#include "concurrent_routines/thread_safe_queue.hh"
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <iostream>
@@ -421,4 +422,10 @@ TEST(cpu_test, paralell_generate)
   {
 	ASSERT_EQ(x_parallel.get()[i], x_serial.get()[i]);
   }
+}
+
+TEST(cpu_test, thread_safe_queue)
+{
+  zinhart::thread_safe_queue<int> test_queue;
+
 }

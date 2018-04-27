@@ -27,11 +27,12 @@ namespace zinhart
 		HOST ~thread_safe_queue();
 		HOST void push(const T & item);
 		//item only contains the value popped from the queue if the queue is not empty
-		HOST bool try_pop(T & item);
-		HOST bool wait_pop(T & item);
+		HOST bool pop(T & item);
+		HOST bool blocking_pop(T & item);
 		//i.e pending items
 		HOST std::uint32_t size();
 		HOST bool empty() const;
+		HOST void clear();
 
 	};
 }
