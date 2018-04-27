@@ -10,6 +10,7 @@
 #include "thread_safe_queue.hh"
 namespace zinhart
 {
+  /*
 	//an asynchonous thread pool
 	class thread_pool
 	{
@@ -34,5 +35,6 @@ namespace zinhart
 			HOST void shutdown();
 			HOST auto add_task();
 	};
+	*/
 }
 #endif
