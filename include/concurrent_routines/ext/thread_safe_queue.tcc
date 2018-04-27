@@ -27,8 +27,7 @@ namespace zinhart
   template<class T>
 	HOST void thread_safe_queue<T>::push(const T & item)
 	{
-	  //Since the cv is locked upon -> std::unique_lock
-	  std::unique_lock<std::mutex> temp_lock(lock);
+	  std::lock_guard<std::mutex> temp_lock(lock);
 	  //add item to the queue
 	  queue.push(item);
 	  //notify a thread that an item is to be removed from the queue
@@ -52,13 +51,16 @@ namespace zinhart
   template<class T>
 	HOST bool thread_safe_queue<T>::wait_pop(T & item)
 	{
+	  //Since the cv is locked upon -> std::unique_lock
   	  std::unique_lock<std::mutex> local_lock(lock);
-	  cv.wait(lock, [this]()
-		  {
-			//basically wait until the destructor is called (queue goes out of scope)
-			return current_state() == queue_state::INACTIVE ;
-		  }   );
+	  //basically block the current thread until the destructor is called (queue goes out of scope) or an item is available 
+	  cv.wait(lock, [this](){ return current_state() == queue_state::INACTIVE || queue.size() > 0 ;}   );
+	  // so that all threads can exit
+	  if(current_state() == queue_state::INACTIVE)
+		return false;
 	  item = std::move(queue.front());
+	  //update queue
+	  queue.pop();
 	  return true;
 	}
   template<class T>
@@ -68,9 +70,16 @@ namespace zinhart
 	  return queue.size();
 	}
   template<class T>
-	HOST bool thread_safe_queue<T>::empty()
+	HOST bool thread_safe_queue<T>::empty()const
 	{
 	  std::lock_guard<std::mutex> local_lock(lock);
 	  return queue.empty();
+	}
+  template<class T>
+	HOST void clear()
+	{
+	  std::lock_guard<std::mutex> local_lock(lock);
+	  while(queue.size() > 0)
+		queue.pop();
 	}
 }

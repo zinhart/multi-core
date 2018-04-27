@@ -31,7 +31,7 @@ namespace zinhart
 		HOST bool wait_pop(T & item);
 		//i.e pending items
 		HOST std::uint32_t size();
-		HOST bool empty();
+		HOST bool empty() const;
 
 	};
 }
