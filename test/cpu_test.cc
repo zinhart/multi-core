@@ -684,6 +684,7 @@ TEST(thread_safe_queue, call_pop_on_available_on_empty_queue)
 }
 
 
-TEST(thread_safe_queue, call_pop_on_available_on_empty_queue)
+TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
 {
+}
 
