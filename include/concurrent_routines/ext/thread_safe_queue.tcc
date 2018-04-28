@@ -30,7 +30,7 @@ namespace zinhart
 	  std::lock_guard<std::mutex> temp_lock(lock);
 	  //add item to the queue
 	  queue.push(item);
-	  //notify a thread that an item is to be removed from the queue
+	  //notify a thread that an item is ready to be removed from the queue
 	  cv.notify_one();
 	}
   template<class T>
@@ -49,7 +49,7 @@ namespace zinhart
 	  return true;
 	}
   template<class T>
-	HOST bool thread_safe_queue<T>::blocking_pop(T & item)
+	HOST bool thread_safe_queue<T>::pop_on_available(T & item)
 	{
 	  //Since the cv is locked upon -> std::unique_lock
   	  std::unique_lock<std::mutex> local_lock(lock);

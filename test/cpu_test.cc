@@ -476,7 +476,7 @@ TEST(thread_safe_queue, call_empty_on_empty_queue)
 	t.join();
   }
 }
-TEST(thread_safe_queue_call, clear_on_empty_queue)
+TEST(thread_safe_queue, call_clear_on_empty_queue)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -507,6 +507,7 @@ TEST(thread_safe_queue_call, clear_on_empty_queue)
   }
 }
 
+//this also implicitly tests push and size on nonempty queues
 TEST(thread_safe_queue, call_push)
 {
   std::random_device rd;
@@ -538,3 +539,151 @@ TEST(thread_safe_queue, call_push)
   //should be the queue size
   ASSERT_EQ( n_threads + 1, test_queue.size());
 }
+
+
+TEST(thread_safe_queue, call_size_on_non_empty_queue)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  //to be called from each thread
+  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  {
+	std::uint32_t old_size = init_queue.size();
+	init_queue.push(item);
+	ASSERT_TRUE( init_queue.size() >=  old_size);
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  call_push(test_queue, 0);
+  ASSERT_EQ(1, test_queue.size());
+  //call push from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+  //should be the queue size
+  ASSERT_EQ( n_threads + 1, test_queue.size());
+}
+
+
+TEST(thread_safe_queue, call_empty_on_non_empty_queue)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  //to be called from each thread
+  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  {
+	init_queue.push(item);
+	ASSERT_EQ(false ,init_queue.empty());
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  call_push(test_queue, 0);
+  ASSERT_EQ(false, test_queue.empty());
+  //call push from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+  //should not be empty
+  ASSERT_EQ( false, test_queue.empty());
+}
+
+TEST(thread_safe_queue, call_pop_on_empty_queue)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  //to be called from each thread
+  auto call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  {
+	bool pop_result = init_queue.pop(item);
+	ASSERT_EQ(false, pop_result);
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  call_pop(test_queue, 0);
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_pop, std::ref(test_queue), i + 1 );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+}
+
+TEST(thread_safe_queue, call_pop_on_non_empty_queue)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint8_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  //to be called from each thread
+  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  {
+	std::uint32_t old_size = init_queue.size();
+	init_queue.push(item);
+  };
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  //call push from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
+  }
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+  //should be the queue size
+  ASSERT_EQ( n_threads, test_queue.size());
+
+  //now the queue has n_threads  elements
+  
+  auto test_call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
+  {
+	bool pop_result = init_queue.pop(item);
+	ASSERT_EQ(expected_result, pop_result);
+  };
+  std::int32_t ret_val;
+  for( i = 0; i < n_threads; ++i)
+  {
+	//since this is an empty queue every thread should return false;
+	threads[i] = std::thread(test_call_pop, std::ref(test_queue), std::ref(ret_val), bool(true) );
+  }
+
+  for(std::thread & t : threads)
+  {
+	t.join();
+  }
+  ASSERT_EQ(test_queue.size(), 0);
+  //on empty queues pop should return false
+  test_call_pop(std::ref(test_queue), ret_val, false );
+}
+
+TEST(thread_safe_queue, call_pop_on_available_on_empty_queue)
+{
+}
+
+
+TEST(thread_safe_queue, call_pop_on_available_on_empty_queue)
+{
+
