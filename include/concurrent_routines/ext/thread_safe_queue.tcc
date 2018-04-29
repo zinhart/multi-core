@@ -3,24 +3,24 @@ namespace zinhart
 {
   template<class T>
 	HOST thread_safe_queue<T>::thread_safe_queue()
-			:state(queue_state::ACTIVE)
+			:current_state(queue_state::ACTIVE)
 	{}
   template<class T>
 	HOST thread_safe_queue<T>::~thread_safe_queue()
 	{
 	  kill();
 	}
-  template<class T>
+/*  template<class T>
 	HOST typename thread_safe_queue<T>::queue_state thread_safe_queue<T>::current_state()
 	{return (state == queue_state::ACTIVE) ? queue_state::ACTIVE : queue_state::INACTIVE; }
-
+*/
   template<class T>
 	HOST void thread_safe_queue<T>::kill()
 	{
 	  //As I understand it when their is no cv or the need of locking multiple mutexes a std::lock_guard suffices
 	  std::lock_guard<std::mutex> local_lock(lock);
 	  //so that wait pop can exit
-	  state = queue_state::INACTIVE;
+	  current_state = queue_state::INACTIVE;
 	  //notify threads of the updated queue state
 	  cv.notify_all();
 	}
@@ -54,9 +54,13 @@ namespace zinhart
 	  //Since the cv is locked upon -> std::unique_lock
   	  std::unique_lock<std::mutex> local_lock(lock);
 	  //basically block the current thread until the destructor is called (queue goes out of scope) or an item is available further wait conditions can be added here 
-	  cv.wait(lock, [this](){ return current_state() == queue_state::INACTIVE || queue.size() > 0 ;}   );
+	  cv.wait(local_lock, [this](){ return current_state == queue_state::INACTIVE || queue.size() > 0 ;}   );
 	  // so that all threads can exit
-	  if(current_state() == queue_state::INACTIVE)
+	  /*if(current_state == queue_state::INACTIVE)
+	  {
+		return false;
+	  }*/
+	  if(queue.empty() || current_state == queue_state::INACTIVE)
 		return false;
 	  item = std::move(queue.front());
 	  //update queue

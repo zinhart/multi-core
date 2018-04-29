@@ -11,11 +11,11 @@ namespace zinhart
 	{
 	  enum class queue_state : bool {ACTIVE = true, INACTIVE = false};
 	  private:
-		queue_state state;
+		queue_state current_state;
 		std::mutex lock;
 		std::queue<T> queue;
 		std::condition_variable cv;
-		queue_state current_state();
+		//queue_state current_state();
 		void kill();
 	  public:
 		HOST thread_safe_queue();

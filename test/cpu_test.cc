@@ -657,7 +657,6 @@ TEST(thread_safe_queue, call_pop_on_non_empty_queue)
   ASSERT_EQ( n_threads, test_queue.size());
 
   //now the queue has n_threads  elements
-  
   auto test_call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
   {
 	bool pop_result = init_queue.pop(item);
@@ -681,10 +680,90 @@ TEST(thread_safe_queue, call_pop_on_non_empty_queue)
 
 TEST(thread_safe_queue, call_pop_on_available_on_empty_queue)
 {
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint16_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  
+  std::int32_t ret_val;
+  auto test_call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
+  {
+	bool pop_result = init_queue.pop_on_available(item);
+	ASSERT_EQ(expected_result, pop_result);
+  };
+  
+  std::cout<<"n_threads: "<<n_threads<<"\n";
+  //introduce scoping here in order to test if threads blocked on the condition of the queue being empty can exit when the queue goes out of scope
+  {
+  	zinhart::thread_safe_queue<std::int32_t> test_queue;
+	//call pop_on_available from a random number of threads not exceding MAX_CPU_THREADS
+	for( i = 0; i < n_threads; ++i)
+	{
+	  //since this is an empty queue every thread should return false;
+	  threads[i] = std::thread(test_call_pop, std::ref(test_queue), std::ref(ret_val), false);
+	  //in order to make sure that pop_on_available returns correctly, in the case of an empty queue, each thread is allowed to run independently of the main thread
+	  threads[i].detach();
+	}
+  }
+
 }
 
 
 TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
 {
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint16_t n_threads = thread_dist(mt), i;
+  std::vector<std::thread> threads(n_threads); 
+  
+  std::int32_t ret_val;
+  auto test_call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
+  {
+	bool pop_result = init_queue.pop_on_available(item);
+	std::cout<<"Item: "<<item<<"\n";
+//	ASSERT_EQ(expected_result, pop_result);
+	//(init_queue.size() == 0) ? ASSERT_EQ(expected_result, pop_result) : ASSERT_NE(expected_result, pop_result);
+/*	if(init_queue.size() == 0)
+	  ASSERT_EQ(expected_result, pop_result);
+	else
+	  ASSERT_NE(expected_result, pop_result);*/
+  };
+  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  {
+	std::uint32_t old_size = init_queue.size();
+	init_queue.push(item);
+	ASSERT_TRUE( init_queue.size() >=  old_size);
+  }; 
+
+  std::cout<<"n_threads: "<<n_threads<<"\n";
+  //introduce scoping here in order to test if threads blocked on the condition of the queue being empty can exit when the queue goes out of scope
+  {
+  	zinhart::thread_safe_queue<std::int32_t> test_queue;
+  	//call push from a random number of threads not exceding MAX_CPU_THREADS
+	for( i = 0; i < n_threads; ++i)
+	{
+	  //since this is an empty queue every thread should return false;
+	  threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
+	}
+	for(std::thread & t : threads)
+	{
+	  t.join();
+	}
+	//call pop_on_available from a random number of threads not exceding MAX_CPU_THREADS
+	for( i = 0; i < n_threads; ++i)
+	{
+	  //since this is an empty queue every thread should return false;
+	  threads[i] = std::thread(test_call_pop, std::ref(test_queue), std::ref(ret_val), true);
+	  //in order to make sure that pop_on_available returns correctly, in the case of an empty queue, each thread is allowed to run independently of the main thread
+	  threads[i].detach();
+	}
+
+	for(std::thread & t : threads)
+	{
+//	  t.join();
+	}
+  }
 }
 
