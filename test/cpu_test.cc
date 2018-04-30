@@ -708,21 +708,18 @@ TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
   
   std::int32_t ret_val;
   
-  //introduce scoping here in order to test if threads blocked on the condition of the queue being empty can exit when the queue goes out of scope
+  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  //call pop_on_available from a random number of threads not exceding MAX_CPU_THREADS
+  for( i = 0; i < n_threads; ++i)
   {
-  	zinhart::thread_safe_queue<std::int32_t> test_queue;
-	//call pop_on_available from a random number of threads not exceding MAX_CPU_THREADS
-	for( i = 0; i < n_threads; ++i)
-	{
-	  // since this is an empty queue every thread should return false;
-	   threads[i] = std::thread(std::move(tasks[i]), std::ref(test_queue), std::ref(ret_val), true);
-	   futures[i].get();
-	}
-	//destructor of queue called here
-	for(std::thread & t : threads)
-	{
-	  t.join();
-	}
+	// since this is an empty queue every thread should return false;
+	 threads[i] = std::thread(std::move(tasks[i]), std::ref(test_queue), std::ref(ret_val), true);
+	 futures[i].get();
+  }
+  //destructor of queue called here
+  for(std::thread & t : threads)
+  {
+	t.join();
   }
 
 }
