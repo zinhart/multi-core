@@ -1,72 +1,58 @@
 #include "../thread_safe_queue.hh"
+#include <iostream>
 namespace zinhart
 {
   template<class T>
-	HOST thread_safe_queue<T>::thread_safe_queue()
-			:current_state(queue_state::ACTIVE)
-	{}
-  template<class T>
-	HOST thread_safe_queue<T>::~thread_safe_queue()
-	{
-	  kill();
-	}
-/*  template<class T>
-	HOST typename thread_safe_queue<T>::queue_state thread_safe_queue<T>::current_state()
-	{return (state == queue_state::ACTIVE) ? queue_state::ACTIVE : queue_state::INACTIVE; }
-*/
-  template<class T>
-	HOST void thread_safe_queue<T>::kill()
-	{
-	  //As I understand it when their is no cv or the need of locking multiple mutexes a std::lock_guard suffices
-	  std::lock_guard<std::mutex> local_lock(lock);
-	  //so that wait pop can exit
-	  current_state = queue_state::INACTIVE;
-	  //notify threads of the updated queue state
-	  cv.notify_all();
-	}
-  template<class T>
 	HOST void thread_safe_queue<T>::push(const T & item)
 	{
-	  std::lock_guard<std::mutex> temp_lock(lock);
-	  //add item to the queue
+	  std::lock_guard<std::mutex> local_lock(lock);
+	  // add item to the queue
 	  queue.push(item);
-	  //notify a thread that an item is ready to be removed from the queue
+	  // notify a thread that an item is ready to be removed from the queue
+	  cv.notify_one();
+	}
+  template<class T>
+	HOST void thread_safe_queue<T>::push(T && item)
+	{
+	  std::lock_guard<std::mutex> local_lock(lock);
+	  // add item to the queue
+	  queue.push(std::move(item));
+	  // notify a thread that an item is ready to be removed from the queue
 	  cv.notify_one();
 	}
   template<class T>
 	HOST bool thread_safe_queue<T>::pop(T & item)
 	{
 	  std::lock_guard<std::mutex> local_lock(lock);
-	  //don't call pop on an empty queue
-	  if(queue.empty())
+	  if(queue.size() > 0)
 	  {
-		return false;
+		// avoid copying
+		item = std::move(queue.front());
+		// update queue
+		queue.pop();
+		// successfull write
+		return true;
 	  }
-	  //avoid copying
-	  item = std::move(queue.front());
-	  //update queue
-	  queue.pop();
-	  return true;
+	  // unsuccessfull write
+	  return false;
 	}
   template<class T>
 	HOST bool thread_safe_queue<T>::pop_on_available(T & item)
 	{
-	  //Since the cv is locked upon -> std::unique_lock
+	  // Since the cv is locked upon -> std::unique_lock
   	  std::unique_lock<std::mutex> local_lock(lock);
-	  //basically block the current thread until the destructor is called (queue goes out of scope) or an item is available further wait conditions can be added here 
-	  cv.wait(local_lock, [this](){ return current_state == queue_state::INACTIVE || queue.size() > 0 ;}   );
-	  // so that all threads can exit
-	  /*if(current_state == queue_state::INACTIVE)
-	  {
-		return false;
-	  }*/
-	  if(queue.empty() || current_state == queue_state::INACTIVE)
-		return false;
+	  // basically block the current thread until an item is available, 
+	  // so calling this function before pushing items on to the queue is an error,
+	  // further wait conditions can be added here 
+	  cv.wait(local_lock, [this](){ return queue.size() > 0; });
+	  // avoid copying
 	  item = std::move(queue.front());
-	  //update queue
+	  // update queue
 	  queue.pop();
+	  // successfull write
 	  return true;
 	}
+
   template<class T>
 	HOST std::uint32_t thread_safe_queue<T>::size()
 	{
