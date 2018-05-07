@@ -4,7 +4,6 @@
 #include "timer.hh"
 #include <thread>
 #include <cstdint>
-#define MAX_CPU_THREADS std::thread::hardware_concurrency()
 namespace zinhart
 {
   //this function is used by each thread to determine what pieces of data it will operate on

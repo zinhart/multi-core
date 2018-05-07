@@ -1,5 +1,6 @@
 #include "concurrent_routines/concurrent_routines.hh"
 #include "concurrent_routines/thread_safe_queue.hh"
+#include "concurrent_routines/thread_pool.hh"
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <iostream>
@@ -722,4 +723,12 @@ TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
 	t.join();
   }
 
+}
+
+TEST(thread_pool, call_add_task)
+{
+  zinhart::thread_pool pool(1); 
+  pool.down();
+  //auto future = pool.add_task([](int a, int b){ return a + b;}, 1 , 2);
+  //ASSERT_EQ(future.get(), 3);
 }

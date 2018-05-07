@@ -43,7 +43,7 @@ namespace zinhart
   	  std::unique_lock<std::mutex> local_lock(lock);
 	  // basically block the current thread until an item is available, 
 	  // so calling this function before pushing items on to the queue is an error,
-	  // further wait conditions can be added here 
+	  // further wait conditions could be added here 
 	  cv.wait(local_lock, [this](){ return queue.size() > 0; });
 	  // avoid copying
 	  item = std::move(queue.front());
