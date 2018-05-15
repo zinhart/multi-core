@@ -3,6 +3,19 @@
 namespace zinhart
 {
   template<class T>
+	HOST thread_safe_queue<T>::thread_safe_queue()
+  	{ queue_state = QUEUE_STATE::ACTIVE; }
+  template<class T>
+	HOST void thread_safe_queue<T>::shutdown()
+	{
+	  std::lock_guard<std::mutex> local_lock(lock);
+	  queue_state = QUEUE_STATE::INACTIVE;
+	  cv.notify_all();
+	}
+  template<class T>
+	HOST thread_safe_queue<T>::~thread_safe_queue() /*= default*/
+	{ shutdown();}
+  template<class T>
 	HOST void thread_safe_queue<T>::push(const T & item)
 	{
 	  std::lock_guard<std::mutex> local_lock(lock);
@@ -44,7 +57,7 @@ namespace zinhart
 	  // basically block the current thread until an item is available, 
 	  // so calling this function before pushing items on to the queue is an error,
 	  // further wait conditions could be added here 
-	  cv.wait(local_lock, [this](){ return queue.size() > 0; });
+	  cv.wait(local_lock, [this](){ return queue.size() > 0 || queue_state == QUEUE_STATE::INACTIVE; });
 	  // avoid copying
 	  item = std::move(queue.front());
 	  // update queue
@@ -71,5 +84,6 @@ namespace zinhart
 	  std::lock_guard<std::mutex> local_lock(lock);
 	  while(queue.size() > 0)
 		queue.pop();
+	  cv.notify_all();
 	}
 }
