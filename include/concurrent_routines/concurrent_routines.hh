@@ -97,19 +97,22 @@ namespace zinhart
 		  }
 	  };
 	//GPU WRAPPERS
-	HOST int parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
-	template <class Precision_Type>
-	  HOST int paralell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * C);
+	HOST std::int32_t parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
 	
 	template <class Precision_Type>
-	  HOST int paralell_matrix_product(Precision_Type * A, Precision_Type * B, Precision_Type * C);
-	  
+	  HOST std::int32_t parallell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB,	std::uint32_t LDC, std::uint32_t SDC );
 	template <class Precision_Type>
-	  HOST int paralell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * C);
+	  HOST std::int32_t shared_matrix_product(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB, std::uint32_t LDC, std::uint32_t SDC);
+	
+	template <class Precision_Type>
+	  HOST std::int32_t parallell_naive_matrix_transpose_gpu(Precision_Type * O, Precision_Type * I, std::uint32_t LDA, std::uint32_t SDA);
 
 	template <class Precision_Type>
-	  HOST int paralell_matrix_product_gpu(Precision_Type * A, Precision_Type * B, Precision_Type * C);
-	#endif
+	  HOST std::int32_t parallell_shared_matrix_transpose_gpu(Precision_Type * O, Precision_Type * I, std::uint32_t LDA, std::uint32_t SDA);
+	
+	template <class Precision_Type>
+	  void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in);
+#endif
 }
 #include "ext/concurrent_routines_ext.tcc"
 #endif

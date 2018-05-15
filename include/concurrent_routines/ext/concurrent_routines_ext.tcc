@@ -349,7 +349,7 @@ namespace zinhart
  * */
 #if CUDA_ENABLED == true
 	template <class PrecisionType>
-	  HOST int paralell_naive_matrix_product_gpu(const std::uint32_t & N, PrecisionType * A, PrecisionType * B, PrecisionType * C)
+	  HOST std::int32_t paralell_naive_matrix_product_gpu(const std::uint32_t & N, PrecisionType * A, PrecisionType * B, PrecisionType * C)
 	  {
 		std::uint32_t threads_per_block;
 		dim3 block_launch;
@@ -359,21 +359,7 @@ namespace zinhart
 		//call kernel
 		return 0;
 	  }
-	template <class PrecisionType>
-	  HOST int paralell_matrix_product(PrecisionType * A, PrecisionType * B, PrecisionType * C)
-	  {
-		return 0;
-	  }
-	template <class PrecisionType>
-	  HOST int paralell_naive_matrix_transpose_gpu(PrecisionType * A, PrecisionType * B, PrecisionType * C)
-	  {
-		return 0;
-	  }
-	template <class PrecisionType>
-	  HOST int paralell_matrix_transpose_gpu(PrecisionType * A, PrecisionType * B, PrecisionType * C)
-	  {
-		return 0;
-	  }
+
 #endif
 }
 
