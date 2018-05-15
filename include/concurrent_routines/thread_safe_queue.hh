@@ -35,7 +35,7 @@ namespace zinhart
 		HOST bool empty();
 		HOST void clear();
 		//manually shutdown the queue
-		void shutdown();
+		HOST void shutdown();
 	};
 }
 #include "ext/thread_safe_queue.tcc"
