@@ -58,6 +58,10 @@ namespace zinhart
 	  // so calling this function before pushing items on to the queue is an error,
 	  // further wait conditions could be added here 
 	  cv.wait(local_lock, [this](){ return queue.size() > 0 || queue_state == QUEUE_STATE::INACTIVE; });
+	  
+	  // if an early termination signal is received then return an unsuccessfull write
+	  if (queue_state == QUEUE_STATE::INACTIVE)
+		  return false;
 	  // avoid copying
 	  item = std::move(queue.front());
 	  // update queue

@@ -62,11 +62,11 @@ endif()
 include_directories( . include ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
 
 # set cxx standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 # force cxx standard
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set cxx flags
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall -std=c++14 ${CMAKE_CXX_FLAGS}")
 # set cxx release flags
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 # set cxx debug flags

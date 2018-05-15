@@ -724,11 +724,23 @@ TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
   }
 
 }
-
+//no exceptions segfaults
+TEST(thread_pool, constructor_and_destructor)
+{
+	zinhart::thread_pool pool;
+}
 TEST(thread_pool, call_add_task)
 {
-  zinhart::thread_pool pool(1); 
-  pool.down();
-  //auto future = pool.add_task([](int a, int b){ return a + b;}, 1 , 2);
-  //ASSERT_EQ(future.get(), 3);
+  static zinhart::thread_pool pool; 
+  std::vector<zinhart::thread_pool::thread_future<std::uint32_t>> results;
+  for(std::uint32_t i = 0, j = 0; i < 20; ++i)
+  {	  
+	results.push_back(pool.add_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
+  }
+
+  for(std::uint32_t i = 0, j = 0; i < 20; ++i)
+  {	  
+	//std::cout<< i <<" + "<< j <<" = "<<results[i].get()<<"\n";
+	ASSERT_EQ(i * j, results[i].get());
+  }
 }
