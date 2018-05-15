@@ -18,49 +18,53 @@ namespace zinhart
 	private:
 	  class thread_task_interface
 	  {
-		  public:
-		  	HOST thread_task_interface() = default;
-		  	HOST thread_task_interface(const thread_task_interface&) = delete;
-		  	HOST thread_task_interface & operator =(const thread_task_interface&) = delete;
-		  	HOST thread_task_interface & operator =(thread_task_interface&&) = default;
-		  	HOST ~thread_task_interface() = default;
-		  	virtual void operator()() = 0;
+		public:
+		  HOST thread_task_interface() = default;
+		  HOST thread_task_interface(const thread_task_interface&) = delete;
+		  HOST thread_task_interface & operator =(const thread_task_interface&) = delete;
+		  HOST thread_task_interface & operator =(thread_task_interface&&) = default;
+		  HOST ~thread_task_interface() = default;
+		  virtual void operator()() = 0;
 	  };
+
 	  template <class Callable>
 		class thread_task : public thread_task_interface
 		{
 		  private:
-			  Callable c;
+			  Callable callable;
 		  public:
 	  		  HOST thread_task(Callable && c)
-		  	  {	this->c = std::move(c); }
+				   :callable{std::move(c)}
+		  	  {	/*this->callable = std::move(c);*/ }
 		  	  HOST thread_task(const thread_task&) = delete;
 		  	  HOST thread_task & operator =(const thread_task&) = delete;
 		  	  HOST thread_task & operator =(thread_task&&) = default;
 			  HOST virtual ~thread_task() = default;
 			  void operator()() override
-			  { this->c(); }
+			  { this->callable(); }
 		};
 	public:
 	  template <class T>
-		class thread_future
+		class task_future
 		{
 		  private:
 			  std::future<T> future;
 		  public:
-	  		  HOST thread_future(std::future<T> && future)
-		  	  {	this->future = std::move(future); }
-		  	  HOST thread_future(const thread_future&) = delete;
-		  	  HOST thread_future & operator =(const thread_future&) = delete;
-		  	  HOST thread_future & operator =(thread_future&&) = default;
-			  HOST ~thread_future()
+	  		  HOST task_future(std::future<T> && futur)
+				  :future{std::move(futur)}
+		  	  {	/*this->future = std::move(future);*/ }
+		  	  HOST task_future(const task_future&) = delete;
+		  	  HOST task_future & operator =(const task_future&) = delete;
+		  	  HOST task_future & operator =(task_future&&) = default;
+			  HOST task_future(task_future &&) = default;
+			  HOST ~task_future()
 			  {
 				if (future.valid())
 			  		future.get();
 			  }
-			  T get()
+			  auto get()
 			  {
-				if (future.valid())
+				//if (future.valid())
 			  		return future.get();
 			  }
 		};
@@ -84,7 +88,7 @@ namespace zinhart
 		  using task_type = thread_task<packaged_task>;
 
 		  packaged_task task{std::move(bound_task)};
-		  thread_future<result_type> result{task.get_future()};
+		  task_future<result_type> result{task.get_future()};
 		  queue.push(std::make_unique<task_type>(std::move(task)));
 		  return result;
 		}

@@ -12,7 +12,7 @@ namespace zinhart
  	 // set the queue state for work
 	 thread_pool_state = THREAD_POOL_STATE::UP;
 	 for(std::uint32_t i = 0; i < n_threads; ++i )
-	  threads.emplace_back(std::thread(&thread_pool::work, this));
+	  threads.emplace_back(&thread_pool::work, this);
 	}
 	catch(...)
 	{
@@ -61,7 +61,7 @@ namespace zinhart
 	  using task_type = thread_task<packaged_task>;
 
 	  packaged_task task = std::move(bound_task);
-	  thread_future<result_type> result{task.get_future()};
+	  task_future<result_type> result{task.get_future()};
 	  queue.push(std::make_unique<task_type>(std::move(task)));
 	  return result;
 	}*/
