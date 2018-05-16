@@ -50,10 +50,21 @@ find_package(LAPACK REQUIRED)
 if(BuildCuda)
   find_package(CUDA REQUIRED)
   set(CUDA_ARCH -gencode arch = compute_61, code = sm_61)
-  # set macro to conditional include headers define functions etc w.r.t gpu code
-  add_definitions(-DCUDA_ENABLED=true)
+
+  # check to see if CUDA_ENABLED was defined by another library using this one
+  string(REGEX MATCH "CUDA_ENABLED" result "${COMPILE_DEFINITIONS}" )
+  if(${result} MATCHES "CUDA_ENABLED")
+    # do nothing
+  else()
+	# set macro to conditionaly include headers define functions etc w.r.t gpu code
+	add_definitions(-DCUDA_ENABLED=true)
+  endif()
 else()
+  string(REGEX MATCH "CUDA_ENABLED" result "${COMPILE_DEFINITIONS}")
+  if(${result} MATCHES "CUDA_ENABLED")
+  else()
 	add_definitions(-DCUDA_ENABLED=false)
+  endif()
 endif()
 
 # set include paths
