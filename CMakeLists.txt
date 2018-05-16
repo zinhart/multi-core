@@ -21,8 +21,8 @@ option(Sanitize "Sanitize" OFF)
 option(PTHREADS "PTHREADS" ON)
 option(WIN32_THREADS "WIN32_THREADS" OFF)
 
-option (BuildHw2 "BuildHw2" ON)
-option (BuildHw3 "BuildHw3" ON)
+option (BuildHw2 "BuildHw2" OFF)
+option (BuildHw3 "BuildHw3" OFF)
 
 # set lib type
 if(BuildShared)
