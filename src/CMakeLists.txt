@@ -2,7 +2,7 @@ if(BuildCuda)
   set(concurrent_routines_lib
 	  gpu.cu
 	  cpu.cc
-	  #	  thread_pool.cc
+	  thread_pool.cc
 
   )
   # link with cuda lib
