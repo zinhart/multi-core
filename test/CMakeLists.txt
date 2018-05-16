@@ -2,10 +2,10 @@
 include_directories(.)
 
 #add google test library
-add_library(gtest ./gtest/gtest-all.cc)
+add_library(gtest_concurrent_routines ./gtest/gtest-all.cc)
 
 #link google test
-target_link_libraries(gtest ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(gtest_concurrent_routines ${CMAKE_THREAD_LIBS_INIT})
 
 # cpu & gpu unit tests
 if(BuildCuda)
@@ -18,7 +18,7 @@ if(BuildCuda)
 add_executable(unit_tests ${unit_tests_src})
 
 target_link_libraries(unit_tests 
-					  gtest
+					  gtest_concurrent_routines
 					  concurrent_routines
 					  ${CMAKE_THREAD_LIBS_INIT}
 					  )
@@ -36,7 +36,7 @@ else()
 add_executable(unit_tests ${unit_tests_src})
 
 target_link_libraries(unit_tests 
-					  gtest
+					  gtest_concurrent_routines
 					  concurrent_routines
 					  ${CMAKE_THREAD_LIBS_INIT}
 					  )
