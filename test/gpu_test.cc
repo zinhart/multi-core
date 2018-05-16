@@ -74,7 +74,7 @@ TEST(gpu_test, parrallel_saxpy_gpu)
   //validate each value
   for(i = 0; i < n_elements; ++i)
   {
-	std::cout<<y_host.get()[i]<<" "<<y_host_copy.get()[i]<<"\n";
+//	std::cout<<y_host.get()[i]<<" "<<y_host_copy.get()[i]<<"\n";
 	//ASSERT_EQ(y_host.get()[i], y_host_copy.get()[i]);
   }
   cudaFree(x_device);
