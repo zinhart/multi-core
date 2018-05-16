@@ -430,17 +430,17 @@ TEST(thread_safe_queue, call_size_on_empty_queue)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
+  std::uniform_int_distribution<std::uint32_t> thread_dist(std::uint32_t{1}, std::uint32_t{MAX_CPU_THREADS});
+  std::uint32_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   auto call_size = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue)
   {
-	ASSERT_EQ(0, init_queue.size());
+	ASSERT_EQ(std::uint32_t{0}, init_queue.size());
   };
   zinhart::thread_safe_queue<std::int32_t> test_queue;
   //called from the main thread
   call_size(test_queue);
-  ASSERT_EQ(0, test_queue.size());
+  ASSERT_EQ(std::uint32_t{0}, test_queue.size());
   //call size from a random number of threads not exceding MAX_CPU_THREADS
   for( i = 0; i < n_threads; ++i)
   {
@@ -489,14 +489,14 @@ TEST(thread_safe_queue, call_clear_on_empty_queue)
   {
 	init_queue.clear();
 	//since these were already tested
-	ASSERT_EQ(true, init_queue.empty());
-	ASSERT_EQ(0, init_queue.size());
+	ASSERT_EQ(bool{true}, init_queue.empty());
+	ASSERT_EQ(std::uint32_t{0}, init_queue.size());
   };
   zinhart::thread_safe_queue<std::int32_t> test_queue;
   //called from the main thread
   call_clear(test_queue);
-  ASSERT_EQ(true, test_queue.empty());
-  ASSERT_EQ(0, test_queue.size());
+  ASSERT_EQ(bool{true}, test_queue.empty());
+  ASSERT_EQ(std::uint32_t{0}, test_queue.size());
   //call clear from a random number of threads not exceding MAX_CPU_THREADS
   for( i = 0; i < n_threads; ++i)
   {
@@ -525,9 +525,9 @@ TEST(thread_safe_queue, call_push)
 	ASSERT_TRUE( init_queue.size() >=  old_size);
   };
   zinhart::thread_safe_queue<std::int32_t> test_queue;
-  call_push(test_queue, 0);
-  ASSERT_EQ(false, test_queue.empty());
-  ASSERT_EQ(1, test_queue.size());
+  call_push(test_queue,0);
+  ASSERT_EQ(bool{false}, test_queue.empty());
+  ASSERT_EQ(std::uint32_t{1}, test_queue.size());
   //call push from a random number of threads not exceding MAX_CPU_THREADS
   for( i = 0; i < n_threads; ++i)
   {
@@ -539,7 +539,7 @@ TEST(thread_safe_queue, call_push)
 	t.join();
   }
   //should be the queue size
-  ASSERT_EQ( n_threads + 1, test_queue.size());
+  ASSERT_EQ( std::uint32_t{n_threads + 1}, test_queue.size());
 }
 
 
@@ -559,7 +559,7 @@ TEST(thread_safe_queue, call_size_on_non_empty_queue)
   };
   zinhart::thread_safe_queue<std::int32_t> test_queue;
   call_push(test_queue, 0);
-  ASSERT_EQ(1, test_queue.size());
+  ASSERT_EQ(std::uint32_t{1}, test_queue.size());
   //call push from a random number of threads not exceding MAX_CPU_THREADS
   for( i = 0; i < n_threads; ++i)
   {
@@ -641,7 +641,6 @@ TEST(thread_safe_queue, call_pop_on_non_empty_queue)
   //to be called from each thread
   auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
   {
-	std::uint32_t old_size = init_queue.size();
 	init_queue.push(item);
   };
   zinhart::thread_safe_queue<std::int32_t> test_queue;
@@ -675,9 +674,10 @@ TEST(thread_safe_queue, call_pop_on_non_empty_queue)
   {
 	t.join();
   }
-  ASSERT_EQ(test_queue.size(), 0);
+  ASSERT_EQ(test_queue.size(), std::uint32_t{0});
   //on empty queues pop should return false
-  test_call_pop(std::ref(test_queue), ret_val, false );
+  bool f = false;
+  test_call_pop(std::ref(test_queue), ret_val, f );
 }
 
 //calling it on an empty queue doesn't make sense after all
@@ -731,16 +731,21 @@ TEST(thread_pool, constructor_and_destructor)
 }
 TEST(thread_pool, call_add_task)
 {
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uniform_int_distribution<std::uint32_t> size_dist(1, MAX_CPU_THREADS);
   static zinhart::thread_pool pool; 
+  std::uint32_t results_size = size_dist(mt);
   std::vector<zinhart::thread_pool::task_future<std::uint32_t>> results;
-  for(std::uint32_t i = 0, j = 0; i < 20; ++i)
+  for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
   {	  
 	results.push_back(pool.add_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
   }
-
-  for(std::uint32_t i = 0, j = 0; i < 20; ++i)
+  std::uint32_t res;
+  for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
   {	  
-	//std::cout<< i <<" + "<< j <<" = "<<results[i].get()<<"\n";
-	ASSERT_EQ(i * j, results[i].get());
+	res = results[i].get();  
+	ASSERT_EQ(i + j, res);
   }
 }

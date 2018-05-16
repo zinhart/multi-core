@@ -9,6 +9,7 @@
 #include "macros.hh"
 #include "thread_safe_queue.hh"
 #include <functional>
+#include <type_traits>
 namespace zinhart
 {
   //an asynchonous thread pool
@@ -34,8 +35,7 @@ namespace zinhart
 			  Callable callable;
 		  public:
 	  		  HOST thread_task(Callable && c)
-				   :callable{std::move(c)}
-		  	  {	/*this->callable = std::move(c);*/ }
+		  	  {	this->callable = std::move(c); }
 		  	  HOST thread_task(const thread_task&) = delete;
 		  	  HOST thread_task & operator =(const thread_task&) = delete;
 		  	  HOST thread_task & operator =(thread_task&&) = default;
@@ -50,9 +50,8 @@ namespace zinhart
 		  private:
 			  std::future<T> future;
 		  public:
-	  		  HOST task_future(std::future<T> && futur)
-				  :future{std::move(futur)}
-		  	  {	/*this->future = std::move(future);*/ }
+	  		  HOST task_future(std::future<T> && future)
+		  	  {	this->future = std::move(future); }
 		  	  HOST task_future(const task_future&) = delete;
 		  	  HOST task_future & operator =(const task_future&) = delete;
 		  	  HOST task_future & operator =(task_future&&) = default;
@@ -62,13 +61,10 @@ namespace zinhart
 				if (future.valid())
 			  		future.get();
 			  }
-			  auto get()
-			  {
-				//if (future.valid())
-			  		return future.get();
-			  }
+			  T get()
+			  { return future.get(); }
 		};
-	public:
+
 	  HOST void down();
 	  // disable everthing
 	  HOST thread_pool(const thread_pool&) = delete;
@@ -80,22 +76,21 @@ namespace zinhart
 	  HOST std::uint32_t get_threads();
 	  
 	  template<class Callable, class ... Args>
-		HOST auto add_task(Callable && c, Args&&...args)
+		HOST auto add_task(Callable && c, Args&&...args) -> task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >
 		{
-		  auto bound_task = std::bind(std::forward<Callable>(c), std::forward<Args>(args)...);
-		  using result_type = std::result_of_t<decltype(bound_task)()>;
+		  auto bound_task = std::bind(std::forward<Callable>(c), std::forward<Args>(args)...); 
+		  using result_type = typename std::result_of<decltype(bound_task)()>::type;
 		  using packaged_task = std::packaged_task<result_type()>;
 		  using task_type = thread_task<packaged_task>;
-
 		  packaged_task task{std::move(bound_task)};
 		  task_future<result_type> result{task.get_future()};
-		  queue.push(std::make_unique<task_type>(std::move(task)));
+		  queue.push(std::make_shared<task_type>(std::move(task)));
 		  return result;
 		}
 	private:
 	  THREAD_POOL_STATE thread_pool_state;
 	  std::vector<std::thread> threads;
-	  thread_safe_queue< std::unique_ptr<thread_task_interface> > queue;
+	  thread_safe_queue< std::shared_ptr<thread_task_interface> > queue;
 	  HOST void up(const std::uint32_t & n_threads);
 	  HOST void work();
 	};
