@@ -3,7 +3,7 @@ if(BuildCuda)
 	  gpu.cu
 	  cpu.cc
 	  thread_pool.cc
-
+	  concurrent_routines_error.cc
   )
   # link with cuda lib
   cuda_add_library(concurrent_routines ${LIB_TYPE} ${concurrent_routines_lib})
@@ -11,6 +11,7 @@ if(BuildCuda)
   #link cpu threading library
   target_link_libraries(
    concurrent_routines 
+   ${CUDA_CUBLAS_LIBRARIES}
    ${CMAKE_THREAD_LIBS_INIT}
   )
 

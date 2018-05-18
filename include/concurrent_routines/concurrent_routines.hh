@@ -113,9 +113,9 @@ namespace zinhart
 	template <class Precision_Type>
 	  void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in);
 
-	// assumed to be row major
-	template <class Precision_Type>
-	  std::int32_t dgemm_wrapper(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB);
+	// assumed to be row major indices this generated the column indices
+    HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
+
 #endif
 }
 #include "ext/concurrent_routines_ext.tcc"

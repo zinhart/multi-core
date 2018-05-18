@@ -1,8 +1,12 @@
 #include "concurrent_routines/concurrent_routines.hh"
+#include "concurrent_routines/concurrent_routines_error.hh"
 #include "gtest/gtest.h"
 #include <random>
 #include <limits>
 #include <iostream>
+#if CUDA_ENABLED == true
+#include <cublas_v2.h>
+#endif
 TEST(gpu_test, parrallel_saxpy_gpu)
 {
 #if CUDA_ENABLED
@@ -72,10 +76,11 @@ TEST(gpu_test, parrallel_saxpy_gpu)
 
   std::cout<<"N elements "<<n_elements<<"\n";
   //validate each value
+  float epsilon = 0.0005;
   for(i = 0; i < n_elements; ++i)
   {
-//	std::cout<<y_host.get()[i]<<" "<<y_host_copy.get()[i]<<"\n";
-	//ASSERT_EQ(y_host.get()[i], y_host_copy.get()[i]);
+	//std::cout<<y_host.get()[i]<<" "<<y_host_copy.get()[i]<<"\n";
+	ASSERT_NEAR(y_host.get()[i], y_host_copy.get()[i], epsilon);
   }
   cudaFree(x_device);
   if(error_id != cudaSuccess)
@@ -85,3 +90,144 @@ TEST(gpu_test, parrallel_saxpy_gpu)
 	std::cerr<<"y_device deallocation failed with error: "<<cudaGetErrorString(error_id)<<"\n";
   std::cout<<"Hello From GPU Tests\n";
 }
+TEST(gpu_test, gemm_wrapper)
+{
+  cudaError_t error_id;
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint8_t> uint_dist(2, 30/*std::numeric_limits<std::uint8_t>::max()*/);
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
+  std::int32_t A_row = uint_dist(mt);
+  std::int32_t A_col = uint_dist(mt);
+  std::int32_t B_row = A_col;
+  std::int32_t B_col = uint_dist(mt);
+  std::int32_t C_row = A_row;
+  std::int32_t C_col = B_row;
+  std::int32_t m, n, k, lda, ldb, ldc;
+  float * A_host;
+  float * B_host;
+  float * C_host;
+  float * A_host_copy;
+  float * B_host_copy;
+  float * C_host_copy;
+  float * A_device, * B_device, * C_device;
+  auto matrix_product = [](float * A, float * B, float * C, std::uint32_t A_rows, std::uint32_t A_cols, std::uint32_t B_cols)
+						{
+						  for(std::uint32_t i = 0; i < A_rows; ++i)
+						  {
+							for(std::uint32_t j = 0; j < B_cols; ++j)
+							{
+							  float sum = 0.0;
+							  for(std::uint32_t k = 0; k < A_cols; ++k)
+							  {
+								double a = A[i * A_cols + k];
+								double b = B[k * B_cols + j];
+								sum += a * b;
+							  }
+							  C[i * B_cols + j] = sum;
+							}
+						  }
+						};
+  auto print_mat = [](float * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
+			   {
+				 std::cout<<s<<"\n";
+	   			 for(std::uint32_t i = 0; i < mat_rows; ++i)  
+				 {
+				   for(std::uint32_t j = 0; j < mat_cols; ++j)
+				   {
+					 std::cout<<mat[i * mat_cols + j]<<" ";
+				   }
+				   std::cout<<"\n";
+				 }
+				 
+			   };
+
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host, A_row * A_col * sizeof(float), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host, B_row * B_col * sizeof(float), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host, C_row * C_col * sizeof(float), cudaHostAllocDefault));
+
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host_copy, A_row * A_col * sizeof(float), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host_copy, B_row * B_col * sizeof(float), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host_copy, C_row * C_col * sizeof(float), cudaHostAllocDefault));
+
+  zinhart::check_cuda_api(cudaMalloc((void**)&A_device,  A_row * A_col * sizeof(float)));
+  zinhart::check_cuda_api(cudaMalloc((void**)&B_device,  B_row * B_col * sizeof(float)));
+  zinhart::check_cuda_api(cudaMalloc((void**)&C_device,  C_row * C_col * sizeof(float)));
+  
+  for(std::uint32_t i = 0; i < A_row * A_col; ++i)
+  {
+	A_host[i] = real_dist(mt);
+  }
+  for(std::uint32_t i = 0; i < B_row * B_col; ++i)
+  {
+	B_host[i] = real_dist(mt);
+  }
+  for(std::uint32_t i = 0; i < C_row * C_col; ++i)
+  {
+	C_host[i] = 0.0;
+  }
+
+
+  zinhart::check_cuda_api(cudaMemcpy(A_device, A_host, A_row * A_col * sizeof(float), cudaMemcpyHostToDevice));
+  zinhart::check_cuda_api(cudaMemcpy(B_device, B_host, B_row * B_col * sizeof(float), cudaMemcpyHostToDevice));
+  zinhart::check_cuda_api(cudaMemcpy(C_device, C_host, C_row * C_col * sizeof(float), cudaMemcpyHostToDevice));
+
+  cublasStatus_t cublas_error_id;
+  cublasHandle_t context;
+  zinhart::check_cublas_api(cublasCreate(&context));
+  float alpha = 1;
+  float beta = 1; 
+  zinhart::gemm_wrapper(m,n,k,lda,ldb,ldc, A_row, A_col, B_row, B_col); 
+  //sgemm here
+  zinhart::check_cublas_api(cublasSgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
+			  m, n, k,
+			  &alpha,
+			  B_device, lda,
+			  A_device, ldb,
+			  &beta,
+			  C_device, ldc
+			 ));
+
+ /* 
+  zinhart::check_cublas_api(cublasSgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
+			  C_row, C_col, A_col,
+			  &alpha,
+			  B_device, A_row,
+			  A_device, B_row,
+			  &beta,
+			  C_device, C_row
+			 ));
+*/
+  zinhart::check_cublas_api(cublasDestroy(context));
+  zinhart::check_cuda_api(cudaMemcpy(A_host_copy, A_device, A_row * A_col * sizeof(float), cudaMemcpyDeviceToHost));
+  zinhart::check_cuda_api(cudaMemcpy(B_host_copy, B_device, B_row * B_col * sizeof(float), cudaMemcpyDeviceToHost));
+  zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_row * C_col * sizeof(float), cudaMemcpyDeviceToHost));
+
+  matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
+/*  print_mat(A_host, A_row, A_col,"A_host");
+  print_mat(A_host_copy, A_row, A_col, "A_host_copy");
+  print_mat(B_host, B_row, B_col,"B_host");
+  print_mat(B_host_copy, B_row, B_col, "B_host_copy");
+  print_mat(C_host, C_row, C_col,"C_host");
+  print_mat(C_host_copy, C_row, C_col, "C_host_copy");*/
+  float epsilon = .0005;
+  for(std::uint32_t i = 0; i < C_row * C_col; ++i)
+  {
+	ASSERT_NEAR(A_host[i],A_host_copy[i], epsilon);
+	ASSERT_NEAR(B_host[i],B_host_copy[i], epsilon);
+	ASSERT_NEAR(C_host[i],C_host_copy[i], epsilon);
+  }
+
+  zinhart::check_cuda_api(cudaFreeHost(A_host));
+  zinhart::check_cuda_api(cudaFreeHost(B_host));
+  zinhart::check_cuda_api(cudaFreeHost(C_host));
+  zinhart::check_cuda_api(cudaFreeHost(A_host_copy));
+  zinhart::check_cuda_api(cudaFreeHost(B_host_copy));
+  zinhart::check_cuda_api(cudaFreeHost(C_host_copy));
+  zinhart::check_cuda_api(cudaFree(A_device));
+  zinhart::check_cuda_api(cudaFree(B_device));
+  zinhart::check_cuda_api(cudaFree(C_device)); 
+}
+

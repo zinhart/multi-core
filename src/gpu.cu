@@ -12,9 +12,6 @@ namespace zinhart
   template HOST std::int32_t parallell_naive_matrix_transpose_gpu(double * O, double * I, std::uint32_t LDA, std::uint32_t SDA);
   template HOST std::int32_t parallell_shared_matrix_transpose_gpu(float * O, float * I, std::uint32_t LDA, std::uint32_t SDA);
   template HOST std::int32_t parallell_shared_matrix_transpose_gpu(double * O, double * I, std::uint32_t LDA, std::uint32_t SDA);
-  template HOST std::int32_t dgemm_wrapper(float * A, float * B, float * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB);
-  template HOST std::int32_t dgemm_wrapper(double * A, double * B, double * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB);
-
 
   // KERNELS
   __global__ void saxpy_kernel(const float a, float * x, float * y, const std::uint32_t N)
@@ -302,11 +299,5 @@ namespace zinhart
 	    // when there is only one warp per block, we need to allocate two warps
 		// worth of shared memory so that we don't index shared memory out of bounds
 		std::uint32_t shared_memory = (threads <= 32) ? 2 * threads * sizeof(Precision_Type) : threads * sizeof(Precision_Type);
-	  }
-
-	// assumed to be row major
-	template <class Precision_Type>
-	  std::int32_t dgemm_wrapper(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB)
-	  {
 	  }
 }
