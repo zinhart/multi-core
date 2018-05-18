@@ -112,6 +112,10 @@ namespace zinhart
 	
 	template <class Precision_Type>
 	  void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in);
+
+	// assumed to be row major
+	template <class Precision_Type>
+	  std::int32_t dgemm_wrapper(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB);
 #endif
 }
 #include "ext/concurrent_routines_ext.tcc"
