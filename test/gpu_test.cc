@@ -96,41 +96,44 @@ TEST(gpu_test, gemm_wrapper)
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(2, 30/*std::numeric_limits<std::uint8_t>::max()*/);
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, std::numeric_limits<std::uint8_t>::max());
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
   std::int32_t A_row = uint_dist(mt);
   std::int32_t A_col = uint_dist(mt);
+  std::int32_t A_total_elements = A_row  * A_col;
   std::int32_t B_row = A_col;
   std::int32_t B_col = uint_dist(mt);
+  std::int32_t B_total_elements = B_row * B_col;
   std::int32_t C_row = A_row;
   std::int32_t C_col = B_row;
+  std::int32_t C_total_elements = C_row * C_col;
+  std::cout<<"total pinned memory: "<<std::uint32_t(A_total_elements * B_total_elements * C_total_elements)<<" bytes.\n";
   std::int32_t m, n, k, lda, ldb, ldc;
-  float * A_host;
-  float * B_host;
-  float * C_host;
-  float * A_host_copy;
-  float * B_host_copy;
-  float * C_host_copy;
-  float * A_device, * B_device, * C_device;
-  auto matrix_product = [](float * A, float * B, float * C, std::uint32_t A_rows, std::uint32_t A_cols, std::uint32_t B_cols)
+  double * A_host;
+  double * B_host;
+  double * C_host;
+  double * A_host_copy;
+  double * B_host_copy;
+  double * C_host_copy;
+  double * A_device, * B_device, * C_device;
+  auto matrix_product = [](double * A, double * B, double * C, std::uint32_t A_rows, std::uint32_t A_cols, std::uint32_t B_cols)
 						{
 						  for(std::uint32_t i = 0; i < A_rows; ++i)
 						  {
 							for(std::uint32_t j = 0; j < B_cols; ++j)
 							{
-							  float sum = 0.0;
+							  double sum = 0.0;
 							  for(std::uint32_t k = 0; k < A_cols; ++k)
 							  {
-								double a = A[i * A_cols + k];
-								double b = B[k * B_cols + j];
-								sum += a * b;
-							  }
-							  C[i * B_cols + j] = sum;
+								float a = A[i * A_cols + k];
+								float b = B[k * B_cols + j];
+								C[i * B_cols + j] += a * b;
+							  } 
 							}
 						  }
 						};
-  auto print_mat = [](float * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
+  auto print_mat = [](double * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
 			   {
 				 std::cout<<s<<"\n";
 	   			 for(std::uint32_t i = 0; i < mat_rows; ++i)  
@@ -144,79 +147,79 @@ TEST(gpu_test, gemm_wrapper)
 				 
 			   };
 
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host, A_row * A_col * sizeof(float), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host, B_row * B_col * sizeof(float), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host, C_row * C_col * sizeof(float), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host, A_total_elements * sizeof(double), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host, B_total_elements * sizeof(double), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host, C_total_elements * sizeof(double), cudaHostAllocDefault));
 
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host_copy, A_row * A_col * sizeof(float), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host_copy, B_row * B_col * sizeof(float), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host_copy, C_row * C_col * sizeof(float), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host_copy, A_total_elements * sizeof(double), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host_copy, B_total_elements * sizeof(double), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host_copy, C_total_elements * sizeof(double), cudaHostAllocDefault));
 
-  zinhart::check_cuda_api(cudaMalloc((void**)&A_device,  A_row * A_col * sizeof(float)));
-  zinhart::check_cuda_api(cudaMalloc((void**)&B_device,  B_row * B_col * sizeof(float)));
-  zinhart::check_cuda_api(cudaMalloc((void**)&C_device,  C_row * C_col * sizeof(float)));
-  
-  for(std::uint32_t i = 0; i < A_row * A_col; ++i)
+  for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {
 	A_host[i] = real_dist(mt);
+	A_host_copy[i] = 0;
   }
-  for(std::uint32_t i = 0; i < B_row * B_col; ++i)
+  for(std::uint32_t i = 0; i < B_total_elements; ++i)
   {
 	B_host[i] = real_dist(mt);
+	B_host_copy[i] = 0;
   }
-  for(std::uint32_t i = 0; i < C_row * C_col; ++i)
+  for(std::uint32_t i = 0; i < C_total_elements; ++i)
   {
-	C_host[i] = 0.0;
+	C_host[i] = 0.0f;
+	C_host_copy[i] = 0;
   }
 
+  zinhart::check_cuda_api(cudaMalloc((void**)&A_device,  A_total_elements * sizeof(double)));
+  zinhart::check_cuda_api(cudaMalloc((void**)&B_device,  B_total_elements * sizeof(double)));
+  zinhart::check_cuda_api(cudaMalloc((void**)&C_device,  C_total_elements * sizeof(double)));
 
-  zinhart::check_cuda_api(cudaMemcpy(A_device, A_host, A_row * A_col * sizeof(float), cudaMemcpyHostToDevice));
-  zinhart::check_cuda_api(cudaMemcpy(B_device, B_host, B_row * B_col * sizeof(float), cudaMemcpyHostToDevice));
-  zinhart::check_cuda_api(cudaMemcpy(C_device, C_host, C_row * C_col * sizeof(float), cudaMemcpyHostToDevice));
+
+  zinhart::check_cuda_api(cudaMemcpy(A_device, A_host, A_total_elements * sizeof(double), cudaMemcpyHostToDevice));
+  zinhart::check_cuda_api(cudaMemcpy(B_device, B_host, B_total_elements * sizeof(double), cudaMemcpyHostToDevice));
+  zinhart::check_cuda_api(cudaMemcpy(C_device, C_host, C_total_elements * sizeof(double), cudaMemcpyHostToDevice));
 
   cublasStatus_t cublas_error_id;
   cublasHandle_t context;
   zinhart::check_cublas_api(cublasCreate(&context));
-  float alpha = 1;
-  float beta = 1; 
+  double alpha = 1;
+  double beta = 1; 
   zinhart::gemm_wrapper(m,n,k,lda,ldb,ldc, A_row, A_col, B_row, B_col); 
   //sgemm here
-  zinhart::check_cublas_api(cublasSgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
+  /*zinhart::check_cublas_api(cublasDgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
 			  m, n, k,
 			  &alpha,
 			  B_device, lda,
 			  A_device, ldb,
 			  &beta,
 			  C_device, ldc
-			 ));
+			 ));*/
 
- /* 
-  zinhart::check_cublas_api(cublasSgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
-			  C_row, C_col, A_col,
-			  &alpha,
-			  B_device, A_row,
-			  A_device, B_row,
-			  &beta,
-			  C_device, C_row
-			 ));
-*/
+  
+  zinhart::check_cuda_api(cudaMemcpy(A_host_copy, A_device, A_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
+  zinhart::check_cuda_api(cudaMemcpy(B_host_copy, B_device, B_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
+  zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
   zinhart::check_cublas_api(cublasDestroy(context));
-  zinhart::check_cuda_api(cudaMemcpy(A_host_copy, A_device, A_row * A_col * sizeof(float), cudaMemcpyDeviceToHost));
-  zinhart::check_cuda_api(cudaMemcpy(B_host_copy, B_device, B_row * B_col * sizeof(float), cudaMemcpyDeviceToHost));
-  zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_row * C_col * sizeof(float), cudaMemcpyDeviceToHost));
 
-  matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
+  //matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
 /*  print_mat(A_host, A_row, A_col,"A_host");
   print_mat(A_host_copy, A_row, A_col, "A_host_copy");
   print_mat(B_host, B_row, B_col,"B_host");
   print_mat(B_host_copy, B_row, B_col, "B_host_copy");
   print_mat(C_host, C_row, C_col,"C_host");
   print_mat(C_host_copy, C_row, C_col, "C_host_copy");*/
-  float epsilon = .0005;
-  for(std::uint32_t i = 0; i < C_row * C_col; ++i)
+  double epsilon = .0005;
+  for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {
-	ASSERT_NEAR(A_host[i],A_host_copy[i], epsilon);
-	ASSERT_NEAR(B_host[i],B_host_copy[i], epsilon);
+	ASSERT_NEAR(A_host[i], A_host_copy[i], epsilon);
+  }
+  for(std::uint32_t i = 0; i < B_total_elements; ++i)
+  {
+	ASSERT_NEAR(B_host[i], B_host_copy[i], epsilon);
+  }
+  for(std::uint32_t i = 0; i < C_total_elements; ++i)
+  {
 	ASSERT_NEAR(C_host[i],C_host_copy[i], epsilon);
   }
 
