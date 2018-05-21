@@ -7,6 +7,7 @@
 #if CUDA_ENABLED == true
 #include <cublas_v2.h>
 #endif
+/*
 TEST(gpu_test, parrallel_saxpy_gpu)
 {
 #if CUDA_ENABLED
@@ -89,14 +90,14 @@ TEST(gpu_test, parrallel_saxpy_gpu)
   if(error_id != cudaSuccess)
 	std::cerr<<"y_device deallocation failed with error: "<<cudaGetErrorString(error_id)<<"\n";
   std::cout<<"Hello From GPU Tests\n";
-}
+}*/
 TEST(gpu_test, gemm_wrapper)
 {
   cudaError_t error_id;
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(1, std::numeric_limits<std::uint8_t>::max());
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, std::numeric_limits<std::uint8_t>::max() );
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
   std::int32_t A_row = uint_dist(mt);
@@ -106,9 +107,10 @@ TEST(gpu_test, gemm_wrapper)
   std::int32_t B_col = uint_dist(mt);
   std::int32_t B_total_elements = B_row * B_col;
   std::int32_t C_row = A_row;
-  std::int32_t C_col = B_row;
+  std::int32_t C_col = B_col;
   std::int32_t C_total_elements = C_row * C_col;
   std::cout<<"total pinned memory: "<<std::uint32_t(A_total_elements * B_total_elements * C_total_elements)<<" bytes.\n";
+  std::cout<<" ";
   std::int32_t m, n, k, lda, ldb, ldc;
   double * A_host;
   double * B_host;
@@ -123,12 +125,11 @@ TEST(gpu_test, gemm_wrapper)
 						  {
 							for(std::uint32_t j = 0; j < B_cols; ++j)
 							{
-							  double sum = 0.0;
 							  for(std::uint32_t k = 0; k < A_cols; ++k)
 							  {
-								float a = A[i * A_cols + k];
-								float b = B[k * B_cols + j];
-								C[i * B_cols + j] += a * b;
+								float a = A[IDX2R(i, k, A_cols)];
+								float b = B[IDX2R(k, j, B_cols)];
+								C[IDX2R(i, j, B_cols)] += a * b;
 							  } 
 							}
 						  }
@@ -155,20 +156,44 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host_copy, B_total_elements * sizeof(double), cudaHostAllocDefault));
   zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host_copy, C_total_elements * sizeof(double), cudaHostAllocDefault));
 
+  for (std::uint32_t i =0; i < A_row; ++i)
+  {
+	for(std::uint32_t j = 0; j < A_col; ++j)
+	{
+	  A_host[IDX2R(i,j, A_col)] = real_dist(mt);
+	}
+  }
+
+  for (std::uint32_t i =0; i < B_row; ++i)
+  {
+	for(std::uint32_t j = 0; j < B_col; ++j)
+	{
+	  B_host[IDX2R(i,j, B_col)] = real_dist(mt);
+	}
+  }
+
+  for (std::uint32_t i =0; i < C_row; ++i)
+  {
+	for(std::uint32_t j = 0; j < C_col; ++j)
+	{
+	  C_host[IDX2R(i,j, C_col)] = 0.0f;
+	}
+  }
+  print_mat(A_host, A_row, A_col,"A_host");
+  print_mat(B_host, B_row, B_col,"B_host");
+  print_mat(C_host, C_row, C_col,"C_host");
+
   for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {
-	A_host[i] = real_dist(mt);
 	A_host_copy[i] = 0;
   }
   for(std::uint32_t i = 0; i < B_total_elements; ++i)
   {
-	B_host[i] = real_dist(mt);
 	B_host_copy[i] = 0;
   }
   for(std::uint32_t i = 0; i < C_total_elements; ++i)
   {
-	C_host[i] = 0.0f;
-	C_host_copy[i] = 0;
+	C_host_copy[i] = 0.0f;
   }
 
   zinhart::check_cuda_api(cudaMalloc((void**)&A_device,  A_total_elements * sizeof(double)));
@@ -187,14 +212,14 @@ TEST(gpu_test, gemm_wrapper)
   double beta = 1; 
   zinhart::gemm_wrapper(m,n,k,lda,ldb,ldc, A_row, A_col, B_row, B_col); 
   //sgemm here
-  /*zinhart::check_cublas_api(cublasDgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
+  zinhart::check_cublas_api(cublasDgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
 			  m, n, k,
 			  &alpha,
 			  B_device, lda,
 			  A_device, ldb,
 			  &beta,
 			  C_device, ldc
-			 ));*/
+			 ));/**/
 
   
   zinhart::check_cuda_api(cudaMemcpy(A_host_copy, A_device, A_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
@@ -202,13 +227,13 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
   zinhart::check_cublas_api(cublasDestroy(context));
 
-  //matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
-/*  print_mat(A_host, A_row, A_col,"A_host");
+  matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
+  print_mat(A_host, A_row, A_col,"A_host");
   print_mat(A_host_copy, A_row, A_col, "A_host_copy");
   print_mat(B_host, B_row, B_col,"B_host");
   print_mat(B_host_copy, B_row, B_col, "B_host_copy");
   print_mat(C_host, C_row, C_col,"C_host");
-  print_mat(C_host_copy, C_row, C_col, "C_host_copy");*/
+  print_mat(C_host_copy, C_row, C_col, "C_host_copy");
   double epsilon = .0005;
   for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {
