@@ -18,5 +18,6 @@
   #define SHARED
   #include <lapacke.h>
 #endif
+#include <cstdint>
 #define MAX_CPU_THREADS std::thread::hardware_concurrency()
 #endif

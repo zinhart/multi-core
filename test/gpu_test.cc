@@ -64,13 +64,13 @@ TEST(gpu_test, gemm_wrapper)
 				 
 			   };
 
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host, A_total_elements * sizeof(double), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host, B_total_elements * sizeof(double), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host, C_total_elements * sizeof(double), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host, A_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host, B_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host, C_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
 
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host_copy, A_total_elements * sizeof(double), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host_copy, B_total_elements * sizeof(double), cudaHostAllocDefault));
-  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host_copy, C_total_elements * sizeof(double), cudaHostAllocDefault));
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host_copy, A_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host_copy, B_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host_copy, C_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
 
   for (std::uint32_t i =0; i < A_row; ++i)
   {
@@ -112,18 +112,18 @@ TEST(gpu_test, gemm_wrapper)
 	C_host_copy[i] = 0.0f;
   }
 
-  zinhart::check_cuda_api(cudaMalloc((void**)&A_device,  A_total_elements * sizeof(double)));
-  zinhart::check_cuda_api(cudaMalloc((void**)&B_device,  B_total_elements * sizeof(double)));
-  zinhart::check_cuda_api(cudaMalloc((void**)&C_device,  C_total_elements * sizeof(double)));
+  zinhart::check_cuda_api(cudaMalloc((void**)&A_device,  A_total_elements * sizeof(double)),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaMalloc((void**)&B_device,  B_total_elements * sizeof(double)),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaMalloc((void**)&C_device,  C_total_elements * sizeof(double)),__FILE__,__LINE__);
 
 
-  zinhart::check_cuda_api(cudaMemcpy(A_device, A_host, A_total_elements * sizeof(double), cudaMemcpyHostToDevice));
-  zinhart::check_cuda_api(cudaMemcpy(B_device, B_host, B_total_elements * sizeof(double), cudaMemcpyHostToDevice));
-  zinhart::check_cuda_api(cudaMemcpy(C_device, C_host, C_total_elements * sizeof(double), cudaMemcpyHostToDevice));
+  zinhart::check_cuda_api(cudaMemcpy(A_device, A_host, A_total_elements * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaMemcpy(B_device, B_host, B_total_elements * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaMemcpy(C_device, C_host, C_total_elements * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__);
 
   cublasStatus_t cublas_error_id;
   cublasHandle_t context;
-  zinhart::check_cublas_api(cublasCreate(&context));
+  zinhart::check_cublas_api(cublasCreate(&context),__FILE__,__LINE__);
   double alpha = 1;
   double beta = 1; 
   zinhart::gemm_wrapper(m,n,k,lda,ldb,ldc, A_row, A_col, B_row, B_col); 
@@ -135,13 +135,13 @@ TEST(gpu_test, gemm_wrapper)
 			  A_device, ldb,
 			  &beta,
 			  C_device, ldc
-			 ));/**/
+			 ),__FILE__,__LINE__);/**/
 
   
-  zinhart::check_cuda_api(cudaMemcpy(A_host_copy, A_device, A_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
-  zinhart::check_cuda_api(cudaMemcpy(B_host_copy, B_device, B_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
-  zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_total_elements * sizeof(double), cudaMemcpyDeviceToHost));
-  zinhart::check_cublas_api(cublasDestroy(context));
+  zinhart::check_cuda_api(cudaMemcpy(A_host_copy, A_device, A_total_elements * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaMemcpy(B_host_copy, B_device, B_total_elements * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_total_elements * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__);
+  zinhart::check_cublas_api(cublasDestroy(context),__FILE__,__LINE__);
 
   matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
 /*  print_mat(A_host, A_row, A_col,"A_host");
@@ -164,14 +164,14 @@ TEST(gpu_test, gemm_wrapper)
 	ASSERT_NEAR(C_host[i],C_host_copy[i], epsilon);
   }
 
-  zinhart::check_cuda_api(cudaFreeHost(A_host));
-  zinhart::check_cuda_api(cudaFreeHost(B_host));
-  zinhart::check_cuda_api(cudaFreeHost(C_host));
-  zinhart::check_cuda_api(cudaFreeHost(A_host_copy));
-  zinhart::check_cuda_api(cudaFreeHost(B_host_copy));
-  zinhart::check_cuda_api(cudaFreeHost(C_host_copy));
-  zinhart::check_cuda_api(cudaFree(A_device));
-  zinhart::check_cuda_api(cudaFree(B_device));
-  zinhart::check_cuda_api(cudaFree(C_device)); 
+  zinhart::check_cuda_api(cudaFreeHost(A_host),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFreeHost(B_host),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFreeHost(C_host),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFreeHost(A_host_copy),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFreeHost(B_host_copy),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFreeHost(C_host_copy),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFree(A_device),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFree(B_device),__FILE__,__LINE__);
+  zinhart::check_cuda_api(cudaFree(C_device),__FILE__,__LINE__); 
 }
 
