@@ -7,90 +7,6 @@
 #if CUDA_ENABLED == true
 #include <cublas_v2.h>
 #endif
-/*
-TEST(gpu_test, parrallel_saxpy_gpu)
-{
-#if CUDA_ENABLED
-  std::cout<<"CUDA ENABLEs\n";
-#else
-  std::cout<<"Cuda Disabled\n";
-#endif
-  cudaError_t error_id;
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  //for any needed random uint
-  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
-  //for any needed random real
-  std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
-  std::uint32_t n_elements = uint_dist(mt);
-  std::shared_ptr<float> x_host = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_host = std::shared_ptr<float>(new float [n_elements]);
-  //the device memory will be copied to here
-  std::shared_ptr<float> y_host_copy = std::shared_ptr<float>(new float [n_elements]);
-
-  float * x_device, * y_device; 
-  //allocate device memory and check for errors
-  error_id = cudaMalloc( (void **) &x_device, n_elements * sizeof(float) );
-  //check for errors
-  if(error_id != cudaSuccess)
-	std::cerr<<"x_device memory alloc failed with error: "<<cudaGetErrorString(error_id)<<"\n";
-
-  //allocate device memory and check for errors
-  error_id = cudaMalloc( (void **) &y_device, n_elements * sizeof(float) );
-  //check for errors
-  if(error_id != cudaSuccess)
-	std::cerr<<"y_device memory alloc failed with error: "<<cudaGetErrorString(error_id)<<"\n";
-
-  auto serial_saxpy = [](const float & a, float & x, float & y)
-						{
-						  return a * x + y;
-						};
-
-  const float a = real_dist(mt);
-  std::uint32_t i = 0;
-  //randomly initialize x_host/(_copy)
-  for(i = 0; i < n_elements; ++i )
-  {
-	x_host.get()[i] = real_dist(mt);
-	y_host.get()[i] = real_dist(mt);
-	y_host_copy.get()[i] = y_host.get()[i];
-	y_host.get()[i] = serial_saxpy(a, x_host.get()[i], y_host.get()[i]);
-  }
-
-  //copy memory to device
-  error_id = cudaMemcpy(y_device, y_host_copy.get(), n_elements * sizeof(float), cudaMemcpyHostToDevice);
-  if(error_id != cudaSuccess)
-	std::cerr<<"y_device (HostToDevice) memcpy failed with error: "<<cudaGetErrorString(error_id)<<"\n";
-  error_id = cudaMemcpy(x_device, x_host.get(), n_elements * sizeof(float), cudaMemcpyHostToDevice);
-  if(error_id != cudaSuccess)
-	std::cerr<<"x_device (HostToDevice) memcpy failed with error: "<<cudaGetErrorString(error_id)<<"\n";
-
-  //call kernel
-  zinhart::parallel_saxpy_gpu(a, x_device, y_device, n_elements);
- 
-  
-  //copy memory back to host
-  error_id = cudaMemcpy( y_host_copy.get(), y_device, std::uint32_t(n_elements) * sizeof(float), cudaMemcpyDeviceToHost);
-  //check for errors
-  if(error_id != cudaSuccess)
-	std::cerr<<"y_host (DeviceToHost) failed with error: "<<cudaGetErrorString(error_id)<<"\n"; 
-
-  std::cout<<"N elements "<<n_elements<<"\n";
-  //validate each value
-  float epsilon = 0.0005;
-  for(i = 0; i < n_elements; ++i)
-  {
-	//std::cout<<y_host.get()[i]<<" "<<y_host_copy.get()[i]<<"\n";
-	ASSERT_NEAR(y_host.get()[i], y_host_copy.get()[i], epsilon);
-  }
-  cudaFree(x_device);
-  if(error_id != cudaSuccess)
-	std::cerr<<"x_device deallocation failed with error: "<<cudaGetErrorString(error_id)<<"\n";
-  cudaFree(y_device);
-  if(error_id != cudaSuccess)
-	std::cerr<<"y_device deallocation failed with error: "<<cudaGetErrorString(error_id)<<"\n";
-  std::cout<<"Hello From GPU Tests\n";
-}*/
 TEST(gpu_test, gemm_wrapper)
 {
   cudaError_t error_id;
@@ -127,9 +43,9 @@ TEST(gpu_test, gemm_wrapper)
 							{
 							  for(std::uint32_t k = 0; k < A_cols; ++k)
 							  {
-								float a = A[IDX2R(i, k, A_cols)];
-								float b = B[IDX2R(k, j, B_cols)];
-								C[IDX2R(i, j, B_cols)] += a * b;
+								float a = A[zinhart::idx2r(i, k, A_cols)];
+								float b = B[zinhart::idx2r(k, j, B_cols)];
+								C[zinhart::idx2r(i, j, B_cols)] += a * b;
 							  } 
 							}
 						  }
@@ -160,7 +76,7 @@ TEST(gpu_test, gemm_wrapper)
   {
 	for(std::uint32_t j = 0; j < A_col; ++j)
 	{
-	  A_host[IDX2R(i,j, A_col)] = real_dist(mt);
+	  A_host[zinhart::idx2r(i,j, A_col)] = real_dist(mt);
 	}
   }
 
@@ -168,7 +84,7 @@ TEST(gpu_test, gemm_wrapper)
   {
 	for(std::uint32_t j = 0; j < B_col; ++j)
 	{
-	  B_host[IDX2R(i,j, B_col)] = real_dist(mt);
+	  B_host[zinhart::idx2r(i,j, B_col)] = real_dist(mt);
 	}
   }
 
@@ -176,12 +92,12 @@ TEST(gpu_test, gemm_wrapper)
   {
 	for(std::uint32_t j = 0; j < C_col; ++j)
 	{
-	  C_host[IDX2R(i,j, C_col)] = 0.0f;
+	  C_host[zinhart::idx2r(i,j, C_col)] = 0.0f;
 	}
   }
-  print_mat(A_host, A_row, A_col,"A_host");
+/*  print_mat(A_host, A_row, A_col,"A_host");
   print_mat(B_host, B_row, B_col,"B_host");
-  print_mat(C_host, C_row, C_col,"C_host");
+  print_mat(C_host, C_row, C_col,"C_host");*/
 
   for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {
@@ -228,12 +144,12 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cublas_api(cublasDestroy(context));
 
   matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
-  print_mat(A_host, A_row, A_col,"A_host");
+/*  print_mat(A_host, A_row, A_col,"A_host");
   print_mat(A_host_copy, A_row, A_col, "A_host_copy");
   print_mat(B_host, B_row, B_col,"B_host");
   print_mat(B_host_copy, B_row, B_col, "B_host_copy");
   print_mat(C_host, C_row, C_col,"C_host");
-  print_mat(C_host_copy, C_row, C_col, "C_host_copy");
+  print_mat(C_host_copy, C_row, C_col, "C_host_copy");*/
   double epsilon = .0005;
   for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {

@@ -1,7 +1,7 @@
 if(BuildCuda)
   set(concurrent_routines_lib
-	  gpu.cu
-	  cpu.cc
+	  concurrent_routines.cu
+	  concurrent_routines.cc
 	  thread_pool.cc
 	  concurrent_routines_error.cc
   )
@@ -27,7 +27,7 @@ if(BuildCuda)
   install(DIRECTORY ../include/concurrent_routines DESTINATION include)
 else()
   set(concurrent_routines_lib 
-	cpu.cc
+	concurrent_routines.cc
 	thread_pool.cc
      )	
    add_library(concurrent_routines ${concurrent_routines_lib} )
