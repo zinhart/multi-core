@@ -8,8 +8,8 @@ namespace zinhart
 {
 #if CUDA_ENABLED == true
   HOST const char * cublas_get_error_string(cublasStatus_t status);
-  HOST cudaError_t check_cuda_api(cudaError_t result);
-  HOST cublasStatus_t check_cublas_api(cublasStatus_t result);
+  HOST std::int32_t check_cuda_api(cudaError_t result, const char * file, std::int32_t line);
+  HOST std::int32_t check_cublas_api(cublasStatus_t result, const char * file, std::int32_t line);
 #endif
 }
 #endif

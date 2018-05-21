@@ -19,18 +19,19 @@ namespace zinhart
 	return "unknown error";
   }
 
-  HOST cudaError_t check_cuda_api(cudaError_t result)
+  HOST std::int32_t check_cuda_api(cudaError_t result, const char * file, std::int32_t line)
   {
+	std::int32_t ret = (result == cudaSuccess) ? 0 : 1;
 	if(result != cudaSuccess)
-	  std::cerr<<"cuda runtime error: "<<cudaGetErrorString(result)<< " at "<<__FILE__<<" "<<__LINE__<<"\n";
-	return result;
+	  std::cerr<<"cuda runtime error: "<<cudaGetErrorString(result)<< " at "<<file<<" "<<line<<"\n";
+	return ret;
   }
-  HOST cublasStatus_t check_cublas_api(cublasStatus_t result)
+  HOST std::int32_t check_cublas_api(cublasStatus_t result, const char * file, std::int32_t line)
   {	
+	std::int32_t ret = (result == CUBLAS_STATUS_SUCCESS) ? 0 : 1;
 	if(result != CUBLAS_STATUS_SUCCESS)
-	  std::cerr<<"cublas runtime error: "<<cublas_get_error_string(result)<< " at "<<__FILE__<<" "<<__LINE__<<"\n";
-;
-	return result;
+	  std::cerr<<"cublas runtime error: "<<cublas_get_error_string(result)<< " at "<<file<<" "<<line<<"\n";
+	return ret;
   }
 #endif
 }
