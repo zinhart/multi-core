@@ -52,6 +52,9 @@ namespace zinhart
 	template < class BidirectionalIt, class Generator >
 	HOST void paralell_generate(BidirectionalIt first, BidirectionalIt last, Generator g,
 		 const std::uint32_t & n_threads = MAX_CPU_THREADS);
+	
+	CUDA_CALLABLE_MEMBER std::uint32_t idx2c(std::int32_t i,std::int32_t j,std::int32_t ld);// for column major ordering, if A is MxN then ld is M
+	CUDA_CALLABLE_MEMBER std::uint32_t idx2r(std::int32_t i,std::int32_t j,std::int32_t ld);// for row major ordering, if A is MxN then ld is N
 
 
 #if CUDA_ENABLED == 1
@@ -97,21 +100,12 @@ namespace zinhart
 		  }
 	  };
 	//GPU WRAPPERS
-	HOST std::int32_t parallel_saxpy_gpu(const float & a, float * x, float * y, const std::uint32_t N);
-	
-	template <class Precision_Type>
-	  HOST std::int32_t parallell_naive_matrix_product_gpu(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB,	std::uint32_t LDC, std::uint32_t SDC );
-	template <class Precision_Type>
-	  HOST std::int32_t shared_matrix_product(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t LDA, std::uint32_t SDA, std::uint32_t LDB, std::uint32_t SDB, std::uint32_t LDC, std::uint32_t SDC);
-	
-	template <class Precision_Type>
-	  HOST std::int32_t parallell_naive_matrix_transpose_gpu(Precision_Type * O, Precision_Type * I, std::uint32_t LDA, std::uint32_t SDA);
-
-	template <class Precision_Type>
-	  HOST std::int32_t parallell_shared_matrix_transpose_gpu(Precision_Type * O, Precision_Type * I, std::uint32_t LDA, std::uint32_t SDA);
-	
 	template <class Precision_Type>
 	  void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in);
+
+	// assumed to be row major indices this generated the column indices
+    HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
+
 #endif
 }
 #include "ext/concurrent_routines_ext.tcc"
