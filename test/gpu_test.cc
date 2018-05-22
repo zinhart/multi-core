@@ -13,7 +13,7 @@ TEST(gpu_test, gemm_wrapper)
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(1, std::numeric_limits<std::uint8_t>::max() );
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 5/*std::numeric_limits<std::uint8_t>::max()*/ );
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
   std::int32_t A_row = uint_dist(mt);
@@ -35,21 +35,6 @@ TEST(gpu_test, gemm_wrapper)
   double * B_host_copy;
   double * C_host_copy;
   double * A_device, * B_device, * C_device;
-  auto matrix_product = [](double * A, double * B, double * C, std::uint32_t A_rows, std::uint32_t A_cols, std::uint32_t B_cols)
-						{
-						  for(std::uint32_t i = 0; i < A_rows; ++i)
-						  {
-							for(std::uint32_t j = 0; j < B_cols; ++j)
-							{
-							  for(std::uint32_t k = 0; k < A_cols; ++k)
-							  {
-								float a = A[zinhart::idx2r(i, k, A_cols)];
-								float b = B[zinhart::idx2r(k, j, B_cols)];
-								C[zinhart::idx2r(i, j, B_cols)] += a * b;
-							  } 
-							}
-						  }
-						};
   auto print_mat = [](double * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
 			   {
 				 std::cout<<s<<"\n";
@@ -95,9 +80,10 @@ TEST(gpu_test, gemm_wrapper)
 	  C_host[zinhart::idx2r(i,j, C_col)] = 0.0f;
 	}
   }
-/*  print_mat(A_host, A_row, A_col,"A_host");
-  print_mat(B_host, B_row, B_col,"B_host");
-  print_mat(C_host, C_row, C_col,"C_host");*/
+ /* 
+  zinhart::print_matrix_row_major(A_host, A_row, A_col,"A_host");
+  zinhart::print_matrix_row_major(B_host, B_row, B_col,"B_host");
+  zinhart::print_matrix_row_major(C_host, C_row, C_col,"C_host");*/
 
   for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {
@@ -143,13 +129,13 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_total_elements * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__);
   zinhart::check_cublas_api(cublasDestroy(context),__FILE__,__LINE__);
 
-  matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
-/*  print_mat(A_host, A_row, A_col,"A_host");
-  print_mat(A_host_copy, A_row, A_col, "A_host_copy");
-  print_mat(B_host, B_row, B_col,"B_host");
-  print_mat(B_host_copy, B_row, B_col, "B_host_copy");
-  print_mat(C_host, C_row, C_col,"C_host");
-  print_mat(C_host_copy, C_row, C_col, "C_host_copy");*/
+  zinhart::serial_matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
+/*  zinhart::print_matrix_row_major(A_host, A_row, A_col,"A_host");
+  zinhart::print_matrix_row_major(A_host_copy, A_row, A_col, "A_host_copy");
+  zinhart::print_matrix_row_major(B_host, B_row, B_col,"B_host");
+  zinhart::print_matrix_row_major(B_host_copy, B_row, B_col, "B_host_copy");
+  zinhart::print_matrix_row_major(C_host, C_row, C_col,"C_host");
+  zinhart::print_matrix_row_major(C_host_copy, C_row, C_col, "C_host_copy");*/
   double epsilon = .0005;
   for(std::uint32_t i = 0; i < A_total_elements; ++i)
   {

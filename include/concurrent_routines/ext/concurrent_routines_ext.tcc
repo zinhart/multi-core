@@ -344,6 +344,39 @@ namespace zinhart
 				t.join();
 			}
 		}
+ /*
+ * CPU WRAPPERS HELPER FUNCTIONS
+ * */
+  template<class Precision_Type>
+	  HOST void serial_matrix_product(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t M, std::uint32_t N, std::uint32_t K)
+	  {
+		for(std::uint32_t a = 0; a < M; ++a)
+		{
+		  for(std::uint32_t b = 0; b < K; ++b)
+		  {
+			for(std::uint32_t c = 0; c < N; ++c)
+			{
+			  float a_val = A[idx2r(a, c, N)];
+			  float b_val = B[idx2r(c, b, K)];
+			  C[idx2r(a, b, K)] += a_val * b_val;
+			} 
+		  }
+		}
+	  }
+	template<class Precision_Type>
+	  HOST void print_matrix_row_major(Precision_Type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
+	  {
+		 std::cout<<s<<"\n";
+		 for(std::uint32_t i = 0; i < mat_rows; ++i)  
+		 {
+		   for(std::uint32_t j = 0; j < mat_cols; ++j)
+		   {
+			 std::cout<<mat[idx2r(i,j,mat_cols)]<<" ";
+		   }
+		   std::cout<<"\n";
+		 }
+	  }
+
 /*
  * GPU TEMPLATE WRAPPERS
  * */
