@@ -6,10 +6,10 @@
 #include <cstdint>
 namespace zinhart
 {
-  //this function is used by each thread to determine what pieces of data it will operate on
-  HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop);
- 
-  //CPU WRAPPERS
+  /***************************
+   * CPU WRAPPERS ************
+   * *************************
+   */
   HOST void paralell_saxpy(
   		const float & a, float * x, float * y,
 	  	const std::uint32_t & n_elements, const std::uint32_t & n_threads = MAX_CPU_THREADS
@@ -52,12 +52,28 @@ namespace zinhart
 	template < class BidirectionalIt, class Generator >
 	HOST void paralell_generate(BidirectionalIt first, BidirectionalIt last, Generator g,
 		 const std::uint32_t & n_threads = MAX_CPU_THREADS);
-	
+
+
+	// HELPER FUNCTIONS
+	// this function is used by each thread to determine what pieces of data it will operate on
+	HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop);
 	CUDA_CALLABLE_MEMBER std::uint32_t idx2c(std::int32_t i,std::int32_t j,std::int32_t ld);// for column major ordering, if A is MxN then ld is M
 	CUDA_CALLABLE_MEMBER std::uint32_t idx2r(std::int32_t i,std::int32_t j,std::int32_t ld);// for row major ordering, if A is MxN then ld is N
-
+	template<class Precision_Type>
+	  HOST void serial_matrix_product(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t m, std::uint32_t n, std::uint32_t k);
+	template<class Precision_Type>
+	  HOST void print_matrix_row_major(Precision_Type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s);
 
 #if CUDA_ENABLED == 1
+  /***************************
+   * GPU WRAPPERS ************
+   * *************************
+   */
+	template <class Precision_Type>
+	  void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in);
+	// assumed to be row major indices this generated the column indices
+    HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
+
 	// GPU HELPERS
 	 
 	template<std::uint32_t Grid_Dim>
@@ -99,13 +115,6 @@ namespace zinhart
 		  {
 		  }
 	  };
-	//GPU WRAPPERS
-	template <class Precision_Type>
-	  void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in);
-
-	// assumed to be row major indices this generated the column indices
-    HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
-
 #endif
 }
 #include "ext/concurrent_routines_ext.tcc"
