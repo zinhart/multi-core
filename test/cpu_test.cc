@@ -735,12 +735,11 @@ TEST(thread_pool, call_add_task)
   std::mt19937 mt(rd());
   std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
   std::uniform_int_distribution<std::uint32_t> size_dist(1, MAX_CPU_THREADS);
-  static zinhart::thread_pool pool; 
   std::uint32_t results_size = size_dist(mt);
   std::vector<zinhart::thread_pool::task_future<std::uint32_t>> results;
   for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
   {	  
-	results.push_back(pool.add_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
+	results.push_back(zinhart::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
   }
   std::uint32_t res;
   for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)

@@ -1,6 +1,7 @@
 #ifndef CONCURRENT_ROUTINES_HH
 #define CONCURRENT_ROUTINES_HH
 #include "macros.hh"
+#include "thread_pool.hh"
 #include "timer.hh"
 #include <thread>
 #include <cstdint>
@@ -53,6 +54,16 @@ namespace zinhart
 	HOST void paralell_generate(BidirectionalIt first, BidirectionalIt last, Generator g,
 		 const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
+	// thread pool
+	namespace default_thread_pool
+	{
+	  template <class Callable, class ... Args>
+		auto push_task(Callable && c, Args&&...args) -> thread_pool::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >
+		{
+		  static thread_pool basic_thread_pool;
+		  return basic_thread_pool.add_task(std::forward<Callable>(c), std::forward<Args>(args)...);
+		}
+	}
 
 	// HELPER FUNCTIONS
 	// this function is used by each thread to determine what pieces of data it will operate on
