@@ -13,7 +13,7 @@ TEST(gpu_test, gemm_wrapper)
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 5/*std::numeric_limits<std::uint8_t>::max()*/ );
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 100/*std::numeric_limits<std::uint8_t>::max()*/ );
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
   std::int32_t A_row = uint_dist(mt);
