@@ -4,8 +4,12 @@
 namespace zinhart
 {
   //EXPLICIT INSTANTIATIONS (to make templates , such as the wrapper functions, in defined in the .cu available in main.cc)
-
+  
+  template HOST std::int32_t call_axps(float a, float * x, float s, std::uint32_t N, const std::uint32_t & device_id);
   template HOST std::int32_t call_axps(double a, double * x, double s, std::uint32_t N, const std::uint32_t & device_id);
+
+  template HOST std::int32_t call_axps_async(float a, float * x, float s, std::uint32_t N, cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t call_axps_async(double a, double * x, double s, std::uint32_t N, cudaStream_t & stream, const std::uint32_t & device_id);
   // KERNELS
   
   template <class Precision_Type>
@@ -18,6 +22,7 @@ namespace zinhart
 	}
 
   // GPU WRAPPERS
+  
   template <class Precision_Type>
 	HOST std::int32_t call_axps(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, const std::uint32_t & device_id)
 	{
@@ -28,6 +33,19 @@ namespace zinhart
 	  std::cout<<"num_blocks.x: "<<num_blocks.x<<" num_blocks.y: "<<num_blocks.y<<" num_blocks.z: "<<num_blocks.z<<" threads_per_block: "<<threads_per_block<<" N:" <<N<<"\n";
 	  // call kernel
 	  axps<<<num_blocks,threads_per_block>>>(a,x,s,N);
+	  return 0;
+	  
+	}
+  template <class Precision_Type>
+	HOST std::int32_t call_axps_async(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, cudaStream_t & stream, const std::uint32_t & device_id)
+	{
+	  dim3 num_blocks;
+	  std::int32_t threads_per_block;
+	  grid<1> one_dimensional_grid;
+	  one_dimensional_grid(num_blocks, threads_per_block, N, device_id);
+	  std::cout<<"num_blocks.x: "<<num_blocks.x<<" num_blocks.y: "<<num_blocks.y<<" num_blocks.z: "<<num_blocks.z<<" threads_per_block: "<<threads_per_block<<" N:" <<N<<"\n";
+	  // call kernel
+	  axps<<<num_blocks,threads_per_block, 0, stream>>>(a,x,s,N);
 	  return 0;
 	  
 	}

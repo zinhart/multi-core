@@ -4,7 +4,7 @@
 #include <random>
 #include <limits>
 #include <iostream>
-#include <vector>
+#include <list>
 #if CUDA_ENABLED == true
 #include <cublas_v2.h>
 #endif
@@ -161,6 +161,7 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaFree(B_device),__FILE__,__LINE__);
   zinhart::check_cuda_api(cudaFree(C_device),__FILE__,__LINE__); 
 }
+
 TEST(gpu_test, call_axps)
 {
   std::random_device rd;
@@ -204,7 +205,6 @@ TEST(gpu_test, call_axps)
 	serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_copy[i]), s));
   }
 
-
   // compare
   for(std::uint32_t i = 0; i < N; ++i)
   { 
@@ -217,5 +217,82 @@ TEST(gpu_test, call_axps)
   delete X_host_copy;
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaDeviceReset(),__FILE__, __LINE__));
+}
 
+
+
+TEST(gpu_test, call_axps_async)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 100/*std::numeric_limits<std::uint8_t>::max()*/ );
+  std::uniform_int_distribution<std::uint8_t> stream_dist(1, 10/*std::numeric_limits<std::uint8_t>::max()*/ );
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
+
+  std::int32_t N = uint_dist(mt);
+  std::int32_t n_streams = stream_dist(mt);
+  double a = real_dist(mt);
+  double s = real_dist(mt);
+
+  double * X_host{nullptr};
+  double * X_host_copy{nullptr};
+  double * X_device{nullptr};
+  cudaStream_t * stream{nullptr};
+  std::list<zinhart::thread_pool::task_future<void>> serial_axps_results;
+
+  //X_host = new double[N];
+  //X_host_copy = new double[N];
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, N * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host_copy, N * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&stream, n_streams * sizeof(cudaStream_t),cudaHostAllocDefault),__FILE__,__LINE__));
+
+
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device,  N * sizeof(double)),__FILE__,__LINE__));
+
+
+  // initialize
+  for(std::uint32_t i = 0; i < N; ++i)
+  {
+	X_host[i] = real_dist(mt);
+	X_host_copy[i] = X_host[i];
+  }
+
+  //ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpy(X_device, X_host, N * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__));
+  for (std::uint32_t i = 0; i < n_streams; ++i)
+  {
+  	// copy host to device
+	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_device, X_host, N * sizeof(double), cudaMemcpyHostToDevice, stream[i]),__FILE__,__LINE__));
+	// call kernel 
+	ASSERT_EQ(0, zinhart::call_axps_async(a, X_device, s, N, stream[i])); 
+	// copy device to host
+	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_host, X_device, N * sizeof(double), cudaMemcpyDeviceToHost, stream[i]),__FILE__,__LINE__));
+
+	// do serial axps
+	for(std::uint32_t j = 0; j < N; ++j)
+	{
+	  serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_copy[j]), s));
+	}
+	
+	cudaStreamSynchronize(stream[i]);
+	double epsilon = 0.005;
+	// compare
+	for(std::uint32_t j = 0; j < N; ++j)
+	{ 	
+  	  serial_axps_results.front().get();
+	  ASSERT_NEAR(X_host[j], X_host_copy[j], epsilon);
+	  serial_axps_results.pop_front();
+	}
+
+  }
+  
+  // deallocate
+//  delete X_host;
+//  delete X_host_copy;
+  cudaFreeHost(X_host);
+  cudaFreeHost(X_host_copy);
+  cudaFreeHost(stream);
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaDeviceReset(),__FILE__, __LINE__));
 }
