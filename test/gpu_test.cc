@@ -4,6 +4,7 @@
 #include <random>
 #include <limits>
 #include <iostream>
+#include <vector>
 #if CUDA_ENABLED == true
 #include <cublas_v2.h>
 #endif
@@ -160,4 +161,61 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaFree(B_device),__FILE__,__LINE__);
   zinhart::check_cuda_api(cudaFree(C_device),__FILE__,__LINE__); 
 }
+TEST(gpu_test, call_axps)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 100/*std::numeric_limits<std::uint8_t>::max()*/ );
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
 
+  std::int32_t N = uint_dist(mt);
+  double a = real_dist(mt);
+  double s = real_dist(mt);
+
+  double * X_host{nullptr};
+  double * X_host_copy{nullptr};
+  double * X_device{nullptr};
+  std::vector<zinhart::thread_pool::task_future<void>> serial_axps_results;
+
+  X_host = new double[N];
+  X_host_copy = new double[N];
+
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device,  N * sizeof(double)),__FILE__,__LINE__));
+
+  // initialize
+  for(std::uint32_t i = 0; i < N; ++i)
+  {
+	X_host[i] = real_dist(mt);
+	X_host_copy[i] = X_host[i];
+  }
+
+  // copy host to device
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpy(X_device, X_host, N * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__));
+
+  // call kernel 
+  zinhart::call_axps(a, X_device, s,N); 
+  // copy device to host
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpy(X_host, X_device, N * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__));
+  // do serial axps
+  for(std::uint32_t i = 0; i < N; ++i)
+  {
+	serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_copy[i]), s));
+  }
+
+
+  // compare
+  for(std::uint32_t i = 0; i < N; ++i)
+  { 
+    serial_axps_results[i].get();	
+	ASSERT_EQ(X_host[i], X_host_copy[i]);
+  }
+  
+  // deallocate
+  delete X_host;
+  delete X_host_copy;
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaDeviceReset(),__FILE__, __LINE__));
+
+}

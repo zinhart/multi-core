@@ -61,6 +61,15 @@ namespace zinhart
 	ldb = k;
 	ldc = m;
   }
+  HOST std::int32_t geam_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, const std::uint32_t SDB)
+  {
+	m = SDB;
+	n = LDA;
+	k = LDB;
+	lda = m;
+	ldb = k;
+	ldc = m;
+  }
   CUDA_CALLABLE_MEMBER std::uint32_t idx2c(std::int32_t i,std::int32_t j,std::int32_t ld)// for column major ordering, if A is MxN then ld is M
   { return j * ld + i; }
   CUDA_CALLABLE_MEMBER std::uint32_t idx2r(std::int32_t i,std::int32_t j,std::int32_t ld)// for row major ordering, if A is MxN then ld is N

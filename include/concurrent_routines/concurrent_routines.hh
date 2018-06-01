@@ -81,12 +81,13 @@ namespace zinhart
    * *************************
    */
 	template <class Precision_Type>
+	  HOST std::int32_t call_axps(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, const std::uint32_t & device_id = 0);
+	template <class Precision_Type>
 	  void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in);
 	// assumed to be row major indices this generated the column indices
     HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
 
 	// GPU HELPERS
-	 
 	template<std::uint32_t Grid_Dim>
 	  class grid;
 	template<>
@@ -94,18 +95,17 @@ namespace zinhart
 	  {
 		public:
 		  //assuming you only got 1 gpu
-		  void operator()(const std::uint32_t & N, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
+		  void operator()(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, const std::uint32_t & device_id = 0)
 		  {
 			cudaDeviceProp properties;
-			cudaGetDeviceProperties(&properties, 0);
-			dim3 block_launch;
+			cudaGetDeviceProperties(&properties, device_id);
 			std::uint32_t warp_size = properties.warpSize;
 			threads_per_block = (N + warp_size -1) / warp_size * warp_size;
 			if(threads_per_block > 4 * warp_size)
 			  threads_per_block = 4 * warp_size;
-			x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
-			y = 1;
-			z = 1;
+			block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
+			block_launch.y = 1;
+			block_launch.z = 1;
 		  }
 	  };
 	//to do
