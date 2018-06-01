@@ -20,6 +20,25 @@ namespace zinhart
 		return;
 	  x[thread_id] = a * x[thread_id] + s;
 	}
+  template <class Precision_Type>
+	__global__ void axps(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, const std::uint32_t tile_dim, const std::uint32_t block_row)
+	{
+	  extern __shared__  std::uint8_t x_shared[];
+	  Precision_Type * x_tile = reinterpret_cast<Precision_Type*>(x_shared);
+	  const std::uint32_t thread_id = blockIdx.x * tile_dim + threadIdx.x;
+	  const std::uint32_t width = gridDim.x * tile_dim;
+	  if(thread_id > N )
+		return;
+	  /*for(std::uint32_t i = 0; i < tile_dim; i+= block_row)
+	  {
+		x_tile[(threadIdx.y + i) * tile_dim + threadIdx.x] = x[ (thread_id_y + i) * width + thread_id_x];
+		x_tile[(threadIdx.y + i) * tile_dim + threadIdx.x] = a * x_tile[(threadIdx.y + i) * tile_dim + threadIdx.x] + s;
+	  }
+	  for(std::uint32_t i = 0; i < tile_dim; i+= block_row)
+	  {
+		x[(thread_id_y+i) * width + thread_id_x] = x_tile[(threadIdx.y + i) * tile_dim + threadIdx.x];
+	  }*/
+	}
 
   // GPU WRAPPERS
   
@@ -39,13 +58,17 @@ namespace zinhart
   template <class Precision_Type>
 	HOST std::int32_t call_axps_async(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, cudaStream_t & stream, const std::uint32_t & device_id)
 	{
+	  /*
 	  dim3 num_blocks;
 	  std::int32_t threads_per_block;
+	  const std::uint32_t tile_dim = 16;
+	  const std::uint32_t block_row = 8;
+	  const std::uint32_t shared_memory = tile_dim * tile_dim * sizeof(Precision_Type);
 	  grid<1> one_dimensional_grid;
 	  one_dimensional_grid(num_blocks, threads_per_block, N, device_id);
 	  std::cout<<"num_blocks.x: "<<num_blocks.x<<" num_blocks.y: "<<num_blocks.y<<" num_blocks.z: "<<num_blocks.z<<" threads_per_block: "<<threads_per_block<<" N:" <<N<<"\n";
 	  // call kernel
-	  axps<<<num_blocks,threads_per_block, 0, stream>>>(a,x,s,N);
+	  axps<<<num_blocks,threads_per_block, shared_memory, stream>>>(a,x,s,N, tile_dim, block_row);*/
 	  return 0;
 	  
 	}
@@ -59,8 +82,42 @@ namespace zinhart
 
 	    // when there is only one warp per block, we need to allocate two warps
 		// worth of shared memory so that we don't index shared memory out of bounds
-		std::uint32_t shared_memory = (threads <= 32) ? 2 * threads * sizeof(Precision_Type) : threads * sizeof(Precision_Type);
+		//std::uint32_t shared_memory = (threads <= 32) ? 2 * threads * sizeof(Precision_Type) : threads * sizeof(Precision_Type);
 	  }
 
+	namespace cuda_device_properties
+	{
+	  auto get_properties(std::uint32_t device_id) -> cudaDeviceProp
+	  {
+		static cudaDeviceProp properties;
+		cudaGetDeviceProperties(&properties, device_id);
+		return properties;
+
+	  }	
+	  void get_warp_size(std::uint32_t & warp_size)
+	  {
+		warp_size = get_properties().warpSize;
+	  }
+	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block)
+	  {
+		max_shared_memory_per_block = get_properties().sharedMemPerBlock;
+	  }
+	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block)
+	  {
+		max_threads_per_block = get_properties().maxThreadsPerBlock;
+	  }
+	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3])
+	  {
+		max_threads_dim[0] = get_properties().maxThreadsDim[0];
+		max_threads_dim[1] = get_properties().maxThreadsDim[1];
+		max_threads_dim[2] = get_properties().maxThreadsDim[2];
+	  }
+	  void get_max_grid_size(std::int32_t (& max_grid_size)[3])
+	  {
+		max_grid_size[0] = get_properties().maxGridSize[0];
+		max_grid_size[1] = get_properties().maxGridSize[1];
+		max_grid_size[2] = get_properties().maxGridSize[2];
+	  }
+	}
   
 }

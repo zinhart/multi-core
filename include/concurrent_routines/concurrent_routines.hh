@@ -80,6 +80,17 @@ namespace zinhart
    * GPU WRAPPERS ************
    * *************************
    */
+
+
+	namespace cuda_device_properties
+	{
+	  auto get_properties(std::uint32_t device_id = 0) -> cudaDeviceProp;
+	  void get_warp_size(std::uint32_t & warp_size);
+	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block);
+	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block);
+	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3]);
+	  void get_max_grid_size(std::int32_t (& max_threads_dim)[3]);
+	}
 	template <class Precision_Type>
 	  HOST std::int32_t call_axps(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, const std::uint32_t & device_id = 0);
 
@@ -91,6 +102,7 @@ namespace zinhart
 	// assumed to be row major indices this generated the column indices
     HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
 
+
 	// GPU HELPERS
 	template<std::uint32_t Grid_Dim>
 	  class grid;
@@ -101,9 +113,19 @@ namespace zinhart
 		  //assuming you only got 1 gpu
 		  void operator()(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, const std::uint32_t & device_id = 0)
 		  {
-			cudaDeviceProp properties;
-			cudaGetDeviceProperties(&properties, device_id);
-			std::uint32_t warp_size = properties.warpSize;
+			std::uint32_t warp_size{0}; 
+			cuda_device_properties::get_warp_size(warp_size);
+			threads_per_block = (N + warp_size -1) / warp_size * warp_size;
+			if(threads_per_block > 4 * warp_size)
+			  threads_per_block = 4 * warp_size;
+			block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
+			block_launch.y = 1;
+			block_launch.z = 1;
+		  }
+		  void operator()(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, std::uint32_t & shared_memory, const std::uint32_t & device_id = 0)
+		  {
+			std::uint32_t warp_size{0};
+			cuda_device_properties::get_warp_size(warp_size);
 			threads_per_block = (N + warp_size -1) / warp_size * warp_size;
 			if(threads_per_block > 4 * warp_size)
 			  threads_per_block = 4 * warp_size;

@@ -20,11 +20,11 @@ namespace zinhart
 	  class thread_task_interface
 	  {
 		public:
-		  HOST thread_task_interface() = default;
-		  HOST thread_task_interface(const thread_task_interface&) = delete;
-		  HOST thread_task_interface & operator =(const thread_task_interface&) = delete;
-		  HOST thread_task_interface & operator =(thread_task_interface&&) = default;
-		  HOST ~thread_task_interface() = default;
+		  thread_task_interface() = default;
+		  thread_task_interface(const thread_task_interface&) = delete;
+		  thread_task_interface & operator =(const thread_task_interface&) = delete;
+		  thread_task_interface & operator =(thread_task_interface&&) = default;
+		  ~thread_task_interface() = default;
 		  virtual void operator()() = 0;
 	  };
 
@@ -36,11 +36,11 @@ namespace zinhart
 		  public:
 	  		  HOST thread_task(Callable && c)
 		  	  {	this->callable = std::move(c); }
-		  	  HOST thread_task(const thread_task&) = delete;
-		  	  HOST thread_task & operator =(const thread_task&) = delete;
-		  	  HOST thread_task & operator =(thread_task&&) = default;
-			  HOST virtual ~thread_task() = default;
-			  void operator()() override
+		  	  thread_task(const thread_task&) = delete;
+		  	  thread_task & operator =(const thread_task&) = delete;
+		  	  thread_task & operator =(thread_task&&) = default;
+			  virtual ~thread_task() = default;
+			  HOST void operator()() override
 			  { this->callable(); }
 		};
 	public:
@@ -54,14 +54,14 @@ namespace zinhart
 		  	  {	this->future = std::move(future); }
 		  	  HOST task_future(const task_future&) = delete;
 		  	  HOST task_future & operator =(const task_future&) = delete;
-		  	  HOST task_future & operator =(task_future&&) = default;
-			  HOST task_future(task_future &&) = default;
+		  	  task_future & operator =(task_future&&) = default;
+			  task_future(task_future &&) = default;
 			  HOST ~task_future()
 			  {
 				if (future.valid())
 			  		future.get();
 			  }
-			  T get()
+			  HOST T get()
 			  { return future.get(); }
 		};
 

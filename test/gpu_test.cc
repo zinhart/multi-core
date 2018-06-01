@@ -242,8 +242,6 @@ TEST(gpu_test, call_axps_async)
   cudaStream_t * stream{nullptr};
   std::list<zinhart::thread_pool::task_future<void>> serial_axps_results;
 
-  //X_host = new double[N];
-  //X_host_copy = new double[N];
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, N * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host_copy, N * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&stream, n_streams * sizeof(cudaStream_t),cudaHostAllocDefault),__FILE__,__LINE__));
@@ -259,7 +257,6 @@ TEST(gpu_test, call_axps_async)
 	X_host_copy[i] = X_host[i];
   }
 
-  //ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpy(X_device, X_host, N * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__));
   for (std::uint32_t i = 0; i < n_streams; ++i)
   {
   	// copy host to device
@@ -288,8 +285,6 @@ TEST(gpu_test, call_axps_async)
   }
   
   // deallocate
-//  delete X_host;
-//  delete X_host_copy;
   cudaFreeHost(X_host);
   cudaFreeHost(X_host_copy);
   cudaFreeHost(stream);
