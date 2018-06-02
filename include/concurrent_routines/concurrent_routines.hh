@@ -190,7 +190,7 @@ namespace zinhart
 			  num_blocks.z = 1;
 
 			  // note shared memory is terms of bytes not array lengths, returns as much shared memory as N * sizeof(T) provided N * sizeof(T) < max_shared_memory_per_block
-			  shared_memory_bytes = (N * sizeof(T) > max_shared_memory_per_block) ? max_shared_memory_per_block : (N * sizeof(T));
+			  shared_memory_bytes = (N * sizeof(T) > max_shared_memory_per_block) ? max_shared_memory_per_block : (N * sizeof(T) );
 			}
 		};
 	  //to do
