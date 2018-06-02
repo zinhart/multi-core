@@ -373,17 +373,6 @@ namespace zinhart
  * GPU TEMPLATE WRAPPERS
  * */
 #if CUDA_ENABLED == true
-	template <class PrecisionType>
-	  HOST std::int32_t paralell_naive_matrix_product_gpu(const std::uint32_t & N, PrecisionType * A, PrecisionType * B, PrecisionType * C)
-	  {
-		std::uint32_t threads_per_block;
-		dim3 block_launch;
-		//get grid paramemters
-		grid<1U> g;
-		g(N, threads_per_block, block_launch.x, block_launch.y, block_launch.z, 0);
-		//call kernel
-		return 0;
-	  }
 
 #endif
 }
