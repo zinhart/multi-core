@@ -52,7 +52,7 @@ namespace zinhart
 	  t.join();
   }
  
-  HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, const std::uint32_t SDB)
+  HOST void gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, const std::uint32_t SDB)
   {
 	m = SDB;
 	n = LDA;
@@ -61,7 +61,7 @@ namespace zinhart
 	ldb = k;
 	ldc = m;
   }
-  HOST std::int32_t geam_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, const std::uint32_t SDB)
+  HOST void geam_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, const std::uint32_t SDB)
   {
 	m = SDB;
 	n = LDA;

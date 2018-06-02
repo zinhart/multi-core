@@ -10,11 +10,10 @@
 #endif
 TEST(gpu_test, gemm_wrapper)
 {
-  cudaError_t error_id;
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 100/*std::numeric_limits<std::uint8_t>::max()*/ );
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, std::numeric_limits<std::uint8_t>::max() );
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
   std::int32_t A_row = uint_dist(mt);
@@ -36,19 +35,6 @@ TEST(gpu_test, gemm_wrapper)
   double * B_host_copy;
   double * C_host_copy;
   double * A_device, * B_device, * C_device;
-  auto print_mat = [](double * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
-			   {
-				 std::cout<<s<<"\n";
-	   			 for(std::uint32_t i = 0; i < mat_rows; ++i)  
-				 {
-				   for(std::uint32_t j = 0; j < mat_cols; ++j)
-				   {
-					 std::cout<<mat[i * mat_cols + j]<<" ";
-				   }
-				   std::cout<<"\n";
-				 }
-				 
-			   };
 
   zinhart::check_cuda_api(cudaHostAlloc((void**)&A_host, A_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
   zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host, B_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
@@ -58,43 +44,39 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaHostAlloc((void**)&B_host_copy, B_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
   zinhart::check_cuda_api(cudaHostAlloc((void**)&C_host_copy, C_total_elements * sizeof(double), cudaHostAllocDefault),__FILE__,__LINE__);
 
-  for (std::uint32_t i =0; i < A_row; ++i)
+  for (std::int32_t i =0; i < A_row; ++i)
   {
-	for(std::uint32_t j = 0; j < A_col; ++j)
+	for(std::int32_t j = 0; j < A_col; ++j)
 	{
 	  A_host[zinhart::idx2r(i,j, A_col)] = real_dist(mt);
 	}
   }
 
-  for (std::uint32_t i =0; i < B_row; ++i)
+  for (std::int32_t i =0; i < B_row; ++i)
   {
-	for(std::uint32_t j = 0; j < B_col; ++j)
+	for(std::int32_t j = 0; j < B_col; ++j)
 	{
 	  B_host[zinhart::idx2r(i,j, B_col)] = real_dist(mt);
 	}
   }
 
-  for (std::uint32_t i =0; i < C_row; ++i)
+  for (std::int32_t i =0; i < C_row; ++i)
   {
-	for(std::uint32_t j = 0; j < C_col; ++j)
+	for(std::int32_t j = 0; j < C_col; ++j)
 	{
 	  C_host[zinhart::idx2r(i,j, C_col)] = 0.0f;
 	}
   }
- /* 
-  zinhart::print_matrix_row_major(A_host, A_row, A_col,"A_host");
-  zinhart::print_matrix_row_major(B_host, B_row, B_col,"B_host");
-  zinhart::print_matrix_row_major(C_host, C_row, C_col,"C_host");*/
 
-  for(std::uint32_t i = 0; i < A_total_elements; ++i)
+  for(std::int32_t i = 0; i < A_total_elements; ++i)
   {
 	A_host_copy[i] = 0;
   }
-  for(std::uint32_t i = 0; i < B_total_elements; ++i)
+  for(std::int32_t i = 0; i < B_total_elements; ++i)
   {
 	B_host_copy[i] = 0;
   }
-  for(std::uint32_t i = 0; i < C_total_elements; ++i)
+  for(std::int32_t i = 0; i < C_total_elements; ++i)
   {
 	C_host_copy[i] = 0.0f;
   }
@@ -108,7 +90,6 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaMemcpy(B_device, B_host, B_total_elements * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__);
   zinhart::check_cuda_api(cudaMemcpy(C_device, C_host, C_total_elements * sizeof(double), cudaMemcpyHostToDevice),__FILE__,__LINE__);
 
-  cublasStatus_t cublas_error_id;
   cublasHandle_t context;
   zinhart::check_cublas_api(cublasCreate(&context),__FILE__,__LINE__);
   double alpha = 1;
@@ -138,15 +119,15 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::print_matrix_row_major(C_host, C_row, C_col,"C_host");
   zinhart::print_matrix_row_major(C_host_copy, C_row, C_col, "C_host_copy");*/
   double epsilon = .0005;
-  for(std::uint32_t i = 0; i < A_total_elements; ++i)
+  for(std::int32_t i = 0; i < A_total_elements; ++i)
   {
 	ASSERT_NEAR(A_host[i], A_host_copy[i], epsilon);
   }
-  for(std::uint32_t i = 0; i < B_total_elements; ++i)
+  for(std::int32_t i = 0; i < B_total_elements; ++i)
   {
 	ASSERT_NEAR(B_host[i], B_host_copy[i], epsilon);
   }
-  for(std::uint32_t i = 0; i < C_total_elements; ++i)
+  for(std::int32_t i = 0; i < C_total_elements; ++i)
   {
 	ASSERT_NEAR(C_host[i],C_host_copy[i], epsilon);
   }
@@ -186,7 +167,7 @@ TEST(gpu_test, call_axps)
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device,  N * sizeof(double)),__FILE__,__LINE__));
 
   // initialize
-  for(std::uint32_t i = 0; i < N; ++i)
+  for(std::int32_t i = 0; i < N; ++i)
   {
 	X_host[i] = real_dist(mt);
 	X_host_copy[i] = X_host[i];
@@ -200,13 +181,13 @@ TEST(gpu_test, call_axps)
   // copy device to host
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpy(X_host, X_device, N * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__));
   // do serial axps
-  for(std::uint32_t i = 0; i < N; ++i)
+  for(std::int32_t i = 0; i < N; ++i)
   {
 	serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_copy[i]), s));
   }
 
   // compare
-  for(std::uint32_t i = 0; i < N; ++i)
+  for(std::int32_t i = 0; i < N; ++i)
   { 
     serial_axps_results[i].get();	
 	ASSERT_EQ(X_host[i], X_host_copy[i]);
@@ -226,7 +207,7 @@ TEST(gpu_test, call_axps_async)
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 100/*std::numeric_limits<std::uint8_t>::max()*/ );
+  std::uniform_int_distribution<std::uint8_t> uint_dist(1, std::numeric_limits<std::uint8_t>::max() );
   std::uniform_int_distribution<std::uint8_t> stream_dist(1, 10/*std::numeric_limits<std::uint8_t>::max()*/ );
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
@@ -251,13 +232,13 @@ TEST(gpu_test, call_axps_async)
 
 
   // initialize
-  for(std::uint32_t i = 0; i < N; ++i)
+  for(std::int32_t i = 0; i < N; ++i)
   {
 	X_host[i] = real_dist(mt);
 	X_host_copy[i] = X_host[i];
   }
 
-  for (std::uint32_t i = 0; i < n_streams; ++i)
+  for (std::int32_t i = 0; i < n_streams; ++i)
   {
   	// copy host to device
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_device, X_host, N * sizeof(double), cudaMemcpyHostToDevice, stream[i]),__FILE__,__LINE__));
@@ -267,7 +248,7 @@ TEST(gpu_test, call_axps_async)
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_host, X_device, N * sizeof(double), cudaMemcpyDeviceToHost, stream[i]),__FILE__,__LINE__));
 
 	// do serial axps
-	for(std::uint32_t j = 0; j < N; ++j)
+	for(std::int32_t j = 0; j < N; ++j)
 	{
 	  serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](const double a, double & x, const double s){ x = a * x + s; }, a, std::ref(X_host_copy[j]), s));
 	}
@@ -275,7 +256,7 @@ TEST(gpu_test, call_axps_async)
 	cudaStreamSynchronize(stream[i]);
 	double epsilon = 0.005;
 	// compare
-	for(std::uint32_t j = 0; j < N; ++j)
+	for(std::int32_t j = 0; j < N; ++j)
 	{ 	
   	  serial_axps_results.front().get();
 	  ASSERT_NEAR(X_host[j], X_host_copy[j], epsilon);
