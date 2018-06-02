@@ -6,11 +6,11 @@ namespace zinhart
 {
   //EXPLICIT INSTANTIATIONS (to make templates , such as the wrapper functions, in defined in the .cu available in main.cc)
   
-  template HOST std::int32_t call_axps(float a, float * x, float s, std::uint32_t N, const std::uint32_t & device_id);
-  template HOST std::int32_t call_axps(double a, double * x, double s, std::uint32_t N, const std::uint32_t & device_id);
+  template HOST std::int32_t call_axps(const float & a, float * x, const float & s, const std::uint32_t & N, const std::uint32_t & device_id);
+  template HOST std::int32_t call_axps(const double & a, double * x, const double & s, const std::uint32_t & N, const std::uint32_t & device_id);
 
-  template HOST std::int32_t call_axps_async(float a, float * x, float s, std::uint32_t N, cudaStream_t & stream, const std::uint32_t & device_id);
-  template HOST std::int32_t call_axps_async(double a, double * x, double s, std::uint32_t N, cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t call_axps_async(const float & a, float * x, const float & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t call_axps_async(const double & a, double * x, const double & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
   // KERNELS
   
   template <class Precision_Type>
@@ -36,7 +36,7 @@ namespace zinhart
   // GPU WRAPPERS
   
   template <class Precision_Type>
-	HOST std::int32_t call_axps(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, const std::uint32_t & device_id)
+	HOST std::int32_t call_axps(const Precision_Type & a, Precision_Type * x, const Precision_Type & s, const std::uint32_t & N, const std::uint32_t & device_id)
 	{
 	  dim3 num_blocks;
 	  dim3 threads_per_block;
@@ -47,7 +47,7 @@ namespace zinhart
 	  return zinhart::check_cuda_api(cudaError_t(cudaGetLastError()), __FILE__,__LINE__);
 	}
   template <class Precision_Type>
-	HOST std::int32_t call_axps_async(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, cudaStream_t & stream, const std::uint32_t & device_id)
+	HOST std::int32_t call_axps_async(const Precision_Type & a, Precision_Type * x, const Precision_Type & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id)
 	{
 	  dim3 num_blocks;
 	  dim3 threads_per_block;
@@ -80,7 +80,7 @@ namespace zinhart
 	  HOST auto get_properties(std::uint32_t device_id) -> cudaDeviceProp
 	  {
 		static cudaDeviceProp properties;
-		cudaGetDeviceProperties(&properties, device_id);
+		check_cuda_api(cudaGetDeviceProperties(&properties, device_id),__FILE__, __LINE__);
 		return properties;
 
 	  }	
