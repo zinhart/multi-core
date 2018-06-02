@@ -514,17 +514,17 @@ TEST(thread_safe_queue, call_push)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
+  std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint32_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   //to be called from each thread
-  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  auto call_push = [](zinhart::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
   {
 	std::uint32_t old_size = init_queue.size();
 	init_queue.push(item);
 	ASSERT_TRUE( init_queue.size() >=  old_size);
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::thread_safe_queue<std::uint32_t> test_queue;
   call_push(test_queue,0);
   ASSERT_EQ(bool{false}, test_queue.empty());
   ASSERT_EQ(std::uint32_t{1}, test_queue.size());
@@ -547,17 +547,17 @@ TEST(thread_safe_queue, call_size_on_non_empty_queue)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
+  std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
+  std::uint32_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   //to be called from each thread
-  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  auto call_push = [](zinhart::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
   {
 	std::uint32_t old_size = init_queue.size();
 	init_queue.push(item);
 	ASSERT_TRUE( init_queue.size() >=  old_size);
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::thread_safe_queue<std::uint32_t> test_queue;
   call_push(test_queue, 0);
   ASSERT_EQ(std::uint32_t{1}, test_queue.size());
   //call push from a random number of threads not exceding MAX_CPU_THREADS
@@ -586,11 +586,11 @@ TEST(thread_safe_queue, call_empty_on_non_empty_queue)
   auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
   {
 	init_queue.push(item);
-	ASSERT_EQ(false ,init_queue.empty());
+	ASSERT_EQ(bool{false} ,init_queue.empty());
   };
   zinhart::thread_safe_queue<std::int32_t> test_queue;
   call_push(test_queue, 0);
-  ASSERT_EQ(false, test_queue.empty());
+  ASSERT_EQ(bool{false}, test_queue.empty());
   //call push from a random number of threads not exceding MAX_CPU_THREADS
   for( i = 0; i < n_threads; ++i)
   {
@@ -602,7 +602,7 @@ TEST(thread_safe_queue, call_empty_on_non_empty_queue)
 	t.join();
   }
   //should not be empty
-  ASSERT_EQ( false, test_queue.empty());
+  ASSERT_EQ( bool{false}, test_queue.empty());
 }
 
 TEST(thread_safe_queue, call_pop_on_empty_queue)
@@ -616,7 +616,7 @@ TEST(thread_safe_queue, call_pop_on_empty_queue)
   auto call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
   {
 	bool pop_result = init_queue.pop(item);
-	ASSERT_EQ(false, pop_result);
+	ASSERT_EQ(bool{false}, pop_result);
   };
   zinhart::thread_safe_queue<std::int32_t> test_queue;
   call_pop(test_queue, 0);
