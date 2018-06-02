@@ -269,7 +269,7 @@ TEST(gpu_test, call_axps_async)
 	// do serial axps
 	for(std::uint32_t j = 0; j < N; ++j)
 	{
-	  serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_copy[j]), s));
+	  serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](const double a, double & x, const double s){ x = a * x + s; }, a, std::ref(X_host_copy[j]), s));
 	}
 	
 	cudaStreamSynchronize(stream[i]);
