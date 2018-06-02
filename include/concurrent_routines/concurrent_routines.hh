@@ -85,11 +85,77 @@ namespace zinhart
 	namespace cuda_device_properties
 	{
 	  auto get_properties(std::uint32_t device_id = 0) -> cudaDeviceProp;
-	  void get_warp_size(std::uint32_t & warp_size);
-	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block);
-	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block);
-	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3]);
-	  void get_max_grid_size(std::int32_t (& max_threads_dim)[3]);
+	  void get_warp_size(std::uint32_t & warp_size, const std::uint32_t & device_id);
+	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block, const std::uint32_t & device_id);
+	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block, const std::uint32_t & device_id);
+	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id);
+	  void get_max_grid_size(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id);
+	  void get_max_threads_1d_kernel(std::uint64_t & max_threads, const std::uint32_t & device_id);
+	  template <std::uint32_t Kernel_Dim>
+		class max_threads;
+	  template<>
+		class max_threads<1>
+		{
+		  public:
+			max_threads() = default;
+			max_threads(const max_threads&) = default;
+			max_threads(max_threads&&) = default;
+			max_threads & operator = (const max_threads&) = default;
+			max_threads & operator = (max_threads&&) = default;
+			~max_threads() = default;
+			static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
+			{
+			  std::int32_t max_grid_dim[3];
+			  std::int32_t max_threads_dim[3];
+			  get_max_threads_dim(max_threads_dim, device_id);
+			  get_max_grid_size(max_grid_dim, device_id);
+			  max_threads = max_threads_dim[0] * max_grid_dim[0];
+			}
+		};
+	  template<>
+		class max_threads<2>
+		{
+		  public:
+			max_threads() = default;
+			max_threads(const max_threads&) = default;
+			max_threads(max_threads&&) = default;
+			max_threads & operator = (const max_threads&) = default;
+			max_threads & operator = (max_threads&&) = default;
+			~max_threads() = default;
+			static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
+			{
+			  std::int32_t max_grid_dim[3];
+			  std::int32_t max_threads_dim[3];
+			  get_max_threads_dim(max_threads_dim, device_id);
+			  get_max_grid_size(max_grid_dim, device_id);
+			  max_threads = (max_threads_dim[0] * max_grid_dim[0]) + (max_threads_dim[1] * max_grid_dim[1]);
+			}
+		};
+	  template<>
+		class max_threads<3>
+		{
+		  public:
+			max_threads() = default;
+			max_threads(const max_threads&) = default;
+			max_threads(max_threads&&) = default;
+			max_threads & operator = (const max_threads&) = default;
+			max_threads & operator = (max_threads&&) = default;
+			~max_threads() = default;
+			static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
+			{
+			  std::int32_t max_grid_dim[3];
+			  std::int32_t max_threads_dim[3];
+			  get_max_threads_dim(max_threads_dim, device_id);
+			  get_max_grid_size(max_grid_dim, device_id);
+			  max_threads = (max_threads_dim[0] * max_grid_dim[0]) + (max_threads_dim[1] * max_grid_dim[1]) + (max_threads_dim[2] * max_grid_dim[2]);
+			}
+		};
+	}
+	namespace grid_space
+	{
+	  // N should be the number of outputs that the kernel will must compute
+	  // returns 0 when N fits within the hardward specs 1 other wise
+  	  bool get_grid_params(std::uint32_t N, const std::uint32_t & device_id = 0);
 	}
 	template <class Precision_Type>
 	  HOST std::int32_t call_axps(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, const std::uint32_t & device_id = 0);
@@ -114,9 +180,9 @@ namespace zinhart
 		  void operator()(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, const std::uint32_t & device_id = 0)
 		  {
 			std::uint32_t warp_size{0}; 
-			cuda_device_properties::get_warp_size(warp_size);
-			threads_per_block = (N + warp_size -1) / warp_size * warp_size;
-			if(threads_per_block > 4 * warp_size)
+			cuda_device_properties::get_warp_size(warp_size, device_id);
+			threads_per_block = (N + warp_size -1) / warp_size * warp_size; // warp size * warp size = max_thread_dim[0]
+			if(threads_per_block > 4 * warp_size) // 4 * warp_size = 128
 			  threads_per_block = 4 * warp_size;
 			block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
 			block_launch.y = 1;
@@ -125,7 +191,7 @@ namespace zinhart
 		  void operator()(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, std::uint32_t & shared_memory, const std::uint32_t & device_id = 0)
 		  {
 			std::uint32_t warp_size{0};
-			cuda_device_properties::get_warp_size(warp_size);
+			cuda_device_properties::get_warp_size(warp_size, device_id);
 			threads_per_block = (N + warp_size -1) / warp_size * warp_size;
 			if(threads_per_block > 4 * warp_size)
 			  threads_per_block = 4 * warp_size;

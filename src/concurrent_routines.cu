@@ -94,30 +94,58 @@ namespace zinhart
 		return properties;
 
 	  }	
-	  void get_warp_size(std::uint32_t & warp_size)
+	  void get_warp_size(std::uint32_t & warp_size, const std::uint32_t & device_id)
 	  {
-		warp_size = get_properties().warpSize;
+		warp_size = get_properties(device_id).warpSize;
 	  }
-	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block)
+	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block, const std::uint32_t & device_id)
 	  {
-		max_shared_memory_per_block = get_properties().sharedMemPerBlock;
+		max_shared_memory_per_block = get_properties(device_id).sharedMemPerBlock;
 	  }
-	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block)
+	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block, const std::uint32_t & device_id)
 	  {
-		max_threads_per_block = get_properties().maxThreadsPerBlock;
+		max_threads_per_block = get_properties(device_id).maxThreadsPerBlock;
 	  }
-	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3])
+	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id)
 	  {
-		max_threads_dim[0] = get_properties().maxThreadsDim[0];
-		max_threads_dim[1] = get_properties().maxThreadsDim[1];
-		max_threads_dim[2] = get_properties().maxThreadsDim[2];
+		max_threads_dim[0] = get_properties(device_id).maxThreadsDim[0];
+		max_threads_dim[1] = get_properties(device_id).maxThreadsDim[1];
+		max_threads_dim[2] = get_properties(device_id).maxThreadsDim[2];
 	  }
-	  void get_max_grid_size(std::int32_t (& max_grid_size)[3])
+	  void get_max_grid_size(std::int32_t (& max_grid_size)[3], const std::uint32_t & device_id)
 	  {
-		max_grid_size[0] = get_properties().maxGridSize[0];
-		max_grid_size[1] = get_properties().maxGridSize[1];
-		max_grid_size[2] = get_properties().maxGridSize[2];
+		max_grid_size[0] = get_properties(device_id).maxGridSize[0];
+		max_grid_size[1] = get_properties(device_id).maxGridSize[1];
+		max_grid_size[2] = get_properties(device_id).maxGridSize[2];
 	  }
 	}
-  
+	namespace grid_space
+	{
+	    bool get_grid_dim(std::uint32_t N, const std::uint32_t & device_id)
+		{
+		  std::uint64_t max_outputs_1d_kernel{0};
+		  std::uint64_t max_outputs_2d_kernel{0};
+		  std::uint64_t max_outputs_3d_kernel{0};
+		  cuda_device_properties::max_threads<1>::get_max(max_outputs_1d_kernel,device_id); 
+		  cuda_device_properties::max_threads<2>::get_max(max_outputs_2d_kernel,device_id); 
+		  cuda_device_properties::max_threads<3>::get_max(max_outputs_3d_kernel,device_id); 
+		  if(N <= max_outputs_1d_kernel)
+		  {
+			return false;
+		  }
+		  else if (N <= max_outputs_2d_kernel && N > max_outputs_1d_kernel)
+		  {
+			return false;
+		  }
+		  else if(N <= max_outputs_3d_kernel && N > max_outputs_2d_kernel)
+		  {
+			return false;
+		  }
+		  else
+		  {
+			return true;
+		  }
+		}
+
+	}
 }
