@@ -47,8 +47,7 @@ namespace zinhart
 	{
 	  dim3 num_blocks;
 	  std::int32_t threads_per_block;
-	  grid<1> one_dimensional_grid;
-	  one_dimensional_grid(num_blocks, threads_per_block, N, device_id);
+	  grid_space::grid<1>::get_launch_params(num_blocks, threads_per_block, N, device_id);
 	  std::cout<<"num_blocks.x: "<<num_blocks.x<<" num_blocks.y: "<<num_blocks.y<<" num_blocks.z: "<<num_blocks.z<<" threads_per_block: "<<threads_per_block<<" N:" <<N<<"\n";
 	  // call kernel
 	  axps<<<num_blocks,threads_per_block>>>(a,x,s,N);
@@ -87,32 +86,32 @@ namespace zinhart
 
 	namespace cuda_device_properties
 	{
-	  auto get_properties(std::uint32_t device_id) -> cudaDeviceProp
+	  HOST auto get_properties(std::uint32_t device_id) -> cudaDeviceProp
 	  {
 		static cudaDeviceProp properties;
 		cudaGetDeviceProperties(&properties, device_id);
 		return properties;
 
 	  }	
-	  void get_warp_size(std::uint32_t & warp_size, const std::uint32_t & device_id)
+	  HOST void get_warp_size(std::uint32_t & warp_size, const std::uint32_t & device_id)
 	  {
 		warp_size = get_properties(device_id).warpSize;
 	  }
-	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block, const std::uint32_t & device_id)
+	  HOST void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block, const std::uint32_t & device_id)
 	  {
 		max_shared_memory_per_block = get_properties(device_id).sharedMemPerBlock;
 	  }
-	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block, const std::uint32_t & device_id)
+	  HOST void get_max_threads_per_block(std::uint32_t & max_threads_per_block, const std::uint32_t & device_id)
 	  {
 		max_threads_per_block = get_properties(device_id).maxThreadsPerBlock;
 	  }
-	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id)
+	  HOST void get_max_threads_dim(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id)
 	  {
 		max_threads_dim[0] = get_properties(device_id).maxThreadsDim[0];
 		max_threads_dim[1] = get_properties(device_id).maxThreadsDim[1];
 		max_threads_dim[2] = get_properties(device_id).maxThreadsDim[2];
 	  }
-	  void get_max_grid_size(std::int32_t (& max_grid_size)[3], const std::uint32_t & device_id)
+	  HOST void get_max_grid_size(std::int32_t (& max_grid_size)[3], const std::uint32_t & device_id)
 	  {
 		max_grid_size[0] = get_properties(device_id).maxGridSize[0];
 		max_grid_size[1] = get_properties(device_id).maxGridSize[1];
@@ -121,7 +120,7 @@ namespace zinhart
 	}
 	namespace grid_space
 	{
-	    bool get_grid_dim(std::uint32_t N, const std::uint32_t & device_id)
+	    HOST bool get_grid_dim(std::uint32_t N, const std::uint32_t & device_id)
 		{
 		  std::uint64_t max_outputs_1d_kernel{0};
 		  std::uint64_t max_outputs_2d_kernel{0};

@@ -76,21 +76,16 @@ namespace zinhart
 	  HOST void print_matrix_row_major(Precision_Type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s);
 
 #if CUDA_ENABLED == 1
-  /***************************
-   * GPU WRAPPERS ************
-   * *************************
-   */
-
-
+	// Device properties
 	namespace cuda_device_properties
 	{
-	  auto get_properties(std::uint32_t device_id = 0) -> cudaDeviceProp;
-	  void get_warp_size(std::uint32_t & warp_size, const std::uint32_t & device_id);
-	  void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block, const std::uint32_t & device_id);
-	  void get_max_threads_per_block(std::uint32_t & max_threads_per_block, const std::uint32_t & device_id);
-	  void get_max_threads_dim(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id);
-	  void get_max_grid_size(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id);
-	  void get_max_threads_1d_kernel(std::uint64_t & max_threads, const std::uint32_t & device_id);
+	  HOST auto get_properties(std::uint32_t device_id = 0) -> cudaDeviceProp;
+	  HOST void get_warp_size(std::uint32_t & warp_size, const std::uint32_t & device_id);
+	  HOST void get_max_shared_memory(std::uint32_t & max_shared_memory_per_block, const std::uint32_t & device_id);
+	  HOST void get_max_threads_per_block(std::uint32_t & max_threads_per_block, const std::uint32_t & device_id);
+	  HOST void get_max_threads_dim(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id);
+	  HOST void get_max_grid_size(std::int32_t (& max_threads_dim)[3], const std::uint32_t & device_id);
+	  HOST void get_max_threads_1d_kernel(std::uint64_t & max_threads, const std::uint32_t & device_id);
 	  template <std::uint32_t Kernel_Dim>
 		class max_threads;
 	  template<>
@@ -103,7 +98,7 @@ namespace zinhart
 			max_threads & operator = (const max_threads&) = default;
 			max_threads & operator = (max_threads&&) = default;
 			~max_threads() = default;
-			static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
+			HOST static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
 			{
 			  std::int32_t max_grid_dim[3];
 			  std::int32_t max_threads_dim[3];
@@ -122,7 +117,7 @@ namespace zinhart
 			max_threads & operator = (const max_threads&) = default;
 			max_threads & operator = (max_threads&&) = default;
 			~max_threads() = default;
-			static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
+			HOST static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
 			{
 			  std::int32_t max_grid_dim[3];
 			  std::int32_t max_threads_dim[3];
@@ -141,7 +136,7 @@ namespace zinhart
 			max_threads & operator = (const max_threads&) = default;
 			max_threads & operator = (max_threads&&) = default;
 			~max_threads() = default;
-			static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
+			HOST static void get_max(std::uint64_t & max_threads, const std::uint32_t & device_id)
 			{
 			  std::int32_t max_grid_dim[3];
 			  std::int32_t max_threads_dim[3];
@@ -151,12 +146,65 @@ namespace zinhart
 			}
 		};
 	}
+	// GPU HELPERS
 	namespace grid_space
 	{
 	  // N should be the number of outputs that the kernel will must compute
 	  // returns 0 when N fits within the hardward specs 1 other wise
-  	  bool get_grid_params(std::uint32_t N, const std::uint32_t & device_id = 0);
+  	  HOST static bool get_grid_params(std::uint32_t N, const std::uint32_t & device_id = 0);
+	  template<std::uint32_t Grid_Dim>
+		class grid;
+	  template<>
+		class grid<1>
+		{
+		  public:
+			//assuming you only got 1 gpu
+			HOST static void get_launch_params(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, const std::uint32_t & device_id = 0)
+			{
+			  std::uint32_t warp_size{0}; 
+			  cuda_device_properties::get_warp_size(warp_size, device_id);
+			  threads_per_block = (N + warp_size -1) / warp_size * warp_size; // warp size * warp size = max_thread_dim[0]
+			  if(threads_per_block > 4 * warp_size) // 4 * warp_size = 128
+				threads_per_block = 4 * warp_size;
+			  block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
+			  block_launch.y = 1;
+			  block_launch.z = 1;
+			}
+			HOST static void get_launch_params(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, std::uint32_t & shared_memory, const std::uint32_t & device_id = 0)
+			{
+			  std::uint32_t warp_size{0};
+			  cuda_device_properties::get_warp_size(warp_size, device_id);
+			  threads_per_block = (N + warp_size -1) / warp_size * warp_size;
+			  if(threads_per_block > 4 * warp_size)
+				threads_per_block = 4 * warp_size;
+			  block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
+			  block_launch.y = 1;
+			  block_launch.z = 1;
+			}
+		};
+	  //to do
+	  template<>
+		class grid<2>
+		{
+		  public:
+			HOST static void get_launch_params(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
+			{
+			}
+		};
+	  //to do
+	  template<>
+		class grid<3>
+		{
+		  public:
+			HOST static void get_launch_params(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
+			{
+			}
+		};
 	}
+  /***************************
+   * GPU WRAPPERS ************
+   * *************************
+   */
 	template <class Precision_Type>
 	  HOST std::int32_t call_axps(Precision_Type a, Precision_Type * x, Precision_Type s, std::uint32_t N, const std::uint32_t & device_id = 0);
 
@@ -169,55 +217,7 @@ namespace zinhart
     HOST std::int32_t gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
 
 
-	// GPU HELPERS
-	template<std::uint32_t Grid_Dim>
-	  class grid;
-	template<>
-	  class grid<1>
-	  {
-		public:
-		  //assuming you only got 1 gpu
-		  void operator()(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, const std::uint32_t & device_id = 0)
-		  {
-			std::uint32_t warp_size{0}; 
-			cuda_device_properties::get_warp_size(warp_size, device_id);
-			threads_per_block = (N + warp_size -1) / warp_size * warp_size; // warp size * warp size = max_thread_dim[0]
-			if(threads_per_block > 4 * warp_size) // 4 * warp_size = 128
-			  threads_per_block = 4 * warp_size;
-			block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
-			block_launch.y = 1;
-			block_launch.z = 1;
-		  }
-		  void operator()(dim3 & block_launch, std::int32_t & threads_per_block, const std::uint32_t & N, std::uint32_t & shared_memory, const std::uint32_t & device_id = 0)
-		  {
-			std::uint32_t warp_size{0};
-			cuda_device_properties::get_warp_size(warp_size, device_id);
-			threads_per_block = (N + warp_size -1) / warp_size * warp_size;
-			if(threads_per_block > 4 * warp_size)
-			  threads_per_block = 4 * warp_size;
-			block_launch.x = (N + threads_per_block - 1) / threads_per_block;// number of blocks
-			block_launch.y = 1;
-			block_launch.z = 1;
-		  }
-	  };
-	//to do
-	template<>
-	  class grid<2>
-	  {
-		public:
-		  void operator()(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
-		  {
-		  }
-	  };
-	//to do
-	template<>
-	  class grid<3>
-	  {
-		public:
-		  void operator()(const std::uint32_t & n_elements, std::uint32_t & threads_per_block, std::uint32_t & x, std::uint32_t & y, std::uint32_t & z, const std::uint32_t & device_id = 0)
-		  {
-		  }
-	  };
+	
 #endif
 }
 #include "ext/concurrent_routines_ext.tcc"
