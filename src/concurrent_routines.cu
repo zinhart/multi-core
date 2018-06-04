@@ -19,19 +19,6 @@ namespace zinhart
 	  for(std::uint32_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;  thread_id < N; thread_id += blockDim.x * gridDim.x)
 		x[thread_id] = a * x[thread_id] + s;
 	}
-  template <class Precision_Type>
-	__global__ void axps(const Precision_Type a, Precision_Type * x, const Precision_Type s, std::uint32_t N, const std::uint32_t shared_memory_length)
-	{
-	  extern __shared__  std::uint8_t x_shared[];
-	  Precision_Type * x_tile = reinterpret_cast<Precision_Type*>(x_shared);
-	  // grid-stride loop
-	  for(std::uint32_t thread_id = blockIdx.x * blockDim.x + threadIdx.x;  thread_id < N; thread_id += blockDim.x * gridDim.x)
-	  {
-		x_tile[thread_id] = x[thread_id];
-		x_tile[thread_id] = a * x_tile[thread_id ] + s;
-  		x[thread_id] = x_tile[thread_id];
-	  }
-	}
 
   // GPU WRAPPERS
   
@@ -41,7 +28,9 @@ namespace zinhart
 	  dim3 num_blocks;
 	  dim3 threads_per_block;
 	  grid_space::get_launch_params(num_blocks, threads_per_block, N, device_id);
-	  std::cout<<"num_blocks.x: "<<num_blocks.x<<" num_blocks.y: "<<num_blocks.y<<" num_blocks.z: "<<num_blocks.z<<" threads_per_block: "<<threads_per_block.x<<" N:" <<N<<"\n";
+	  /*std::cout<<"N a:" <<N<<"\n";
+	  std::cout<<"num_blocks.x: "<<num_blocks.x<<" num_blocks.y: "<<num_blocks.y<<" num_blocks.z: "<<num_blocks.z<<"\n";
+	  std::cout<<"threads_per_block.x: "<<threads_per_block.x<<" threads_per_block.y: "<<threads_per_block.y<<" threads_per_block.z: "<< threads_per_block.z<<"\n";	*/
 	  // call kernel
 	  axps<<<num_blocks,threads_per_block>>>(a,x,s,N);
 	  return zinhart::check_cuda_api(cudaError_t(cudaGetLastError()), __FILE__,__LINE__);
@@ -51,15 +40,12 @@ namespace zinhart
 	{
 	  dim3 num_blocks;
 	  dim3 threads_per_block;
-	  std::uint32_t shared_memory_bytes{0};
-	  grid_space::get_launch_params(num_blocks, threads_per_block, N, shared_memory_bytes, device_id, Precision_Type{});
-	  // here will have either the max amount of shared memory or less;
-	  const std::uint32_t shared_memory_length = shared_memory_bytes / sizeof(Precision_Type);
+	  std::uint32_t elements_per_thread{0};
+	  grid_space::get_launch_params(num_blocks, threads_per_block, N, elements_per_thread, device_id, Precision_Type{});
 	 /* std::cout<<"N:" <<N<<"\n";
-	  std::cout<<"shared_memory: "<<shared_memory_length<<"\n";
 	  std::cout<<"num_blocks.x: "<<num_blocks.x<<" num_blocks.y: "<<num_blocks.y<<" num_blocks.z: "<<num_blocks.z<<"\n";
-	  std::cout<<"threads_per_block.x: "<<threads_per_block.x<<" threads_per_block.y: "<<threads_per_block.y<<" threads_per_block.z: "<< threads_per_block.z<<"\n";	 */ 
-	  axps<<<num_blocks, threads_per_block, shared_memory_bytes, stream>>>(a, x, s, N, shared_memory_length);
+	  std::cout<<"threads_per_block.x: "<<threads_per_block.x<<" threads_per_block.y: "<<threads_per_block.y<<" threads_per_block.z: "<< threads_per_block.z<<"\n";	 */
+	  axps<<<num_blocks, threads_per_block, 0, stream>>>(a, x, s, N);
 	  return zinhart::check_cuda_api(cudaError_t(cudaGetLastError()), __FILE__,__LINE__);
 	}
 

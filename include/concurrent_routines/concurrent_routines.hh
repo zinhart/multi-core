@@ -169,29 +169,6 @@ namespace zinhart
 			  num_blocks.y = 1;
 			  num_blocks.z = 1;
 			}
-			// should never need to specify the last parameter, it is there to determine the number of bytes of shared memory
-			template <class T>
-			HOST static void get_launch_params(dim3 & num_blocks, dim3 & threads_per_block, const std::uint32_t & N, std::uint32_t & shared_memory_bytes, const std::uint32_t & device_id = 0, const T & type = T{} )
-
-			{
-			  std::uint32_t warp_size{0};
-			  std::uint32_t max_shared_memory_per_block{0};
-			  cuda_device_properties::get_warp_size(warp_size, device_id);
-			  cuda_device_properties::get_max_shared_memory(max_shared_memory_per_block, device_id);
-
-			  threads_per_block.x = (N + warp_size -1) / warp_size * warp_size;
-			  threads_per_block.y = 1;
-			  threads_per_block.z = 1;
-			  if(threads_per_block.x > 4 * warp_size)
-				threads_per_block.x = 4 * warp_size;
-
-			  num_blocks.x = (N + threads_per_block.x - 1) / threads_per_block.x;// number of blocks
-			  num_blocks.y = 1;
-			  num_blocks.z = 1;
-
-			  // note shared memory is terms of bytes not array lengths, returns as much shared memory as N * sizeof(T) provided N * sizeof(T) < max_shared_memory_per_block
-			  shared_memory_bytes = (N * sizeof(T) > max_shared_memory_per_block) ? max_shared_memory_per_block : (N * sizeof(T) );
-			}
 		};
 	  //to do
 	  template<>
@@ -217,17 +194,28 @@ namespace zinhart
 	  // returns 0 when N fits within the hardward specs 1 other wise
   	  HOST bool get_launch_params(dim3 & num_blocks, dim3 & threads_per_block, std::uint32_t N, const std::uint32_t & device_id = 0);
 	  template <class T>
-		HOST bool get_launch_params(dim3 & num_blocks, dim3 & threads_per_block, std::uint32_t N, std::uint32_t & shared_memory_bytes, const std::uint32_t & device_id = 0, T type = T{})
+		HOST bool get_launch_params(dim3 & num_blocks, dim3 & threads_per_block, std::uint32_t N, std::uint32_t & elements_per_thread, const std::uint32_t & device_id = 0, T type = T{})
 		{
 	  	  std::uint64_t max_outputs_1d_kernel{0};
 		  std::uint64_t max_outputs_2d_kernel{0};
 		  std::uint64_t max_outputs_3d_kernel{0};
+  		  std::uint32_t warp_size{0}; 
 		  cuda_device_properties::max_threads<1>::get_max(max_outputs_1d_kernel, device_id); 
 		  cuda_device_properties::max_threads<2>::get_max(max_outputs_2d_kernel, device_id); 
 		  cuda_device_properties::max_threads<3>::get_max(max_outputs_3d_kernel, device_id); 
+		  cuda_device_properties::get_warp_size(warp_size, device_id);
+
 		  if(N <= max_outputs_1d_kernel)
 		  {
-			grid<1>::get_launch_params(num_blocks, threads_per_block, N, shared_memory_bytes, device_id, type);
+			threads_per_block.x = (N + warp_size - 1) / warp_size * warp_size; // normalize and scale in terms of warp_size
+			threads_per_block.y = 1;
+			threads_per_block.z = 1;
+			if(threads_per_block.x > 8 * warp_size) // 4 * warp_size = 128  
+			  threads_per_block.x = 4 * warp_size;
+			elements_per_thread = threads_per_block.x / warp_size + threads_per_block.x;
+			num_blocks.x = /*elements_per_thread;*/(N + threads_per_block.x - 1) / threads_per_block.x;// number of blocks 
+			num_blocks.y = 1;
+			num_blocks.z = 1;
 			return false;
 		  }
 		  else if (N <= max_outputs_2d_kernel && N > max_outputs_1d_kernel)
