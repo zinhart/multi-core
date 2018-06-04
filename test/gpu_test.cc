@@ -148,11 +148,11 @@ TEST(gpu_test, call_axps)
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(1, 100/*std::numeric_limits<std::uint8_t>::max()*/ );
+  std::uniform_int_distribution<std::uint32_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max() );
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
 
-  std::int32_t N = uint_dist(mt);
+  std::uint32_t N = uint_dist(mt);
   double a = real_dist(mt);
   double s = real_dist(mt);
 
@@ -167,7 +167,7 @@ TEST(gpu_test, call_axps)
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device,  N * sizeof(double)),__FILE__,__LINE__));
 
   // initialize
-  for(std::int32_t i = 0; i < N; ++i)
+  for(std::uint32_t i = 0; i < N; ++i)
   {
 	X_host[i] = real_dist(mt);
 	X_host_copy[i] = X_host[i];
@@ -181,13 +181,13 @@ TEST(gpu_test, call_axps)
   // copy device to host
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpy(X_host, X_device, N * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__));
   // do serial axps
-  for(std::int32_t i = 0; i < N; ++i)
+  for(std::uint32_t i = 0; i < N; ++i)
   {
 	serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_copy[i]), s));
   }
 
   // compare
-  for(std::int32_t i = 0; i < N; ++i)
+  for(std::uint32_t i = 0; i < N; ++i)
   { 
     serial_axps_results[i].get();	
 	ASSERT_EQ(X_host[i], X_host_copy[i]);
@@ -207,15 +207,15 @@ TEST(gpu_test, call_axps_async)
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint8_t> uint_dist(1, std::numeric_limits<std::uint8_t>::max() );
+  std::uniform_int_distribution<std::uint32_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max() );
   std::uniform_int_distribution<std::uint8_t> stream_dist(1, 10/*std::numeric_limits<std::uint8_t>::max()*/ );
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
 
-  std::int32_t N = uint_dist(mt);
-  std::int32_t n_streams = stream_dist(mt);
-  double a = real_dist(mt);
-  double s = real_dist(mt);
+  std::uint32_t N{uint_dist(mt)};
+  std::uint32_t n_streams{stream_dist(mt)};
+  double a {real_dist(mt)};
+  double s {real_dist(mt)};
 
   double * X_host{nullptr};
   double * X_host_copy{nullptr};
@@ -232,13 +232,13 @@ TEST(gpu_test, call_axps_async)
 
 
   // initialize
-  for(std::int32_t i = 0; i < N; ++i)
+  for(std::uint32_t i = 0; i < N; ++i)
   {
 	X_host[i] = real_dist(mt);
 	X_host_copy[i] = X_host[i];
   }
 
-  for (std::int32_t i = 0; i < n_streams; ++i)
+  for (std::uint32_t i = 0; i < n_streams; ++i)
   {
   	// copy host to device
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_device, X_host, N * sizeof(double), cudaMemcpyHostToDevice, stream[i]),__FILE__,__LINE__));
@@ -248,15 +248,15 @@ TEST(gpu_test, call_axps_async)
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_host, X_device, N * sizeof(double), cudaMemcpyDeviceToHost, stream[i]),__FILE__,__LINE__));
 
 	// do serial axps
-	for(std::int32_t j = 0; j < N; ++j)
+	for(std::uint32_t j = 0; j < N; ++j)
 	{
 	  serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](const double a, double & x, const double s){ x = a * x + s; }, a, std::ref(X_host_copy[j]), s));
 	}
 	
 	cudaStreamSynchronize(stream[i]);
-	double epsilon = 0.005;
+	double epsilon = 0.0005;
 	// compare
-	for(std::int32_t j = 0; j < N; ++j)
+	for(std::uint32_t j = 0; j < N; ++j)
 	{ 	
   	  serial_axps_results.front().get();
 	  ASSERT_NEAR(X_host[j], X_host_copy[j], epsilon);
