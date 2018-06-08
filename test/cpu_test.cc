@@ -762,3 +762,12 @@ TEST(thread_pool, call_add_task_member_function)
   zinhart::thread_pool::task_future<std::int32_t> result = zinhart::default_thread_pool::push_task([&t](){return t.add_one(3);});
   ASSERT_EQ(result.get(), 4);
 }
+std::int32_t plus_one(std::int32_t s)
+{
+  return s + 1;
+}
+TEST(thread_pool, call_add_task_function)
+{
+  zinhart::thread_pool::task_future<std::int32_t> result = zinhart::default_thread_pool::push_task(plus_one,3);
+  ASSERT_EQ(result.get(), 4);
+}
