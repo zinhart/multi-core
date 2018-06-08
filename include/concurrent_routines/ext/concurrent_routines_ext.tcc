@@ -348,7 +348,7 @@ namespace zinhart
  * CPU WRAPPERS HELPER FUNCTIONS
  * */
   template<class Precision_Type>
-	  HOST void serial_matrix_product(Precision_Type * A, Precision_Type * B, Precision_Type * C, std::uint32_t M, std::uint32_t N, std::uint32_t K)
+	  HOST void serial_matrix_product(const Precision_Type * A, const Precision_Type * B, Precision_Type * C, const std::uint32_t M, const std::uint32_t N, const std::uint32_t K)
 	  {
 		for(std::uint32_t a = 0; a < M; ++a)
 		  for(std::uint32_t b = 0; b < K; ++b)
