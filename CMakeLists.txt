@@ -49,7 +49,10 @@ find_package(LAPACK REQUIRED)
 # find cuda package and set compute achitecture
 if(BuildCuda)
   find_package(CUDA REQUIRED)
-  set(CUDA_ARCH "-arch=sm_61")
+  if(CUDA_ARCH)
+  else()
+	set(CUDA_ARCH "-arch=sm_61")
+  endif()
   # check to see if CUDA_ENABLED was defined by another library using this one
   string(REGEX MATCH "CUDA_ENABLED" result "${COMPILE_DEFINITIONS}" )
   if(${result} MATCHES "CUDA_ENABLED")
