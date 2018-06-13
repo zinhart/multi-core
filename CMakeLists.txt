@@ -46,14 +46,11 @@ find_package(Threads REQUIRED)
 find_package(LAPACK REQUIRED)
 
 
-# find cuda package and set compute achitecture
+# find cuda package and set compute achitecture and nvcc compile flags
 if(BuildCuda)
   find_package(CUDA REQUIRED)
-  if(CUDA_ARCH)
-  else()
-	set(CUDA_ARCH "-arch=sm_61")
-  endif()
-  # check to see if CUDA_ENABLED was defined by another library using this one
+
+# check to see if CUDA_ENABLED was defined by another library using this one
   string(REGEX MATCH "CUDA_ENABLED" result "${COMPILE_DEFINITIONS}" )
   if(${result} MATCHES "CUDA_ENABLED")
     # do nothing
@@ -61,6 +58,19 @@ if(BuildCuda)
 	# set macro to conditionaly include headers define functions etc w.r.t gpu code
 	add_definitions(-DCUDA_ENABLED=true)
   endif()
+
+# set nvcc flags for debugging
+  if("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
+	if(CUDA_NVCC_FLAGS STREQUAL "")
+	  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_61; -G;-Wno-deprecated-gpu-targets;")
+	endif()
+# otherwise set release flags
+  else()
+	if(CUDA_NVCC_FLAGS STREQUAL "")
+	  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_61 -Xptxas -O3")
+	endif()
+  endif()
+
 else()
   string(REGEX MATCH "CUDA_ENABLED" result "${COMPILE_DEFINITIONS}")
   if(${result} MATCHES "CUDA_ENABLED")
@@ -83,15 +93,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 # set cxx debug flags
 set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions")
 
-#only if Building gpu support
-if(BuildCuda)
-  # set nvcc flags for debugging
-  if("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
-	set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${CUDA_ARCH} -G;-Wno-deprecated-gpu-targets;")
-  else()
-	set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${CUDA_ARCH} -Xptxas -O3")
-  endif()
- endif()
 
 # sanitize flags
 if (Sanitize)
@@ -118,11 +119,11 @@ message(STATUS " Build Tests			  : ${BuildTest}")
 message(STATUS " Sanitize Flags		  : ${Sanitize}")
 if(BuildCuda)
   message(STATUS " Found CUDA			  : ${CUDA_FOUND}")
-  message(STATUS " CUDA_NVCC_FLAGS			  : ${CUDA_NVCC_FLAGS}")
+  message(STATUS " CUDA_NVCC_FLAGS               : ${CUDA_NVCC_FLAGS}")
 endif()
 message(STATUS " CMAKE_CXX_FLAGS		  : ${CMAKE_CXX_FLAGS}")
 if("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
-	message(STATUS " CMAKE_CXX_RELEASE_FLAGS		  : ${CMAKE_CXX_FLAGS_RELEASE}")
+	message(STATUS " CMAKE_CXX_RELEASE_FLAGS	  : ${CMAKE_CXX_FLAGS_RELEASE}")
 elseif("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
   message(STATUS " CMAKE_CXX_FLAGS_DEBUG         : ${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
