@@ -62,7 +62,7 @@ if(BuildCuda)
 # set nvcc flags for debugging
   if("${CMAKE_BUILD_TYPE}" STREQUAL "DEBUG")
 	if(CUDA_NVCC_FLAGS STREQUAL "")
-	  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_61; -G;-Wno-deprecated-gpu-targets;")
+	  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_61; -G; -Wno-deprecated-gpu-targets;")
 	endif()
 # otherwise set release flags
   else()
