@@ -133,7 +133,81 @@ namespace zinhart
 	  }
 	}
 
+  template <std::uint32_t blockSize>
+  __global__ void reduce_kernel_add(double *g_idata, double *g_odata, std::uint32_t n)
+  {
+	extern __shared__ double sdata[];
+	std::uint32_t tid = threadIdx.x;
+	std::uint32_t i = blockIdx.x*(blockSize*2) + tid;
+	std::uint32_t gridSize = blockSize*2*gridDim.x;
+	sdata[tid] = 0;
+	while (i < n) { sdata[tid] += g_idata[i] + g_idata[i+blockSize]; i += gridSize; }
+	__syncthreads();
+	if (blockSize >= 512) { if (tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads(); }
+	if (blockSize >= 256) { if (tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads(); }
+	if (blockSize >= 128) { if (tid < 64) { sdata[tid] += sdata[tid + 64]; } __syncthreads(); }
+	if (tid < 32) {
+	  if (blockSize >= 64) sdata[tid] += sdata[tid + 32];
+	  if (blockSize >= 32) sdata[tid] += sdata[tid + 16];
+	  if (blockSize >= 16) sdata[tid] += sdata[tid + 8];
+	  if (blockSize >= 8) sdata[tid] += sdata[tid + 4];
+	  if (blockSize >= 4) sdata[tid] += sdata[tid + 2];
+	  if (blockSize >= 2) sdata[tid] += sdata[tid + 1];
+	}
+	if (tid == 0) g_odata[blockIdx.x] = sdata[0];
+  }
 
+
+  }
+  template <std::uint32_t blockSize>
+  __global__ void reduce_kernel_minmax(double *g_idata, double *g_odata, std::uint32_t n)
+  {
+	__shared__ double maxtile[BLOCKSIZE];
+	__shared__ double mintile[BLOCKSIZE];
+	std::uint32_t tid = threadIdx.x;
+	std::uint32_t i = blockIdx.x * blockDim.x + threadIdx.x;
+
+	maxtile[tid] = a[i];
+	mintile[tid] = a[i];
+	__syncthreads();
+
+	// strided index and non-divergent branch
+	for (std::uint32_t s = 1; s < blockDim.x; s *= 2) {
+	  std::int32_t index = 2 * s * tid;
+	  if (index < blockDim.x) 
+	  {
+		if (maxtile[tid + s] > maxtile[tid])
+		  maxtile[tid] = maxtile[tid + s];
+		if (mintile[tid + s] < mintile[tid])
+		  mintile[tid] = mintile[tid + s];
+	  }
+	  __syncthreads();
+	}
+
+	if (tid == 0) 
+	{
+	  max[blockIdx.x] = maxtile[0];
+	  min[blockIdx.x] = mintile[0];
+	}
+  }
+
+__global__ void naive sum_scan_kernel(double* const d_out, const double* const d_in, const size_t N)
+{
+  // Using naive scan where each thread calculates a separate partial sum
+  // Step complexity is still O(n) as the last thread will calculate the global sum
+  unsigned int d_hist_idx = blockDim.x * blockIdx.x + threadIdx.x;
+  if (d_hist_idx == 0 || d_hist_idx >= N)
+  {			  
+	return;
+  }
+		
+  unsigned int cdf_val = 0;
+  for (int i = 0; i < d_hist_idx; ++i)
+  {
+	cdf_val = cdf_val + d_in[i];
+  }
+  d_out[d_hist_idx] = cdf_val;
+}
   // GPU WRAPPERS
   HOST std::int32_t parallel_saxpy_gpu(
   		const float & a, float * x, float * y, const std::uint32_t N)
