@@ -11,6 +11,17 @@ namespace zinhart
 
   template HOST std::int32_t call_axps_async(const float & a, float * x, const float & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
   template HOST std::int32_t call_axps_async(const double & a, double * x, const double & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+
+
+  template HOST void reduce(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const std::uint32_t & device_id);
+  template HOST void reduce(float * in, float * out, const std::uint32_t & N, const std::uint32_t & device_id);
+  template HOST void reduce(double * in, double * out, const std::uint32_t & N, const std::uint32_t & device_id);
+
+	
+  template HOST void reduce(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST void reduce(float * in, float * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST void reduce(double * in, double * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+
   // KERNELS
   
   template <class Precision_Type>
@@ -20,11 +31,45 @@ namespace zinhart
 		x[thread_id] = a * x[thread_id] + s;
 	}
 
+  // ripped from mark harris and my ams148 prof steven reeves( if you're reading this steven I learned alot in your class)
+  template <class Precision_Type, std::uint32_t Block_Size>
+	__global__ void reduce_kernel(Precision_Type * in, Precision_Type * out, std::uint32_t N)
+	{
+	  extern __shared__ T sdata[];
+	  int myId = threadIdx.x + (blockDim.x * 2) * blockIdx.x;
+	  int tid = threadIdx.x;
+	  int gridSize = blockDim.x * 2 * gridDim.x; 
+	  sdata[tid] = 0; 
+
+	  //load shared mem from global mem
+	  while(myId < N) { sdata[tid] += in[myId] + in[myId + blockDim.x]; myId += gridSize; }
+	  __syncthreads(); 
+	  //do reduction over shared memory
+	  										  					  
+	  if(Block_Size >= 512){ if(tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads();}
+	  if(Block_Size >= 256){ if(tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads();}
+	  if(Block_Size >= 128){ if(tid < 64) { sdata[tid] += sdata[tid + 64]; } __syncthreads(); }
+	  if(tid < 32)
+	  {	
+		if(Block_Size >= 64) sdata[tid] += sdata[tid+32];
+		if(Block_Size >= 32) sdata[tid] += sdata[tid+16];
+		if(Block_Size >= 16) sdata[tid] += sdata[tid+8];
+		if(Block_Size >= 8) sdata[tid] += sdata[tid+4];
+		if(Block_Size >= 4) sdata[tid] += sdata[tid+2];
+		if(Block_Size >= 2) sdata[tid] += sdata[tid+1];
+	  }
+	  
+	  //only tid 0 writes out result!
+	  if(tid == 0){ out[blockIdx.x] = sdata[0];}
+	}
+
   // GPU WRAPPERS
   
   template <class Precision_Type>
 	HOST std::int32_t call_axps(const Precision_Type & a, Precision_Type * x, const Precision_Type & s, const std::uint32_t & N, const std::uint32_t & device_id)
 	{
+	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
+		return 1;
 	  dim3 num_blocks;
 	  dim3 threads_per_block;
 	  grid_space::get_launch_params(num_blocks, threads_per_block, N, device_id);
@@ -38,6 +83,8 @@ namespace zinhart
   template <class Precision_Type>
 	HOST std::int32_t call_axps_async(const Precision_Type & a, Precision_Type * x, const Precision_Type & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id)
 	{
+	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
+		return 1;
 	  dim3 num_blocks;
 	  dim3 threads_per_block;
 	  std::uint32_t elements_per_thread{0};
@@ -49,17 +96,36 @@ namespace zinhart
 	  return zinhart::check_cuda_api(cudaError_t(cudaGetLastError()), __FILE__,__LINE__);
 	}
 
-  //to do 
   template <class Precision_Type>
-	void reduce(std::uint32_t size, std::uint32_t threads, std::uint32_t blocks, Precision_Type * out, Precision_Type * in)
-	  {
-		dim3 dimBlock(threads, 1, 1);
-		dim3 dimGrid(blocks, 1, 1);
+	HOST void reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const std::uint32_t & device_id)
+	{
+	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
+		return 1;
+	 // dim3 threads_per_block(1024, 1, 1);
+	 // dim3 num_blocks( (N + dimBlock.x - 1) / threads_per_block.x, 1, 1);
+	 dim3 num_blocks;
+	 dim3 threads_per_block;
+	 std::uint32_t shared_memory_bytes = threads_per_block.x * sizeof(Precision_Type);
+	 //grid_space::get_launch_params(num_blocks, threads_per_block, N, elements_per_thread, device_id);
+	 //reduce_kernel<num_blocks, threads_per_block>();
+   	 return zinhart::check_cuda_api(cudaError_t(cudaGetLastError()), __FILE__,__LINE__);
+	}
 
-	    // when there is only one warp per block, we need to allocate two warps
-		// worth of shared memory so that we don't index shared memory out of bounds
-		//std::uint32_t shared_memory = (threads <= 32) ? 2 * threads * sizeof(Precision_Type) : threads * sizeof(Precision_Type);
-	  }
+
+  template <class Precision_Type>
+	HOST void reduce_async(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id)
+	{
+	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
+		return 1;
+	 // dim3 threads_per_block(1024, 1, 1);
+	 // dim3 num_blocks( (N + dimBlock.x - 1) / threads_per_block.x, 1, 1);
+	 dim3 num_blocks;
+	 dim3 threads_per_block;
+	 std::uint32_t shared_memory_bytes = threads_per_block.x * sizeof(Precision_Type);
+	 //grid_space::get_launch_params(num_blocks, threads_per_block, N, elements_per_thread, device_id);
+	 //reduce_kernel<num_blocks, threads_per_block>();
+   	 return zinhart::check_cuda_api(cudaError_t(cudaGetLastError()), __FILE__,__LINE__);
+	}
 
 	namespace cuda_device_properties
 	{
