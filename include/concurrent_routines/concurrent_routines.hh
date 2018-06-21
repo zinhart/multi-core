@@ -248,7 +248,7 @@ namespace zinhart
 	  HOST std::int32_t reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const std::uint32_t & device_id = 0);
 	
 	template <class Precision_Type>
-	  HOST std::int32_t reduce_async(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id = 0);
+	  HOST std::int32_t reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id = 0);
 
 	// assumed to be row major indices this generated the column indices
     HOST void gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);

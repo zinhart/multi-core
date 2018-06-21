@@ -16,11 +16,9 @@ namespace zinhart
   template HOST std::int32_t reduce(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const std::uint32_t & device_id);
   template HOST std::int32_t reduce(float * in, float * out, const std::uint32_t & N, const std::uint32_t & device_id);
   template HOST std::int32_t reduce(double * in, double * out, const std::uint32_t & N, const std::uint32_t & device_id);
-
-	
-  template HOST std::int32_t reduce_async(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
-  template HOST std::int32_t reduce_async(float * in, float * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
-  template HOST std::int32_t reduce_async(double * in, double * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce(float * in, float * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce(double * in, double * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
 
   // KERNELS
   
@@ -44,8 +42,8 @@ namespace zinhart
 	  //load shared mem from global mem
 	  while(myId < N) { sdata[tid] += in[myId] + in[myId + blockDim.x]; myId += gridSize; }
 	  __syncthreads(); 
+	  
 	  //do reduction over shared memory
-	  										  					  
 	  if(Block_Size >= 512){ if(tid < 256) { sdata[tid] += sdata[tid + 256]; } __syncthreads();}
 	  if(Block_Size >= 256){ if(tid < 128) { sdata[tid] += sdata[tid + 128]; } __syncthreads();}
 	  if(Block_Size >= 128){ if(tid < 64) { sdata[tid] += sdata[tid + 64]; } __syncthreads(); }
@@ -113,7 +111,7 @@ namespace zinhart
 
 
   template <class Precision_Type>
-	HOST std::int32_t reduce_async(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id)
+	HOST std::int32_t reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id)
 	{
 	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
 		return 1;
@@ -161,6 +159,7 @@ namespace zinhart
 		max_grid_size[2] = get_properties(device_id).maxGridSize[2];
 	  }
 	}
+
 	namespace grid_space
 	{
 	  HOST bool get_launch_params(dim3 & num_blocks, dim3 & threads_per_block, std::uint32_t N, const std::uint32_t & device_id)
