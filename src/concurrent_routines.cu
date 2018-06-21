@@ -13,14 +13,14 @@ namespace zinhart
   template HOST std::int32_t call_axps_async(const double & a, double * x, const double & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
 
 
-  template HOST void reduce(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const std::uint32_t & device_id);
-  template HOST void reduce(float * in, float * out, const std::uint32_t & N, const std::uint32_t & device_id);
-  template HOST void reduce(double * in, double * out, const std::uint32_t & N, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce(float * in, float * out, const std::uint32_t & N, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce(double * in, double * out, const std::uint32_t & N, const std::uint32_t & device_id);
 
 	
-  template HOST void reduce(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
-  template HOST void reduce(float * in, float * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
-  template HOST void reduce(double * in, double * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce_async(std::int32_t * in, std::int32_t * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce_async(float * in, float * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
+  template HOST std::int32_t reduce_async(double * in, double * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id);
 
   // KERNELS
   
@@ -35,7 +35,7 @@ namespace zinhart
   template <class Precision_Type, std::uint32_t Block_Size>
 	__global__ void reduce_kernel(Precision_Type * in, Precision_Type * out, std::uint32_t N)
 	{
-	  extern __shared__ T sdata[];
+	  extern __shared__ Precision_Type sdata[];
 	  int myId = threadIdx.x + (blockDim.x * 2) * blockIdx.x;
 	  int tid = threadIdx.x;
 	  int gridSize = blockDim.x * 2 * gridDim.x; 
@@ -97,7 +97,7 @@ namespace zinhart
 	}
 
   template <class Precision_Type>
-	HOST void reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const std::uint32_t & device_id)
+	HOST std::int32_t reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const std::uint32_t & device_id)
 	{
 	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
 		return 1;
@@ -113,7 +113,7 @@ namespace zinhart
 
 
   template <class Precision_Type>
-	HOST void reduce_async(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id)
+	HOST std::int32_t reduce_async(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id)
 	{
 	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
 		return 1;
