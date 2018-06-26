@@ -60,6 +60,10 @@ namespace zinhart
 	template <class Precision_Type>
 	  HOST Precision_Type neumaier_sum(Precision_Type * in, const std::uint32_t & N);
 
+	// to call the two methods above
+	//template <class Precision_Type>
+	 // Precision_Type pairwise_sum; 
+
 	// thread pool
 	namespace default_thread_pool
 	{
