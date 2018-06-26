@@ -116,7 +116,7 @@ namespace zinhart
 	  if(zinhart::check_cuda_api(cudaError_t(cudaSetDevice(device_id)), __FILE__, __LINE__) != 0)
 		return 1;
 	 // dim3 threads_per_block(1024, 1, 1);
-	 // dim3 num_blocks( (N + dimBlock.x - 1) / threads_per_block.x, 1, 1);
+	 dim3 num_blocks( (N + dimBlock.x - 1) / threads_per_block.x, 1, 1);
 	 dim3 num_blocks;
 	 dim3 threads_per_block;
 	 std::uint32_t shared_memory_bytes = threads_per_block.x * sizeof(Precision_Type);

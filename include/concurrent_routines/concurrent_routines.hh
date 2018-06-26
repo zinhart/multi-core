@@ -54,6 +54,12 @@ namespace zinhart
 	HOST void paralell_generate(BidirectionalIt first, BidirectionalIt last, Generator g,
 		 const std::uint32_t & n_threads = MAX_CPU_THREADS);
 
+	template <class Precision_Type>
+	  HOST Precision_Type kahan_sum(Precision_Type * in, const std::uint32_t & N);
+	
+	template <class Precision_Type>
+	  HOST Precision_Type neumaier_sum(Precision_Type * in, const std::uint32_t & N);
+
 	// thread pool
 	namespace default_thread_pool
 	{

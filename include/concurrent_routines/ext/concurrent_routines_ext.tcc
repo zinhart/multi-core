@@ -369,6 +369,48 @@ namespace zinhart
 		 }
 	  }
 
+	// taken from wikipedia 
+https://en.wikipedia.org/wiki/Kahan_summation_algorithm	template <class Precision_Type>
+	  HOST Precision_Type kahan_sum(Precision_Type * in, const std::uint32_t & N)
+	  {
+		Precision_Type sum{0.0};
+		// a running compensation for lost lower-order bits
+		Precision_Type compensation{0.0}; 		
+		for(std::uint32_t i  = 1; i < N; ++i)
+		{
+		  Precision_Type y{in[i] - compensation};
+		  // lower order bits are lost here with this addition
+		  Precision_Type t{sum + y}; 
+		  // (t - sum) cancels the higher order part of y and subtracting y recorvers the low part of y
+		  compensation = (t - sum) - y;		  
+		  sum = t;
+		}
+		return sum;
+	  }
+	
+	// taken from wikipedia, this is an improvement on the algorithm above 
+https://en.wikipedia.org/wiki/Kahan_summation_algorithm	template <class Precision_Type>
+	template <class Precision_Type>
+	  HOST Precision_Type neumaier_sum(Precision_Type * in, const std::uint32_t & N)
+	  {
+		Precision_Type sum{0.0};
+		// a running compensation for lost lower-order bits
+		Precision_Type compensation{0.0}; 		
+		for(std::uint32_t i  = 2; i < N; ++i)
+		{
+		  Precision_Type t{sum + in[i]};
+		  if(std::abs(sum) >= std::abs(in[i]))
+			// if the sum is bigger lower order digitis of in[i] are lost
+			compensation += (sum - t) + input[i];
+		  else
+			// if the sum is smaller lower order digits of sum are lost
+			compensation += (input[i] - t) + sum;
+		  sum = t;
+		}
+		// Correction is applied once
+		return sum + compensation;
+	  }
+
 /*
  * GPU TEMPLATE WRAPPERS
  * */

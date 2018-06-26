@@ -306,7 +306,16 @@ TEST(gpu_test, reduce_sum_async)
   // Allocate device memory, X_device is same length as X_host & X_host_validation
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device,  N * n_streams * sizeof(double)),__FILE__,__LINE__));
 
-
+  // call reduction kernel
+  
+  // perform serial reduction
+  
+  // syncronize kernels
+  
+  // copy device memory back to host
+  
+  // validate    
+  
   // Deallocate host memory
   cudaFreeHost(X_host);
   cudaFreeHost(X_host_validation);
