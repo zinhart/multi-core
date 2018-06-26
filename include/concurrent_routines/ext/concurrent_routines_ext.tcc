@@ -373,7 +373,7 @@ namespace zinhart
 https://en.wikipedia.org/wiki/Kahan_summation_algorithm	template <class Precision_Type>
 	  HOST Precision_Type kahan_sum(Precision_Type * in, const std::uint32_t & N)
 	  {
-		Precision_Type sum{0.0};
+		Precision_Type sum{in[0]};
 		// a running compensation for lost lower-order bits
 		Precision_Type compensation{0.0}; 		
 		for(std::uint32_t i  = 1; i < N; ++i)
@@ -393,10 +393,10 @@ https://en.wikipedia.org/wiki/Kahan_summation_algorithm	template <class Precisio
 	template <class Precision_Type>
 	  HOST Precision_Type neumaier_sum(Precision_Type * in, const std::uint32_t & N)
 	  {
-		Precision_Type sum{0.0};
+		Precision_Type sum{in[0]};
 		// a running compensation for lost lower-order bits
 		Precision_Type compensation{0.0}; 		
-		for(std::uint32_t i  = 2; i < N; ++i)
+		for(std::uint32_t i = 1; i < N; ++i)
 		{
 		  Precision_Type t{sum + in[i]};
 		  if(std::abs(sum) >= std::abs(in[i]))
