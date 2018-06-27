@@ -440,8 +440,6 @@ TEST(cpu_test, serial_matrix_multiply)
   const std::uint32_t M{size_dist(mt)};
   const std::uint32_t N{size_dist(mt)};
   const std::uint32_t K{size_dist(mt)};
-  //const std::uint32_t N{M};
-  //const std::uint32_t K{M};
 
   // Array sizes
   std::uint32_t A_elements = M * K;
