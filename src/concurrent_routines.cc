@@ -4,6 +4,10 @@
 #include <vector>
 namespace zinhart
 { 
+  /*
+   * Helper functions
+   * */
+
   //this function is used by each thread to determine what pieces of data it will operate on
   HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop)
   {
@@ -14,6 +18,17 @@ namespace zinhart
 	//if it's the first thread, start should be 0
 	start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
 	stop = n_ops * (thread_id + 1) + remaining_ops;
+  }
+  // from cuda samples
+  HOST std::uint32_t next_pow2(std::uint32_t x)
+  {
+	--x;
+	x |= x >> 1;
+	x |= x >> 2;
+	x |= x >> 4;
+	x |= x >> 8;
+	x |= x >> 16;
+	return ++x;
   }
 /*
  * CPU THREADED ROUTINES

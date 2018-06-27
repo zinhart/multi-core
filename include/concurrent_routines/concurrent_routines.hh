@@ -78,6 +78,7 @@ namespace zinhart
 	// HELPER FUNCTIONS
 	// this function is used by each thread to determine what pieces of data it will operate on
 	HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop);
+  	HOST std::uint32_t next_pow2(std::uint32_t x);
 	CUDA_CALLABLE_MEMBER std::uint32_t idx2c(std::int32_t i,std::int32_t j,std::int32_t ld);// for column major ordering, if A is MxN then ld is M
 	CUDA_CALLABLE_MEMBER std::uint32_t idx2r(std::int32_t i,std::int32_t j,std::int32_t ld);// for row major ordering, if A is MxN then ld is N
 	template<class Precision_Type>
@@ -255,10 +256,10 @@ namespace zinhart
 	  HOST std::int32_t call_axps_async(const Precision_Type & a, Precision_Type * x, const Precision_Type & s, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id = 0);
 
 	template <class Precision_Type>
-	  HOST std::int32_t reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const std::uint32_t & device_id = 0);
+	  HOST std::int32_t reduce(const Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const std::uint32_t & device_id = 0);
 	
 	template <class Precision_Type>
-	  HOST std::int32_t reduce(Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id = 0);
+	  HOST std::int32_t reduce(const Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id = 0);
 
 	// assumed to be row major indices this generated the column indices
     HOST void gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
