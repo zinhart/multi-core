@@ -84,6 +84,8 @@ namespace zinhart
 	template<class Precision_Type>
 	  HOST void serial_matrix_product(const Precision_Type * A, const Precision_Type * B, Precision_Type * C, const std::uint32_t m, const std::uint32_t n, const std::uint32_t k);
 	template<class Precision_Type>
+	  HOST void cache_aware_serial_matrix_product(const Precision_Type * A, const Precision_Type * B, Precision_Type * C, const std::uint32_t m, const std::uint32_t n, const std::uint32_t k);
+	template<class Precision_Type>
 	  HOST void print_matrix_row_major(Precision_Type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s);
 
 #if CUDA_ENABLED == 1

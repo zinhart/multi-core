@@ -426,6 +426,65 @@ TEST(cpu_test, paralell_generate)
   }
 }
 
+TEST(cpu_test, serial_matrix_multiply)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  std::uniform_int_distribution<std::uint16_t> size_dist(1, std::numeric_limits<std::uint8_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+
+  // Matrix dimensions
+  const std::uint32_t M{size_dist(mt)};
+  const std::uint32_t N{size_dist(mt)};
+  const std::uint32_t K{size_dist(mt)};
+  //const std::uint32_t N{M};
+  //const std::uint32_t K{M};
+
+  // Array sizes
+  std::uint32_t A_elements = M * K;
+  std::uint32_t B_elements = N * K;
+  std::uint32_t C_elements = M * N;
+
+  // Matrices
+  std::uint32_t * A_cache_aware = new std::uint32_t [A_elements];
+  std::uint32_t * B_cache_aware = new std::uint32_t [B_elements];
+  std::uint32_t * C_cache_aware = new std::uint32_t [C_elements];
+  std::uint32_t * A_naive = new std::uint32_t [A_elements];
+  std::uint32_t * B_naive = new std::uint32_t [B_elements];
+  std::uint32_t * C_naive = new std::uint32_t [C_elements];
+
+  // Misc variables: their usage is contextual
+  std::uint32_t i = 0;
+  
+  // Initialize all matrices
+  for(i = 0; i < A_elements; ++i)
+  {
+	A_cache_aware[i] = real_dist(mt);
+	A_naive[i] = A_cache_aware[i];
+  }
+  for(i = 0; i < B_elements; ++i)
+  {
+	B_cache_aware[i] = real_dist(mt);
+	B_naive[i] = B_cache_aware[i];
+  }
+  for(i = 0; i < C_elements; ++i)
+  {
+	C_cache_aware[i] = real_dist(mt);
+	C_naive[i] = C_cache_aware[i];
+  }
+
+  zinhart::cache_aware_serial_matrix_product(A_cache_aware, B_cache_aware, C_cache_aware, M, N, K);
+  zinhart::serial_matrix_product(A_naive, B_naive, C_naive, M, N, K);
+  
+  for(i = 0; i < C_elements; ++i)
+  {
+	ASSERT_EQ(C_cache_aware[i], C_naive[i])<<"i: "<< i <<" "<<__FILE__<< " "<<__LINE__<<"\n"; 
+  }
+
+}
 TEST(thread_safe_queue, call_size_on_empty_queue)
 {
   std::random_device rd;

@@ -313,7 +313,7 @@ TEST(gpu_test, reduce_sum_async)
   std::list<zinhart::thread_pool::task_future<double>> serial_reduction_results;
 
   // Misc variables: loop counters temp values etc
-  std::uint32_t i, j, input_offset, output_offset, host_sum, device_sum;
+  std::uint32_t i, j, input_offset, output_offset, host_sum, device_sum, device_id;
 
   // Allocate page locked host memory and check for error, each host vector will have it's own workspace
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, input_vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
@@ -336,16 +336,16 @@ TEST(gpu_test, reduce_sum_async)
 
 
   // trial loop
-  for (std::uint32_t i = 0, input_offset = 0, output_offset = 0; i < n_streams; ++i, input_offset += N, output_offset += num_blocks)
+  for (std::uint32_t i = 0, input_offset = 0, output_offset = 0, device_id = 0; i < n_streams; ++i, input_offset += N, output_offset += num_blocks)
   {
 	// copy host memory to device 
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_device + input_offset, X_host + input_offset, N * sizeof(double), cudaMemcpyHostToDevice, stream[i]),__FILE__,__LINE__));
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_device_out + output_offset, X_host_out + output_offset, num_blocks * sizeof(double), cudaMemcpyHostToDevice, stream[i]),__FILE__,__LINE__));
-
 	
     // call reduction kernel once per stream
+	zinhart::reduce(X_device + input_offset, X_device_out + output_offset, N, stream[i], device_id);
   
-    // perform serial reduction
+    // perform serial reduction (will summation algo's here in the interest of accuracy)
 	
   }	
   // validation loop
