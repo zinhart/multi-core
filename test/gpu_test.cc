@@ -283,14 +283,28 @@ TEST(gpu_test, reduce_sum_async)
   //for any needed random real, the distribution will be floats stored in double to reduce floating point error
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
 
+  // base vector sizes
   const std::uint32_t N{uint_dist(mt)};
   const std::uint32_t n_streams{stream_dist(mt)};
-  const std::uint32_t vector_lengths = N * n_streams;
+ 
+  // this is here to determine the size of x_host_out
+  std::uint32_t max_threads{0};
+  std::uint32_t max_shared_memory_per_block{0};
+  zinhart::cuda_device_properties::get_max_threads_per_block(max_threads, 0);
+  zinhart::cuda_device_properties::get_max_shared_memory(max_shared_memory_per_block, 0);
+  const std::uint32_t threads_per_block{ (N < max_threads * 2) ? zinhart::next_pow2( (N + 1) / 2 ) : max_threads};
+  const std::uint32_t num_blocks{ (N + (threads_per_block * 2 - 1) ) / (threads_per_block * 2)};
+
+  // vector sizes adjust for the number of streams / threads
+  const std::uint32_t input_vector_lengths = N * n_streams;
+  const std::uint32_t output_vector_lengths = num_blocks * n_streams;
 
   // Host and device pointer declarations 
   double * X_host{nullptr};
+  double * X_host_out{nullptr};
   double * X_host_validation{nullptr};
   double * X_device{nullptr};
+  double * X_device_out{nullptr};
   
   // Cuda streams
   cudaStream_t * stream{nullptr};
@@ -298,13 +312,15 @@ TEST(gpu_test, reduce_sum_async)
   // Host threads
   std::list<zinhart::thread_pool::task_future<double>> serial_reduction_results;
 
-  // Allocate page locked host memory and check for error, each host vector will have it's own workspace of size N * n_streams which is vector lengths
-  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
-  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host_validation, vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
+  // Allocate page locked host memory and check for error, each host vector will have it's own workspace
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, input_vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host_out, output_vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host_validation, input_vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&stream, n_streams * sizeof(cudaStream_t),cudaHostAllocDefault),__FILE__,__LINE__));
 
   // Allocate device memory, X_device is same length as X_host & X_host_validation
-  ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device,  N * n_streams * sizeof(double)),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device, input_vector_lengths * sizeof(double)),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device_out, output_vector_lengths * sizeof(double)),__FILE__,__LINE__));
 
   // call reduction kernel
   
@@ -317,12 +333,15 @@ TEST(gpu_test, reduce_sum_async)
   // validate    
   
   // Deallocate host memory
-  cudaFreeHost(X_host);
-  cudaFreeHost(X_host_validation);
-  cudaFreeHost(stream);
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(X_host), __FILE__, __LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(X_host_out), __FILE__, __LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(X_host_validation), __FILE__, __LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(stream), __FILE__, __LINE__));
 
   // Deallocate device memory, and check for errors
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device),__FILE__,__LINE__));
+  ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device_out),__FILE__,__LINE__));
+
   
   // Reset device and check for errors
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaDeviceReset(),__FILE__, __LINE__));
