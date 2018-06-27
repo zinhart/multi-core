@@ -312,6 +312,9 @@ TEST(gpu_test, reduce_sum_async)
   // Host threads
   std::list<zinhart::thread_pool::task_future<double>> serial_reduction_results;
 
+  // loop counters
+  std::uint32_t i, j, offset;
+
   // Allocate page locked host memory and check for error, each host vector will have it's own workspace
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, input_vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host_out, output_vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
@@ -322,16 +325,45 @@ TEST(gpu_test, reduce_sum_async)
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device, input_vector_lengths * sizeof(double)),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaMalloc((void**)&X_device_out, output_vector_lengths * sizeof(double)),__FILE__,__LINE__));
 
-  // call reduction kernel
+  // initialize host vectors
+  for(i = 0; i < input_vector_lengths; ++i)
+  {
+  	X_host[i] = real_dist(mt);	
+   	X_host_validation[i] = X_host[i];
+  }
+
+  // trial loop
+  for (std::uint32_t i = 0, offset = 0; i < n_streams; ++i, offset += N)
+  {
+	// copy host memory to device 
+	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_device + offset, X_host + offset, N * sizeof(double), cudaMemcpyHostToDevice, stream[i]),__FILE__,__LINE__));
+	
+    // call reduction kernel once per stream
   
-  // perform serial reduction
-  
-  // syncronize kernels
-  
-  // copy device memory back to host
-  
-  // validate    
-  
+    // perform serial reduction
+	
+  }	
+  // validation loop
+  for (std::uint32_t i = 0, offset = 0; i < n_streams; ++i, offset += N)
+  {
+
+	// synchronize host thread w.r.t each stream to ensure reduction kernels have finished
+	cudaStreamSynchronize(stream[i]);
+
+
+	// copy device memory back to host
+	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_host + offset, X_device + offset, N * sizeof(double), cudaMemcpyDeviceToHost, stream[i]),__FILE__,__LINE__));
+
+
+	// synchronize host thread w.r.t each stream to ensure each memory copy has finished before validation
+	cudaStreamSynchronize(stream[i]);
+
+    // validate the results of an individual stream and host thread pair 
+	for(j = offset; j < offset + N; ++j)
+	 ASSERT_EQ(X_host[i], X_host_validation[i]);
+
+  }
+      
   // Deallocate host memory
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(X_host), __FILE__, __LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(X_host_out), __FILE__, __LINE__));
@@ -341,7 +373,6 @@ TEST(gpu_test, reduce_sum_async)
   // Deallocate device memory, and check for errors
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device_out),__FILE__,__LINE__));
-
   
   // Reset device and check for errors
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaDeviceReset(),__FILE__, __LINE__));
