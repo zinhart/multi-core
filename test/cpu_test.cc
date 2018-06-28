@@ -67,20 +67,20 @@ TEST(cpu_test, parallel_copy)
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   std::uint32_t n_elements = uint_dist(mt);
-  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  float * x_parallel = new float [n_elements];
+  float * y_parallel = new float [n_elements];
+  float * x_serial = new float [n_elements];
+  float * y_serial = new float [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
 	float first = real_dist(mt);
-	x_serial.get()[i] = first;
-	x_parallel.get()[i] = first;
+	x_serial[i] = first;
+	x_parallel[i] = first;
   }
-  zinhart::parallel::async::parallel_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), results );
-  std::copy(x_serial.get(), x_serial.get() + n_elements, y_serial.get());
+  zinhart::parallel::async::parallel_copy(x_parallel, x_parallel + n_elements, y_parallel, results );
+  std::copy(x_serial, x_serial + n_elements, y_serial);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -89,7 +89,7 @@ TEST(cpu_test, parallel_copy)
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
+	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
 }
 /*

@@ -23,7 +23,7 @@ namespace zinhart
 
 		}
 	  template<class InputIt, class OutputIt, class Container>
-		HOST void parallel_copy(InputIt first, InputIt last, OutputIt output_first, Container & results, thread_pool & default_thread_pool)
+		HOST void parallel_copy(const InputIt & first, const InputIt & last, OutputIt & output_first, Container & results, thread_pool & default_thread_pool)
 		{
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 			//to identify each thread
@@ -31,7 +31,7 @@ namespace zinhart
 			const std::uint32_t n_elements = std::distance(first, last);
   			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			  results.push_back(
-			  default_thread_pool.add_task(zinhart::parallel::vectorized::copy<InputIt, OutputIt>, std::ref(first), std::ref(output_first), thread_id, n_elements, default_thread_pool.size() )
+			  default_thread_pool.add_task(zinhart::parallel::vectorized::copy<InputIt, OutputIt>, std::cref(first), std::ref(output_first), thread_id, n_elements, default_thread_pool.size() )
 			  );
 		}
 	  template<class InputIt, class OutputIt, class UnaryPredicate, class Container>

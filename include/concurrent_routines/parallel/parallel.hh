@@ -17,7 +17,7 @@ namespace zinhart
 		                         thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 	                            );
 	  template<class InputIt, class OutputIt, class Container>
-		HOST void parallel_copy(InputIt first, InputIt last, OutputIt output_it, Container & results, 
+		HOST void parallel_copy(const InputIt & first, const InputIt & last, OutputIt & output_it, Container & results, 
 			                        thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 								   );
 
