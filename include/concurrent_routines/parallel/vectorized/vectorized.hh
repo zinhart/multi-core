@@ -50,7 +50,7 @@ namespace zinhart
 					*(first + op) = new_value;
 		}
 	  template< class ForwardIt, class UnaryPredicate, class T >
-		HOST void parallel_replace_if_init( ForwardIt first, UnaryPredicate unary_predicate, const T & new_value, 
+		HOST void replace_if( ForwardIt first, UnaryPredicate unary_predicate, const T & new_value, 
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;

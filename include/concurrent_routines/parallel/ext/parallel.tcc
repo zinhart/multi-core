@@ -60,11 +60,15 @@ namespace zinhart
 			);
 		}
 	  template< class ForwardIt, class UnaryPredicate, class T, class Container >
-		HOST void parallel_replace_if( ForwardIt first, ForwardIt last, UnaryPredicate unary_predicate, const T& new_value, Container & results, thread_pool & default_thread_pool )
+		HOST void parallel_replace_if( ForwardIt & first, const ForwardIt & last, UnaryPredicate unary_predicate, const T& new_value, Container & results, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  results.push_back(
+			  default_thread_pool.add_task(zinhart::parallel::vectorized::replace_if<ForwardIt, UnaryPredicate, T>,std::ref(first), std::ref(unary_predicate), std::ref(new_value), thread_id, n_elements, default_thread_pool.size() )
+			  );
 		/*	for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);

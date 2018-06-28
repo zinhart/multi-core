@@ -182,7 +182,7 @@ TEST(cpu_test, parallel_replace)
   delete x_serial;
   delete y_serial;
 }
-/*
+
 TEST(cpu_test, parallel_replace_if)
 {
   std::random_device rd;
@@ -192,16 +192,16 @@ TEST(cpu_test, parallel_replace_if)
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   std::uint32_t n_elements = uint_dist(mt);
-  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  float * x_parallel = new float [n_elements];
+  float * y_parallel = new float [n_elements];
+  float * x_serial = new float [n_elements];
+  float * y_serial = new float [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
-	float old_value = real_dist(mt);
-	float new_value = real_dist(mt);
-	auto unary_predicate = [](float & init){return (init == 0.0) ? true : false;};
-	//effectively force a replace on all elements
+  float old_value = real_dist(mt);
+  float new_value = real_dist(mt);
+  auto unary_predicate = [](float & init){return (init == 0.0) ? true : false;};
+  //effectively force a replace on all elements
   for(i = 0; i < n_elements; ++i )
   {
 	x_serial[i] = old_value;
@@ -209,7 +209,7 @@ TEST(cpu_test, parallel_replace_if)
 	y_serial[i] = x_serial[i];
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value);
+  zinhart::parallel::async::parallel_replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value, results);
   std::replace_if(x_serial, x_serial + n_elements, unary_predicate, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -221,9 +221,13 @@ TEST(cpu_test, parallel_replace_if)
   {
 	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
+  delete x_parallel;
+  delete y_parallel;
+  delete x_serial;
+  delete y_serial;
 }
 
-
+/*
 TEST(cpu_test, parallel_replace_copy)
 {
   std::random_device rd;
