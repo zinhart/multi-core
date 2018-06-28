@@ -3,20 +3,10 @@
 #include "macros.hh"
 #include "parallel/parallel.hh"
 #include "serial/serial.hh"
-
-//#include "thread_pool.hh"
 #include "timer.hh"
-//#include <thread>
 #include <cstdint>
 namespace zinhart
 {
-
-  /***************************
-   * CPU WRAPPERS ************
-   * *************************
-   */
-  
-
 #if CUDA_ENABLED == 1
 	// Device properties
 	namespace cuda_device_properties
@@ -197,5 +187,4 @@ namespace zinhart
 	
 #endif
 }
-//#include "ext/concurrent_routines_ext.tcc"
 #endif

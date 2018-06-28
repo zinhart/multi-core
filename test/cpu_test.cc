@@ -10,7 +10,7 @@
 #include <functional>
 #include <future>
 
-TEST(cpu_test, paralell_saxpy)
+TEST(cpu_test, parallel_saxpy)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -24,6 +24,7 @@ TEST(cpu_test, paralell_saxpy)
   std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
   std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
   std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -43,8 +44,13 @@ TEST(cpu_test, paralell_saxpy)
 							y[i] = a * x[i] + y[i];
 						  }
 						};
-  zinhart::parallel::async::parallel_saxpy(alpha, x_parallel.get(), y_parallel.get(), n_elements);
+  zinhart::parallel::async::parallel_saxpy(alpha, x_parallel.get(), y_parallel.get(), n_elements, results);
   serial_saxpy(alpha, x_serial.get(), y_serial.get(), n_elements);
+  // make sure all threads are done before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  }
   for(i = 0; i < n_elements; ++i)
   {
 		ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
@@ -52,7 +58,7 @@ TEST(cpu_test, paralell_saxpy)
   std::cout<<"Hello From CPU Tests\n";
 }
 
-TEST(cpu_test, paralell_copy)
+TEST(cpu_test, parallel_copy)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -72,7 +78,7 @@ TEST(cpu_test, paralell_copy)
 	x_serial.get()[i] = first;
 	x_parallel.get()[i] = first;
   }
-  zinhart::parallel::async::paralell_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get() );
+  zinhart::parallel::async::parallel_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get() );
   std::copy(x_serial.get(), x_serial.get() + n_elements, y_serial.get());
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -102,7 +108,7 @@ TEST(cpu_test, parallel_copy_if)
 		x_parallel.get()[i] = first;
   }
 	auto unary_predicate = [](float & init){ return (init >= 1.0) ? true : false ;};
-  zinhart::parallel::async::paralell_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate );
+  zinhart::parallel::async::parallel_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate );
   std::copy_if(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary_predicate);
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -309,7 +315,7 @@ TEST(cpu_test, parallel_inner_product_second_overload)
   ASSERT_EQ(parallel_ret, serial_ret);
 }
 
-TEST(cpu_test, paralell_accumulate)
+TEST(cpu_test, parallel_accumulate)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -328,13 +334,13 @@ TEST(cpu_test, paralell_accumulate)
 	x_parallel.get()[i] = first;
   }
   //sum
-  float p_sum = zinhart::parallel::async::paralell_accumalute(x_parallel.get(), x_parallel.get() + n_elements, 0 );
+  float p_sum = zinhart::parallel::async::parallel_accumulate(x_parallel.get(), x_parallel.get() + n_elements, 0.0);
   float s_sum = std::accumulate(x_serial.get(), x_serial.get() + n_elements, 0);
   //double check we have the same values 
   ASSERT_EQ(p_sum,s_sum);
 }
 
-TEST(cpu_test, paralell_for_each)
+TEST(cpu_test, parallel_for_each)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -356,7 +362,7 @@ TEST(cpu_test, paralell_for_each)
 						{
 						  a = a * 2.0;
 						};
-  zinhart::parallel::async::paralell_for_each(x_parallel.get(), x_parallel.get() + n_elements, unary);
+  zinhart::parallel::async::parallel_for_each(x_parallel.get(), x_parallel.get() + n_elements, unary);
   std::for_each(x_serial.get(), x_serial.get() + n_elements, unary);
   for(i = 0; i < n_elements; ++i)
   {
@@ -365,7 +371,7 @@ TEST(cpu_test, paralell_for_each)
 }
 
 
-TEST(cpu_test, paralell_transform)
+TEST(cpu_test, parallel_transform)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -390,7 +396,7 @@ TEST(cpu_test, paralell_transform)
 	x_serial.get()[i] = first;
 	x_parallel.get()[i] = first;
   }
-  zinhart::parallel::async::paralell_transform(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(),unary );
+  zinhart::parallel::async::parallel_transform(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(),unary );
   std::transform(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary);
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -399,7 +405,7 @@ TEST(cpu_test, paralell_transform)
   }
 }
 
-TEST(cpu_test, paralell_generate)
+TEST(cpu_test, parallel_generate)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -418,7 +424,7 @@ TEST(cpu_test, paralell_generate)
 	x_parallel.get()[i] = first;
   }
   auto generator = [](){ return -2.0; };
-  zinhart::parallel::async::paralell_generate(x_parallel.get(), x_parallel.get() + n_elements, generator);
+  zinhart::parallel::async::parallel_generate(x_parallel.get(), x_parallel.get() + n_elements, generator);
   std::generate(x_serial.get(), x_serial.get() + n_elements, generator);
   for(i = 0; i < n_elements; ++i)
   {

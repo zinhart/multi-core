@@ -26,20 +26,22 @@ namespace zinhart
 	   * */
 		HOST void parallel_saxpy(
 			  const float & a, float * x, float * y,
-			  const std::uint32_t & n_elements, const thread_pool & default_thread_pool
+			  const std::uint32_t & n_elements, thread_pool & default_thread_pool
 			  )
 		{ 
 		  //to identify each thread
-		  std::uint32_t thread_id = 0;
-		  std::vector<std::thread> threads(default_thread_pool.size());
+		  std::uint32_t thread_id;
+		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			default_thread_pool.add_task(saxpy, thread_id, default_thread_pool.size(), n_elements, a, x, y );
+		  //std::vector<std::thread> threads(default_thread_pool.size());
 		  //initialize each thread
-		  for(std::thread & t : threads)
+		 /* for(std::thread & t : threads)
 		  {
 			t = std::thread(saxpy, thread_id, default_thread_pool.size(), n_elements, a, x, y );
 			++thread_id;
 		  }
 		  for(std::thread & t : threads)
-			t.join();
+			t.join();*/
 		}
 	}
   }

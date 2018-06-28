@@ -4,7 +4,7 @@ if(BuildCuda)
 	  concurrent_routines.cc
 	  concurrent_routines_error.cc
 	  serial/serial.cc
-	  parallel/parallel.cc
+	  #parallel/parallel.cc
 	  parallel/thread_pool.cc
   )
   # link with cuda lib

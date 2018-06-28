@@ -7,12 +7,28 @@ namespace zinhart
 	  /*
 	   * * CPU WRAPPERS IMPLEMENTATION
 	   * * */
+
+	  template <class Precision_Type> 
+		HOST void parallel_saxpy(const Precision_Type & a, Precision_Type * x, Precision_Type * y,const std::uint32_t & n_elements, 
+ 			                     std::vector<zinhart::parallel::thread_pool::task_future<void>> & results,
+		                         thread_pool & default_thread_pool
+	                           )
+		{
+	  	  std::uint32_t thread_id = 0;
+		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			results.push_back(
+				default_thread_pool.add_task(zinhart::parallel::vectorized::saxpy<Precision_Type>, thread_id, n_elements, default_thread_pool.size(), a, x, y)
+				);
+
+		}
 	  template<class InputIt, class OutputIt>
-		HOST OutputIt paralell_copy(InputIt first, InputIt last, OutputIt output_first, const std::uint32_t & n_threads)
+		HOST OutputIt parallel_copy(InputIt first, InputIt last, OutputIt output_first, thread_pool & default_thread_pool)
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+  /*			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task(zinhart::parallel::vectorized::parallel_copy_init<InputIt, OutputIt>, std::ref(first), std::ref(output_first), thread_id, n_elements, thread_pool.size() );
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -21,15 +37,17 @@ namespace zinhart
 				++thread_id;
 			}
 			for(std::thread & t : threads)
-				t.join();
+				t.join();*/
 			return output_first;
 		}
 	  template<class InputIt, class OutputIt, class UnaryPredicate>
-		HOST OutputIt paralell_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate pred,const std::uint32_t & n_threads)
+		HOST OutputIt parallel_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate pred,thread_pool & default_thread_pool)
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+  /*			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task(zinhart::parallel::vectorized::parallel_copy_if_init<InputIt, OutputIt, UnaryPredicate>, std::ref(first), std::ref(output_it), pred, thread_id, n_elements, n_threads);
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -38,15 +56,17 @@ namespace zinhart
 				++thread_id;
 			}
 			for(std::thread & t : threads)
-				t.join();
+				t.join();*/
 			return output_it;
 		}
 	  template< class ForwardIt, class T >
-		HOST void parallel_replace( ForwardIt first, ForwardIt last, const T & old_value, const T & new_value, const std::uint32_t & n_threads )
+		HOST void parallel_replace( ForwardIt first, ForwardIt last, const T & old_value, const T & new_value, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+		/*	for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -55,14 +75,16 @@ namespace zinhart
 				++thread_id;
 			}
 			for(std::thread & t : threads)
-				t.join();
+				t.join();*/
 		}
 	  template< class ForwardIt, class UnaryPredicate, class T >
-		HOST void parallel_replace_if( ForwardIt first, ForwardIt last, UnaryPredicate unary_predicate, const T& new_value, const std::uint32_t & n_threads )
+		HOST void parallel_replace_if( ForwardIt first, ForwardIt last, UnaryPredicate unary_predicate, const T& new_value, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+		/*	for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -72,13 +94,16 @@ namespace zinhart
 			}
 			for(std::thread & t : threads)
 				t.join();
+				*/
 		}
 	  template< class InputIt, class OutputIt, class T >
-		HOST OutputIt parallel_replace_copy( InputIt first, InputIt last, OutputIt output_it, const T & old_value, const T & new_value, const std::uint32_t & n_threads )
+		HOST OutputIt parallel_replace_copy( InputIt first, InputIt last, OutputIt output_it, const T & old_value, const T & new_value, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+	/*	for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -89,14 +114,18 @@ namespace zinhart
 			for(std::thread & t : threads)
 				t.join();
 			return output_it;
+			*/
 		}
 	  //new
 	  template< class InputIt, class OutputIt, class UnaryPredicate, class T >
-		HOST OutputIt parallel_replace_copy_if( InputIt first, InputIt last, OutputIt output_it, UnaryPredicate unary_predicate, const T& new_value, const std::uint32_t & n_threads )
+		HOST OutputIt parallel_replace_copy_if( InputIt first, InputIt last, OutputIt output_it, UnaryPredicate unary_predicate, const T& new_value, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			/*
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -107,13 +136,17 @@ namespace zinhart
 			for(std::thread & t : threads)
 				t.join();
 		  return output_it;
+		  */
 		}
 	  template< class InputIt, class OutputIt, class T >
-		HOST T parallel_inner_product( InputIt first, InputIt last, OutputIt output_it, T value, const std::uint32_t & n_threads )
+		HOST T parallel_inner_product( InputIt first, InputIt last, OutputIt output_it, T value, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			/*for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
+			
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -125,19 +158,22 @@ namespace zinhart
 				t.join();
 
 			return value;
+			*/
 		}
 	  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2>
-		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1,BinaryOperation2 op2, const std::uint32_t & n_threads )
+		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1,BinaryOperation2 op2, thread_pool & default_thread_pool )
 		{
 			return value;
 		}
 	  template< class InputIt, class T >
-		HOST T paralell_accumalute( InputIt first, InputIt last, T init,
-									const std::uint32_t & n_threads = MAX_CPU_THREADS	  )
+		HOST T parallel_accumulate( InputIt first, InputIt last, T init, thread_pool & default_thread_pool)
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			/*
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -150,13 +186,17 @@ namespace zinhart
 				t.join();
 			}
 			return init;
+			*/
 		}
 	  template < class InputIt, class UnaryFunction >
-		HOST UnaryFunction paralell_for_each(InputIt first, InputIt last, UnaryFunction f,const std::uint32_t & n_threads )
+		HOST UnaryFunction parallel_for_each(InputIt first, InputIt last, UnaryFunction f, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			/*
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -169,13 +209,17 @@ namespace zinhart
 				t.join();
 			}
 			return f;
+			*/
 		}
 	  template < class InputIt, class OutputIt, class UnaryOperation >
-		HOST OutputIt paralell_transform(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op, const std::uint32_t & n_threads )
+		HOST OutputIt parallel_transform(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			/*
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -186,13 +230,17 @@ namespace zinhart
 			for(std::thread & t : threads)
 				t.join();
 			return output_first;
+			*/
 		}
 	  template < class BidirectionalIt, class Generator >
-		HOST void paralell_generate(BidirectionalIt first, BidirectionalIt last, Generator g, const std::uint32_t & n_threads)
+		HOST void parallel_generate(BidirectionalIt first, BidirectionalIt last, Generator g, thread_pool & default_thread_pool)
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			/*
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);
 			//initialize each thread
 			for(std::thread & t : threads)
@@ -204,6 +252,7 @@ namespace zinhart
 			{
 				t.join();
 			}
+			*/
 		}
 	}// END NAMESPACE ASYNC
   }// END NAMESPACE PARALLEL

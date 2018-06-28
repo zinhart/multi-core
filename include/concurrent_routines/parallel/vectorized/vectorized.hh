@@ -6,6 +6,19 @@ namespace zinhart
   {
 	namespace vectorized
 	{
+	  template <class Precision_Type>
+		HOST void saxpy(const std::uint32_t thread_id,
+					    const std::uint32_t & n_elements, const std::uint32_t & n_threads, 
+					    const Precision_Type a, Precision_Type * x, Precision_Type * y)
+		{
+		  std::uint32_t start = 0, stop = 0;
+		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  //operate on y's elements from start to stop
+		  for(std::uint32_t op = start; op < stop; ++op)
+		  {
+			y[op] = a * x[op] + y[op];
+		  }
+		}
 	  template<class InputIt, class OutputIt>
 		HOST void parallel_copy_init(InputIt input_it, OutputIt output_it,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
