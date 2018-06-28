@@ -80,7 +80,7 @@ else()
 endif()
 
 # set include paths
-include_directories( . include ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
+include_directories(. include include/concurrent_rountines/  ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
 
 # set cxx standard
 set(CMAKE_CXX_STANDARD 11)

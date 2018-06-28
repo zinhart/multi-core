@@ -1,6 +1,6 @@
 #include "concurrent_routines/concurrent_routines.hh"
-#include "concurrent_routines/thread_safe_queue.hh"
-#include "concurrent_routines/thread_pool.hh"
+//#include "concurrent_routines/thread_safe_queue.hh"
+//#include "concurrent_routines/thread_pool.hh"
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <iostream>
@@ -43,7 +43,7 @@ TEST(cpu_test, paralell_saxpy)
 							y[i] = a * x[i] + y[i];
 						  }
 						};
-  zinhart::paralell_saxpy(alpha, x_parallel.get(), y_parallel.get(), n_elements);
+  zinhart::parallel::async::parallel_saxpy(alpha, x_parallel.get(), y_parallel.get(), n_elements);
   serial_saxpy(alpha, x_serial.get(), y_serial.get(), n_elements);
   for(i = 0; i < n_elements; ++i)
   {
@@ -72,7 +72,7 @@ TEST(cpu_test, paralell_copy)
 	x_serial.get()[i] = first;
 	x_parallel.get()[i] = first;
   }
-  zinhart::paralell_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get() );
+  zinhart::parallel::async::paralell_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get() );
   std::copy(x_serial.get(), x_serial.get() + n_elements, y_serial.get());
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -102,7 +102,7 @@ TEST(cpu_test, parallel_copy_if)
 		x_parallel.get()[i] = first;
   }
 	auto unary_predicate = [](float & init){ return (init >= 1.0) ? true : false ;};
-  zinhart::paralell_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate );
+  zinhart::parallel::async::paralell_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate );
   std::copy_if(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary_predicate);
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -135,7 +135,7 @@ TEST(cpu_test, parallel_replace)
 	y_serial.get()[i] = x_serial.get()[i];
 	x_parallel.get()[i] = old_value;
   }
-  zinhart::parallel_replace(x_parallel.get(), x_parallel.get() + n_elements, old_value, new_value);
+  zinhart::parallel::async::parallel_replace(x_parallel.get(), x_parallel.get() + n_elements, old_value, new_value);
   std::replace(x_serial.get(), x_serial.get() + n_elements, old_value, new_value);
   //double check we have the new value 
   for(i = 0; i < n_elements; ++i)
@@ -169,7 +169,7 @@ TEST(cpu_test, parallel_replace_if)
 	y_serial.get()[i] = x_serial.get()[i];
 	x_parallel.get()[i] = old_value;
   }
-  zinhart::parallel_replace_if(x_parallel.get(), x_parallel.get() + n_elements, unary_predicate, new_value);
+  zinhart::parallel::async::parallel_replace_if(x_parallel.get(), x_parallel.get() + n_elements, unary_predicate, new_value);
   std::replace_if(x_serial.get(), x_serial.get() + n_elements, unary_predicate, new_value);
   //double check we have the new value 
   for(i = 0; i < n_elements; ++i)
@@ -200,7 +200,7 @@ TEST(cpu_test, parallel_replace_copy)
 	x_serial.get()[i] = old_value;
 	x_parallel.get()[i] = old_value;
   }
-  zinhart::parallel_replace_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), old_value, new_value );
+  zinhart::parallel::async::parallel_replace_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), old_value, new_value );
   std::replace_copy(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), old_value, new_value);
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -233,7 +233,7 @@ TEST(cpu_test, parallel_replace_copy_if)
 	x_serial.get()[i] = old_value;
 	x_parallel.get()[i] = old_value;
   }
-  zinhart::parallel_replace_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate, new_value);
+  zinhart::parallel::async::parallel_replace_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate, new_value);
   std::replace_copy_if(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary_predicate, new_value);
   //double check we have the new value 
   for(i = 0; i < n_elements; ++i)
@@ -274,7 +274,7 @@ TEST(cpu_test, parallel_inner_product_first_overload)
 	x_parallel.get()[i] = first;
 	y_parallel.get()[i] = second;
   }
-  parallel_ret =  zinhart::parallel_inner_product(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), init);
+  parallel_ret =  zinhart::parallel::async::parallel_inner_product(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), init);
   serial_ret = std::inner_product(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), init);
   ASSERT_EQ(parallel_ret, serial_ret); 
 }
@@ -303,7 +303,7 @@ TEST(cpu_test, parallel_inner_product_second_overload)
 	x_parallel.get()[i] = first;
 	y_parallel.get()[i] = second;
   }
-  parallel_ret =  zinhart::parallel_inner_product(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), init, std::plus<float>(), std::equal_to<float>());
+  parallel_ret =  zinhart::parallel::async::parallel_inner_product(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), init, std::plus<float>(), std::equal_to<float>());
   serial_ret = std::inner_product(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), init,
 	  std::plus<float>(), std::equal_to<float>());
   ASSERT_EQ(parallel_ret, serial_ret);
@@ -328,7 +328,7 @@ TEST(cpu_test, paralell_accumulate)
 	x_parallel.get()[i] = first;
   }
   //sum
-  float p_sum = zinhart::paralell_accumalute(x_parallel.get(), x_parallel.get() + n_elements, 0 );
+  float p_sum = zinhart::parallel::async::paralell_accumalute(x_parallel.get(), x_parallel.get() + n_elements, 0 );
   float s_sum = std::accumulate(x_serial.get(), x_serial.get() + n_elements, 0);
   //double check we have the same values 
   ASSERT_EQ(p_sum,s_sum);
@@ -356,7 +356,7 @@ TEST(cpu_test, paralell_for_each)
 						{
 						  a = a * 2.0;
 						};
-  zinhart::paralell_for_each(x_parallel.get(), x_parallel.get() + n_elements, unary);
+  zinhart::parallel::async::paralell_for_each(x_parallel.get(), x_parallel.get() + n_elements, unary);
   std::for_each(x_serial.get(), x_serial.get() + n_elements, unary);
   for(i = 0; i < n_elements; ++i)
   {
@@ -390,7 +390,7 @@ TEST(cpu_test, paralell_transform)
 	x_serial.get()[i] = first;
 	x_parallel.get()[i] = first;
   }
-  zinhart::paralell_transform(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(),unary );
+  zinhart::parallel::async::paralell_transform(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(),unary );
   std::transform(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary);
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -418,7 +418,7 @@ TEST(cpu_test, paralell_generate)
 	x_parallel.get()[i] = first;
   }
   auto generator = [](){ return -2.0; };
-  zinhart::paralell_generate(x_parallel.get(), x_parallel.get() + n_elements, generator);
+  zinhart::parallel::async::paralell_generate(x_parallel.get(), x_parallel.get() + n_elements, generator);
   std::generate(x_serial.get(), x_serial.get() + n_elements, generator);
   for(i = 0; i < n_elements; ++i)
   {
@@ -474,8 +474,8 @@ TEST(cpu_test, serial_matrix_multiply)
 	C_naive[i] = C_cache_aware[i];
   }
 
-  zinhart::cache_aware_serial_matrix_product(A_cache_aware, B_cache_aware, C_cache_aware, M, N, K);
-  zinhart::serial_matrix_product(A_naive, B_naive, C_naive, M, N, K);
+  zinhart::serial::cache_aware_serial_matrix_product(A_cache_aware, B_cache_aware, C_cache_aware, M, N, K);
+  zinhart::serial::serial_matrix_product(A_naive, B_naive, C_naive, M, N, K);
   
   for(i = 0; i < C_elements; ++i)
   {
@@ -490,11 +490,11 @@ TEST(thread_safe_queue, call_size_on_empty_queue)
   std::uniform_int_distribution<std::uint32_t> thread_dist(std::uint32_t{1}, std::uint32_t{MAX_CPU_THREADS});
   std::uint32_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
-  auto call_size = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue)
+  auto call_size = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue)
   {
 	ASSERT_EQ(std::uint32_t{0}, init_queue.size());
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
   //called from the main thread
   call_size(test_queue);
   ASSERT_EQ(std::uint32_t{0}, test_queue.size());
@@ -516,11 +516,11 @@ TEST(thread_safe_queue, call_empty_on_empty_queue)
   std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
   std::uint8_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
-  auto call_empty = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue)
+  auto call_empty = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue)
   {
 	ASSERT_EQ(true, init_queue.empty());
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
   //called from the main thread
   call_empty(test_queue);
   ASSERT_EQ(true, test_queue.empty());
@@ -542,14 +542,14 @@ TEST(thread_safe_queue, call_clear_on_empty_queue)
   std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
   std::uint8_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
-  auto call_clear = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue)
+  auto call_clear = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue)
   {
 	init_queue.clear();
 	//since these were already tested
 	ASSERT_EQ(bool{true}, init_queue.empty());
 	ASSERT_EQ(std::uint32_t{0}, init_queue.size());
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
   //called from the main thread
   call_clear(test_queue);
   ASSERT_EQ(bool{true}, test_queue.empty());
@@ -575,13 +575,13 @@ TEST(thread_safe_queue, call_push)
   std::uint32_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   //to be called from each thread
-  auto call_push = [](zinhart::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
+  auto call_push = [](zinhart::parallel::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
   {
 	std::uint32_t old_size = init_queue.size();
 	init_queue.push(item);
 	ASSERT_TRUE( init_queue.size() >=  old_size);
   };
-  zinhart::thread_safe_queue<std::uint32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::uint32_t> test_queue;
   call_push(test_queue,0);
   ASSERT_EQ(bool{false}, test_queue.empty());
   ASSERT_EQ(std::uint32_t{1}, test_queue.size());
@@ -608,13 +608,13 @@ TEST(thread_safe_queue, call_size_on_non_empty_queue)
   std::uint32_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   //to be called from each thread
-  auto call_push = [](zinhart::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
+  auto call_push = [](zinhart::parallel::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
   {
 	std::uint32_t old_size = init_queue.size();
 	init_queue.push(item);
 	ASSERT_TRUE( init_queue.size() >=  old_size);
   };
-  zinhart::thread_safe_queue<std::uint32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::uint32_t> test_queue;
   call_push(test_queue, 0);
   ASSERT_EQ(std::uint32_t{1}, test_queue.size());
   //call push from a random number of threads not exceding MAX_CPU_THREADS
@@ -640,12 +640,12 @@ TEST(thread_safe_queue, call_empty_on_non_empty_queue)
   std::uint8_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   //to be called from each thread
-  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  auto call_push = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
   {
 	init_queue.push(item);
 	ASSERT_EQ(bool{false} ,init_queue.empty());
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
   call_push(test_queue, 0);
   ASSERT_EQ(bool{false}, test_queue.empty());
   //call push from a random number of threads not exceding MAX_CPU_THREADS
@@ -670,12 +670,12 @@ TEST(thread_safe_queue, call_pop_on_empty_queue)
   std::uint8_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   //to be called from each thread
-  auto call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  auto call_pop = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
   {
 	bool pop_result = init_queue.pop(item);
 	ASSERT_EQ(bool{false}, pop_result);
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
   call_pop(test_queue, 0);
   for( i = 0; i < n_threads; ++i)
   {
@@ -696,11 +696,11 @@ TEST(thread_safe_queue, call_pop_on_non_empty_queue)
   std::uint8_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   //to be called from each thread
-  auto call_push = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
+  auto call_push = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
   {
 	init_queue.push(item);
   };
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
   //call push from a random number of threads not exceding MAX_CPU_THREADS
   for( i = 0; i < n_threads; ++i)
   {
@@ -715,7 +715,7 @@ TEST(thread_safe_queue, call_pop_on_non_empty_queue)
   ASSERT_EQ( n_threads, test_queue.size());
 
   //now the queue has n_threads  elements
-  auto test_call_pop = [](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
+  auto test_call_pop = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
   {
 	bool pop_result = init_queue.pop(item);
 	ASSERT_EQ(expected_result, pop_result);
@@ -746,13 +746,13 @@ TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
   std::uint16_t n_threads = thread_dist(mt), i;
   std::vector<std::thread> threads(n_threads); 
   std::vector<std::future<void>> futures(n_threads);
-  std::vector< std::packaged_task<void(zinhart::thread_safe_queue<std::int32_t>&, std::int32_t&, bool)> > tasks(n_threads);
+  std::vector< std::packaged_task<void(zinhart::parallel::thread_safe_queue<std::int32_t>&, std::int32_t&, bool)> > tasks(n_threads);
 
   for(i = 0; i < n_threads; ++i)
   {
 	// create tasks
-	std::packaged_task<void(zinhart::thread_safe_queue<std::int32_t>&, std::int32_t&, bool)> test_call_pop(
-	[](zinhart::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
+	std::packaged_task<void(zinhart::parallel::thread_safe_queue<std::int32_t>&, std::int32_t&, bool)> test_call_pop(
+	[](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
 	{
 	  init_queue.push(1);
 	  bool pop_result = init_queue.pop_on_available(item);
@@ -766,7 +766,7 @@ TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
   
   std::int32_t ret_val;
   
-  zinhart::thread_safe_queue<std::int32_t> test_queue;
+  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
   //call pop_on_available from a random number of threads not exceding MAX_CPU_THREADS
   for( i = 0; i < n_threads; ++i)
   {
@@ -784,7 +784,7 @@ TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
 //no exceptions segfaults
 TEST(thread_pool, constructor_and_destructor)
 {
-	zinhart::thread_pool pool;
+	zinhart::parallel::thread_pool pool;
 }
 TEST(thread_pool, call_add_task)
 {
@@ -793,10 +793,10 @@ TEST(thread_pool, call_add_task)
   std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
   std::uniform_int_distribution<std::uint32_t> size_dist(1, MAX_CPU_THREADS);
   std::uint32_t results_size = size_dist(mt);
-  std::vector<zinhart::thread_pool::task_future<std::uint32_t>> results;
+  std::vector<zinhart::parallel::thread_pool::task_future<std::uint32_t>> results;
   for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
   {	  
-	results.push_back(zinhart::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
+	results.push_back(zinhart::parallel::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
   }
   std::uint32_t res;
   for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
@@ -816,7 +816,7 @@ TEST(thread_pool, call_add_task_member_function)
 	  }
   };
   test t;
-  zinhart::thread_pool::task_future<std::int32_t> result = zinhart::default_thread_pool::push_task([&t](){return t.add_one(3);});
+  zinhart::parallel::thread_pool::task_future<std::int32_t> result = zinhart::parallel::default_thread_pool::push_task([&t](){return t.add_one(3);});
   ASSERT_EQ(result.get(), 4);
 }
 std::int32_t plus_one(std::int32_t s)
@@ -825,6 +825,6 @@ std::int32_t plus_one(std::int32_t s)
 }
 TEST(thread_pool, call_add_task_function)
 {
-  zinhart::thread_pool::task_future<std::int32_t> result = zinhart::default_thread_pool::push_task(plus_one,3);
+  zinhart::parallel::thread_pool::task_future<std::int32_t> result = zinhart::parallel::default_thread_pool::push_task(plus_one,3);
   ASSERT_EQ(result.get(), 4);
 }

@@ -2,8 +2,10 @@ if(BuildCuda)
   set(concurrent_routines_lib
 	  concurrent_routines.cu
 	  concurrent_routines.cc
-	  thread_pool.cc
 	  concurrent_routines_error.cc
+	  serial/serial.cc
+	  parallel/parallel.cc
+	  parallel/thread_pool.cc
   )
   # link with cuda lib
   cuda_add_library(concurrent_routines ${LIB_TYPE} ${concurrent_routines_lib})

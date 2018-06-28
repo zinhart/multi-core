@@ -147,7 +147,7 @@ namespace zinhart
 	   std::uint32_t max_shared_memory_per_block{0};
 	   cuda_device_properties::get_max_threads_per_block(max_threads, device_id);
 	   cuda_device_properties::get_max_shared_memory(max_shared_memory_per_block, device_id);
-	   dim3 threads_per_block( (N < max_threads * 2) ? next_pow2( (N + 1) / 2 ) : max_threads, 1, 1);
+	   dim3 threads_per_block( (N < max_threads * 2) ? zinhart::serial::next_pow2( (N + 1) / 2 ) : max_threads, 1, 1);
 	   dim3 num_blocks( (N + (threads_per_block.x * 2 - 1) ) / (threads_per_block.x * 2), 1, 1);
        // when there is only one warp per block, we need to allocate two warps
        // worth of shared memory so that we don't index shared memory out of bounds
@@ -197,7 +197,7 @@ namespace zinhart
 	   std::uint32_t max_shared_memory_per_block{0};
 	   cuda_device_properties::get_max_threads_per_block(max_threads, device_id);
 	   cuda_device_properties::get_max_shared_memory(max_shared_memory_per_block, device_id);
-	   dim3 threads_per_block( (N < max_threads * 2) ? next_pow2( (N + 1) / 2 ) : max_threads, 1, 1);
+	   dim3 threads_per_block( (N < max_threads * 2) ? zinhart::serial::next_pow2( (N + 1) / 2 ) : max_threads, 1, 1);
 	   dim3 num_blocks( (N + (threads_per_block.x * 2 - 1) ) / (threads_per_block.x * 2), 1, 1);
        // when there is only one warp per block, we need to allocate two warps
        // worth of shared memory so that we don't index shared memory out of bounds

@@ -48,7 +48,7 @@ TEST(gpu_test, gemm_wrapper)
   {
 	for(std::int32_t j = 0; j < A_col; ++j)
 	{
-	  A_host[zinhart::idx2r(i,j, A_col)] = real_dist(mt);
+	  A_host[zinhart::serial::idx2r(i,j, A_col)] = real_dist(mt);
 	}
   }
 
@@ -56,7 +56,7 @@ TEST(gpu_test, gemm_wrapper)
   {
 	for(std::int32_t j = 0; j < B_col; ++j)
 	{
-	  B_host[zinhart::idx2r(i,j, B_col)] = real_dist(mt);
+	  B_host[zinhart::serial::idx2r(i,j, B_col)] = real_dist(mt);
 	}
   }
 
@@ -64,7 +64,7 @@ TEST(gpu_test, gemm_wrapper)
   {
 	for(std::int32_t j = 0; j < C_col; ++j)
 	{
-	  C_host[zinhart::idx2r(i,j, C_col)] = 0.0f;
+	  C_host[zinhart::serial::idx2r(i,j, C_col)] = 0.0f;
 	}
   }
 
@@ -94,7 +94,7 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cublas_api(cublasCreate(&context),__FILE__,__LINE__);
   double alpha = 1;
   double beta = 1; 
-  zinhart::gemm_wrapper(m,n,k,lda,ldb,ldc, A_row, A_col, B_row, B_col); 
+  zinhart::serial::gemm_wrapper(m,n,k,lda,ldb,ldc, A_row, A_col, B_row, B_col); 
   //sgemm here
   zinhart::check_cublas_api(cublasDgemm(context, CUBLAS_OP_N, CUBLAS_OP_N,
 			  m, n, k,
@@ -111,7 +111,7 @@ TEST(gpu_test, gemm_wrapper)
   zinhart::check_cuda_api(cudaMemcpy(C_host_copy, C_device, C_total_elements * sizeof(double), cudaMemcpyDeviceToHost),__FILE__,__LINE__);
   zinhart::check_cublas_api(cublasDestroy(context),__FILE__,__LINE__);
 
-  zinhart::serial_matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
+  zinhart::serial::serial_matrix_product(A_host, B_host, C_host, A_row, A_col, B_col);
 /*  zinhart::print_matrix_row_major(A_host, A_row, A_col,"A_host");
   zinhart::print_matrix_row_major(A_host_copy, A_row, A_col, "A_host_copy");
   zinhart::print_matrix_row_major(B_host, B_row, B_col,"B_host");
@@ -159,7 +159,7 @@ TEST(gpu_test, call_axps)
   double * X_host{nullptr};
   double * X_host_validation{nullptr};
   double * X_device{nullptr};
-  std::vector<zinhart::thread_pool::task_future<void>> serial_axps_results;
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> serial_axps_results;
 
   X_host = new double[N];
   X_host_validation = new double[N];
@@ -183,7 +183,7 @@ TEST(gpu_test, call_axps)
   // do serial axps
   for(std::uint32_t i = 0; i < N; ++i)
   {
-	serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_validation[i]), s));
+	serial_axps_results.push_back(zinhart::parallel::default_thread_pool::push_task([](double a, double & x, double s){ x = a * x + s; }, a, std::ref(X_host_validation[i]), s));
   }
 
   // compare
@@ -221,7 +221,7 @@ TEST(gpu_test, call_axps_async)
   double * X_host_validation{nullptr};
   double * X_device{nullptr};
   cudaStream_t * stream{nullptr};
-  std::list<zinhart::thread_pool::task_future<void>> serial_axps_results;
+  std::list<zinhart::parallel::thread_pool::task_future<void>> serial_axps_results;
 
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, N * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host_validation, N * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
@@ -250,7 +250,7 @@ TEST(gpu_test, call_axps_async)
 	// do serial axps
 	for(std::uint32_t j = 0; j < N; ++j)
 	{
-	  serial_axps_results.push_back(zinhart::default_thread_pool::push_task([](const double a, double & x, const double s){ x = a * x + s; }, a, std::ref(X_host_validation[j]), s));
+	  serial_axps_results.push_back(zinhart::parallel::default_thread_pool::push_task([](const double a, double & x, const double s){ x = a * x + s; }, a, std::ref(X_host_validation[j]), s));
 	}
 	
 	cudaStreamSynchronize(stream[i]);
@@ -292,7 +292,7 @@ TEST(gpu_test, reduce_sum_async)
   std::uint32_t max_shared_memory_per_block{0};
   zinhart::cuda_device_properties::get_max_threads_per_block(max_threads, 0);
   zinhart::cuda_device_properties::get_max_shared_memory(max_shared_memory_per_block, 0);
-  const std::uint32_t threads_per_block{ (N < max_threads * 2) ? zinhart::next_pow2( (N + 1) / 2 ) : max_threads};
+  const std::uint32_t threads_per_block{ (N < max_threads * 2) ? zinhart::serial::next_pow2( (N + 1) / 2 ) : max_threads};
   const std::uint32_t num_blocks{ (N + (threads_per_block * 2 - 1) ) / (threads_per_block * 2)};
 
   // vector sizes adjust for the number of streams / threads
@@ -310,7 +310,7 @@ TEST(gpu_test, reduce_sum_async)
   cudaStream_t * stream{nullptr};
 
   // Host threads
-  std::list<zinhart::thread_pool::task_future<double>> serial_reduction_results;
+  std::list<zinhart::parallel::thread_pool::task_future<double>> serial_reduction_results;
 
   // Misc variables: loop counters temp values etc
   std::uint32_t i, j, input_offset, output_offset, host_sum, device_sum, device_id;

@@ -1,16 +1,18 @@
 #ifndef THREAD_SAFE_QUEUE_HH
 #define THREAD_SAFE_QUEUE_HH
-#include "macros.hh"
+#include "../macros.hh"
 #include <mutex>
 #include <queue>
 #include <condition_variable>
 #include <atomic>
 namespace zinhart
 {
-  template <class T>
+  namespace parallel
+  {
+	template <class T>
 	class thread_safe_queue
 	{
-		enum class QUEUE_STATE : bool {ACTIVE = true, INACTIVE = false};
+  	  enum class QUEUE_STATE : bool {ACTIVE = true, INACTIVE = false};
 	  private:
 		std::mutex lock;
 		std::queue<T> queue;
@@ -37,6 +39,9 @@ namespace zinhart
 		//manually shutdown the queue
 		HOST void shutdown();
 	};
+  }
+
+  
 }
 #include "ext/thread_safe_queue.tcc"
 #endif
