@@ -10,7 +10,7 @@ namespace zinhart
 	   * * */
 
 	  template <class Precision_Type, class Container> 
-		HOST void parallel_saxpy(const Precision_Type & a, Precision_Type * x, Precision_Type * y, const std::uint32_t & n_elements, Container & results,
+		HOST void saxpy(const Precision_Type & a, Precision_Type * x, Precision_Type * y, const std::uint32_t & n_elements, Container & results,
 			                     thread_pool & default_thread_pool
 	                            )
 		{
@@ -23,7 +23,7 @@ namespace zinhart
 
 		}
 	  template<class InputIt, class OutputIt, class Container>
-		HOST void parallel_copy(const InputIt & first, const InputIt & last, OutputIt & output_first, Container & results, thread_pool & default_thread_pool)
+		HOST void copy(const InputIt & first, const InputIt & last, OutputIt & output_first, Container & results, thread_pool & default_thread_pool)
 		{
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 			//to identify each thread
@@ -35,7 +35,7 @@ namespace zinhart
 			  );
 		}
 	  template<class InputIt, class OutputIt, class UnaryPredicate, class Container>
-		HOST void parallel_copy_if(const InputIt & first, const InputIt & last, OutputIt & output_it, UnaryPredicate pred, Container & results, thread_pool & default_thread_pool)
+		HOST void copy_if(const InputIt & first, const InputIt & last, OutputIt & output_it, UnaryPredicate pred, Container & results, thread_pool & default_thread_pool)
 		{
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 			//to identify each thread
@@ -47,7 +47,7 @@ namespace zinhart
 			  );
 		}
 	  template< class ForwardIt, class T, class Container >
-		HOST void parallel_replace(ForwardIt & first, const ForwardIt & last, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
+		HOST void replace(ForwardIt & first, const ForwardIt & last, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
 		{
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 
@@ -60,7 +60,7 @@ namespace zinhart
 			);
 		}
 	  template< class ForwardIt, class UnaryPredicate, class T, class Container >
-		HOST void parallel_replace_if( ForwardIt & first, const ForwardIt & last, UnaryPredicate unary_predicate, const T& new_value, Container & results, thread_pool & default_thread_pool )
+		HOST void replace_if( ForwardIt & first, const ForwardIt & last, UnaryPredicate unary_predicate, const T& new_value, Container & results, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
@@ -71,7 +71,7 @@ namespace zinhart
 			  );
 		}
 	  template< class InputIt, class OutputIt, class T, class Container >
-		HOST void parallel_replace_copy( InputIt & first, const InputIt & last, OutputIt & output_it, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
+		HOST void replace_copy( InputIt & first, const InputIt & last, OutputIt & output_it, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;

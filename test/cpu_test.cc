@@ -44,7 +44,7 @@ TEST(cpu_test, parallel_saxpy)
 							y[i] = a * x[i] + y[i];
 						  }
 						};
-  zinhart::parallel::async::parallel_saxpy(alpha, x_parallel, y_parallel, n_elements, results);
+  zinhart::parallel::async::saxpy(alpha, x_parallel, y_parallel, n_elements, results);
   serial_saxpy(alpha, x_serial, y_serial, n_elements);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -82,7 +82,7 @@ TEST(cpu_test, parallel_copy)
 	x_serial[i] = first;
 	x_parallel[i] = first;
   }
-  zinhart::parallel::async::parallel_copy(x_parallel, x_parallel + n_elements, y_parallel, results );
+  zinhart::parallel::async::copy(x_parallel, x_parallel + n_elements, y_parallel, results );
   std::copy(x_serial, x_serial + n_elements, y_serial);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -122,7 +122,7 @@ TEST(cpu_test, parallel_copy_if)
 		x_parallel[i] = first;
   }
   auto unary_predicate = [](float & init){ return (init >= 1.0) ? true : false ;};
-  zinhart::parallel::async::parallel_copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, results );
+  zinhart::parallel::async::copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, results );
   std::copy_if(x_serial, x_serial + n_elements, y_serial, unary_predicate);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -165,7 +165,7 @@ TEST(cpu_test, parallel_replace)
 	y_serial[i] = x_serial[i];
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace(x_parallel, x_parallel + n_elements, old_value, new_value, results);
+  zinhart::parallel::async::replace(x_parallel, x_parallel + n_elements, old_value, new_value, results);
   std::replace(x_serial, x_serial + n_elements, old_value, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -209,7 +209,7 @@ TEST(cpu_test, parallel_replace_if)
 	y_serial[i] = x_serial[i];
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value, results);
+  zinhart::parallel::async::replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value, results);
   std::replace_if(x_serial, x_serial + n_elements, unary_predicate, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -250,7 +250,7 @@ TEST(cpu_test, parallel_replace_copy)
 	x_serial[i] = old_value;
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace_copy(x_parallel, x_parallel + n_elements, y_parallel, old_value, new_value, results );
+  zinhart::parallel::async::replace_copy(x_parallel, x_parallel + n_elements, y_parallel, old_value, new_value, results );
   std::replace_copy(x_serial, x_serial + n_elements, y_serial, old_value, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
