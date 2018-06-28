@@ -78,7 +78,7 @@ namespace zinhart
 				*(output_it + op) = ( pred( *(first + op) ) ) ? new_value : *(first + op);
 		}
 	  template< class InputIt1, class InputIt2, class T >
-		HOST void parallel_inner_product_init( InputIt1 first1, InputIt2 first2, T & value,
+		HOST void inner_product( InputIt1 first1, InputIt2 first2, T & value,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;

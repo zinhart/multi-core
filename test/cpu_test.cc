@@ -317,21 +317,19 @@ TEST(cpu_test, parallel_sample)
 
 }
 */
-/*
- * take special care with inner prod
 TEST(cpu_test, parallel_inner_product_first_overload)
 {
- 	std::random_device rd;
+  std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
   std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   std::uint32_t n_elements = uint_dist(mt);
-  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  float * x_parallel = new float [n_elements];
+  float * y_parallel = new float [n_elements];
+  float * x_serial = new float [n_elements];
+  float * y_serial = new float [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float first, second, init = real_dist(mt), parallel_ret, serial_ret;
@@ -344,11 +342,21 @@ TEST(cpu_test, parallel_inner_product_first_overload)
 	x_parallel[i] = first;
 	y_parallel[i] = second;
   }
-  parallel_ret =  zinhart::parallel::async::parallel_inner_product(x_parallel, x_parallel + n_elements, y_parallel, init);
+  zinhart::parallel::async::inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, results);
   serial_ret = std::inner_product(x_serial, x_serial + n_elements, y_serial, init);
+  // make sure all threads are done before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  } 
+  parallel_ret = init;
   ASSERT_EQ(parallel_ret, serial_ret); 
+  delete x_parallel;
+  delete y_parallel;
+  delete x_serial;
+  delete y_serial;
 }
-
+/*
 TEST(cpu_test, parallel_inner_product_second_overload)
 {
   std::random_device rd;
