@@ -20,7 +20,7 @@ namespace zinhart
 		  }
 		}
 	  template<class InputIt, class OutputIt>
-		HOST void parallel_copy_init(InputIt input_it, OutputIt output_it,
+		HOST void copy(InputIt input_it, OutputIt output_it,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
@@ -30,7 +30,7 @@ namespace zinhart
 				*(output_it + op) = *(input_it + op);
 		}
 	  template<class InputIt, class OutputIt, class UnaryPredicate>
-		HOST void parallel_copy_if_init(InputIt first, OutputIt output_it, UnaryPredicate pred,
+		HOST void copy_if(InputIt first, OutputIt output_it, UnaryPredicate pred,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
@@ -40,7 +40,7 @@ namespace zinhart
 					*(output_it + op) = *(first + op);
 		}
 	  template< class ForwardIt, class T >
-		HOST void parallel_replace_init( ForwardIt first, const T & old_value, const T & new_value, 
+		HOST void replace( ForwardIt first, const T & old_value, const T & new_value, 
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;

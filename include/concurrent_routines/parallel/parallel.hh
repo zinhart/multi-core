@@ -12,67 +12,66 @@ namespace zinhart
 	 * */
 	namespace async
 	{
-	  template <class Precision_Type> 
-		HOST void parallel_saxpy(const Precision_Type & a, Precision_Type * x, Precision_Type * y,const std::uint32_t & n_elements, 
-			                     std::vector<zinhart::parallel::thread_pool::task_future<void>> & results,
+	  template <class Precision_Type, class Container> 
+		HOST void parallel_saxpy(const Precision_Type & a, Precision_Type * x, Precision_Type * y,const std::uint32_t & n_elements, Container & results,
 		                         thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 	                            );
-	  template<class InputIt, class OutputIt>
-		HOST OutputIt parallel_copy(InputIt first, InputIt last, OutputIt output_it, 
+	  template<class InputIt, class OutputIt, class Container>
+		HOST void parallel_copy(InputIt first, InputIt last, OutputIt output_it, Container & results, 
 			                        thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 								   );
 
-	  template<class InputIt, class OutputIt, class UnaryPredicate>
-		HOST OutputIt parallel_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate pred,
+	  template<class InputIt, class OutputIt, class UnaryPredicate, class Container>
+		HOST void parallel_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate pred, Container & results,
 		                               thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 		                              );
 
-	  template< class ForwardIt, class T >
-		HOST void parallel_replace(ForwardIt first, ForwardIt last,const T& old_value, const T& new_value,
+	  template< class ForwardIt, class T, class Container >
+		HOST void parallel_replace(ForwardIt first, ForwardIt last,const T& old_value, const T& new_value, Container & results,
 		                           thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 		                 	      );
 
-	  template< class ForwardIt, class UnaryPredicate, class T >
-		HOST void parallel_replace_if(ForwardIt first, ForwardIt last, UnaryPredicate p, const T& new_value, 
+	  template< class ForwardIt, class UnaryPredicate, class T, class Container >
+		HOST void parallel_replace_if(ForwardIt first, ForwardIt last, UnaryPredicate p, const T& new_value, Container & results,
 		                              thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 									 );
 
-	  template< class InputIt, class OutputIt, class T >
-		HOST OutputIt parallel_replace_copy(InputIt first, InputIt last, OutputIt output_it, const T& old_value, const T& new_value,
+	  template< class InputIt, class OutputIt, class T, class Container >
+		HOST void parallel_replace_copy(InputIt first, InputIt last, OutputIt output_it, const T& old_value, const T& new_value, Container & results,
 		                                    thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 										   );
 
-	  template< class InputIt, class OutputIt, class UnaryPredicate, class T >
-		HOST OutputIt parallel_replace_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate p, const T& new_value, 
+	  template< class InputIt, class OutputIt, class UnaryPredicate, class T, class Container >
+		HOST void parallel_replace_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate p, const T& new_value, Container & results,
 		                                       thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 											   );
 
-	  template< class InputIt1, class InputIt2, class T >
-		HOST T parallel_inner_product(InputIt1 first1, InputIt1 last1, InputIt2 first2, T value,
+	  template< class InputIt1, class InputIt2, class T, class Container >
+		HOST T parallel_inner_product(InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, Container & results,
 		                              thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 									 );
-	  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2>
-		HOST T parallel_inner_product(InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1, BinaryOperation2 op2,
+	  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2, class Container>
+		HOST T parallel_inner_product(InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1, BinaryOperation2 op2, Container & results,
 		                              thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 									 );
 	 
-	template< class InputIt, class T >
-	  HOST T parallel_accumulate(InputIt first, InputIt last, T init,
+  	  template< class InputIt, class T, class Container >
+  		HOST T parallel_accumulate(InputIt first, InputIt last, T init, Container & results,
 		                         thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 								);
 
-	template < class InputIt, class UnaryFunction >
-	  HOST UnaryFunction parallel_for_each(InputIt first, InputIt last, UnaryFunction f,
+	template < class InputIt, class UnaryFunction, class Container >
+	  HOST void parallel_for_each(InputIt first, InputIt last, UnaryFunction f, Container & results,
 		                                   thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 		                                  );
 	
-	template < class InputIt, class OutputIt, class UnaryOperation >
-	  HOST OutputIt parallel_transform(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op,
+	template < class InputIt, class OutputIt, class UnaryOperation, class Container >
+	  HOST void parallel_transform(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op, Container & results,
 		                               thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 		                              );
 
-	template < class BidirectionalIt, class Generator >
-	  HOST void parallel_generate(BidirectionalIt first, BidirectionalIt last, Generator g,
+	template < class BidirectionalIt, class Generator, class Container >
+	  HOST void parallel_generate(BidirectionalIt first, BidirectionalIt last, Generator g, Container & results,
 		                          thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 								 );
 
