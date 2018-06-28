@@ -69,25 +69,17 @@ namespace zinhart
 			  results.push_back(
 			  default_thread_pool.add_task(zinhart::parallel::vectorized::replace_if<ForwardIt, UnaryPredicate, T>,std::ref(first), std::ref(unary_predicate), std::ref(new_value), thread_id, n_elements, default_thread_pool.size() )
 			  );
-		/*	for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
-			  thread_pool.add_task();
-			std::vector<std::thread> threads(n_threads);
-			//initialize each thread
-			for(std::thread & t : threads)
-			{
-				t = std::thread(zinhart::parallel::vectorized::parallel_replace_if_init<ForwardIt, UnaryPredicate, T>, std::ref(first), std::ref(unary_predicate), std::ref(new_value), thread_id, n_elements, n_threads );
-				++thread_id;
-			}
-			for(std::thread & t : threads)
-				t.join();
-				*/
 		}
 	  template< class InputIt, class OutputIt, class T, class Container >
-		HOST void parallel_replace_copy( InputIt first, InputIt last, OutputIt output_it, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
+		HOST void parallel_replace_copy( InputIt & first, const InputIt & last, OutputIt & output_it, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  results.push_back(
+			  default_thread_pool.add_task(zinhart::parallel::vectorized::replace_copy<InputIt, OutputIt, T>, std::ref(first), std::ref(output_it), std::ref(old_value), std::ref(new_value), thread_id, n_elements, default_thread_pool.size() )
+			  );
 	/*	for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			  thread_pool.add_task();
 			std::vector<std::thread> threads(n_threads);

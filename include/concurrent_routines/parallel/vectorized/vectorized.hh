@@ -60,7 +60,7 @@ namespace zinhart
 					*(first + op) = new_value;
 		}
 	  template< class InputIt, class OutputIt, class T >
-		HOST void parallel_replace_copy_init( InputIt first, OutputIt output_it, const T & old_value, const T & new_value, 
+		HOST void replace_copy( InputIt first, OutputIt output_it, const T & old_value, const T & new_value, 
 			const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
@@ -69,7 +69,7 @@ namespace zinhart
 				*(output_it + op) = (  *(first + op) == old_value) ? new_value : *(first + op);
 		}
 	  template< class InputIt, class OutputIt, class UnaryPredicate, class T >
-		HOST void parallel_replace_copy_if_init( InputIt first, OutputIt output_it, UnaryPredicate pred, const T& new_value,
+		HOST void replace_copy_if( InputIt first, OutputIt output_it, UnaryPredicate pred, const T& new_value,
 	  const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
