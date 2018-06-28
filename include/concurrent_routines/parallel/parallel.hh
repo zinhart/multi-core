@@ -27,7 +27,7 @@ namespace zinhart
 		                              );
 
 	  template< class ForwardIt, class T, class Container >
-		HOST void parallel_replace(ForwardIt first, ForwardIt last,const T& old_value, const T& new_value, Container & results,
+		HOST void parallel_replace(ForwardIt & first, const ForwardIt & last,const T & old_value, const T & new_value, Container & results,
 		                           thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 		                 	      );
 

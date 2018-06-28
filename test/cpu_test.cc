@@ -20,20 +20,20 @@ TEST(cpu_test, parallel_saxpy)
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   float alpha = real_dist(mt);
   std::uint32_t n_elements = uint_dist(mt);
-  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  float * x_parallel = new float [n_elements];
+  float * y_parallel = new float [n_elements];
+  float * x_serial = new float [n_elements];
+  float * y_serial = new float [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
 		float first = real_dist(mt);
 		float second = real_dist(mt);
-		x_serial.get()[i] = first;
-		y_serial.get()[i] = second;
-		x_parallel.get()[i] = first;
-		y_parallel.get()[i] = second;
+		x_serial[i] = first;
+		y_serial[i] = second;
+		x_parallel[i] = first;
+		y_parallel[i] = second;
   }
   auto serial_saxpy = [](
 						const float & a, float * x, float * y,
@@ -44,8 +44,8 @@ TEST(cpu_test, parallel_saxpy)
 							y[i] = a * x[i] + y[i];
 						  }
 						};
-  zinhart::parallel::async::parallel_saxpy(alpha, x_parallel.get(), y_parallel.get(), n_elements, results);
-  serial_saxpy(alpha, x_serial.get(), y_serial.get(), n_elements);
+  zinhart::parallel::async::parallel_saxpy(alpha, x_parallel, y_parallel, n_elements, results);
+  serial_saxpy(alpha, x_serial, y_serial, n_elements);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -53,9 +53,12 @@ TEST(cpu_test, parallel_saxpy)
   }
   for(i = 0; i < n_elements; ++i)
   {
-		ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
+		ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
-  std::cout<<"Hello From CPU Tests\n";
+  delete x_parallel;
+  delete y_parallel;
+  delete x_serial;
+  delete y_serial;
 }
 
 TEST(cpu_test, parallel_copy)
@@ -91,6 +94,10 @@ TEST(cpu_test, parallel_copy)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
+  delete x_parallel;
+  delete y_parallel;
+  delete x_serial;
+  delete y_serial;
 }
 
 TEST(cpu_test, parallel_copy_if)
@@ -127,8 +134,12 @@ TEST(cpu_test, parallel_copy_if)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
+  delete x_parallel;
+  delete y_parallel;
+  delete x_serial;
+  delete y_serial;
 }
-/*
+
 TEST(cpu_test, parallel_replace)
 {
   std::random_device rd;
@@ -138,10 +149,10 @@ TEST(cpu_test, parallel_replace)
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   std::uint32_t n_elements = uint_dist(mt);
-  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  float * x_parallel = new float [n_elements];
+  float * y_parallel = new float [n_elements];
+  float * x_serial = new float [n_elements];
+  float * y_serial = new float [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float old_value = real_dist(mt);
@@ -149,13 +160,13 @@ TEST(cpu_test, parallel_replace)
   //effectively force a replace on all elements
   for(i = 0; i < n_elements; ++i )
   {
-	x_serial.get()[i] = old_value;
+	x_serial[i] = old_value;
 	//save the old values to 
-	y_serial.get()[i] = x_serial.get()[i];
-	x_parallel.get()[i] = old_value;
+	y_serial[i] = x_serial[i];
+	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace(x_parallel.get(), x_parallel.get() + n_elements, old_value, new_value, results);
-  std::replace(x_serial.get(), x_serial.get() + n_elements, old_value, new_value);
+  zinhart::parallel::async::parallel_replace(x_parallel, x_parallel + n_elements, old_value, new_value, results);
+  std::replace(x_serial, x_serial + n_elements, old_value, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -164,10 +175,14 @@ TEST(cpu_test, parallel_replace)
   //double check we have the new value 
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(x_parallel.get()[i], new_value);
+	ASSERT_EQ(x_parallel[i], new_value);
   }
+  delete x_parallel;
+  delete y_parallel;
+  delete x_serial;
+  delete y_serial;
 }
-
+/*
 TEST(cpu_test, parallel_replace_if)
 {
   std::random_device rd;
@@ -189,13 +204,13 @@ TEST(cpu_test, parallel_replace_if)
 	//effectively force a replace on all elements
   for(i = 0; i < n_elements; ++i )
   {
-	x_serial.get()[i] = old_value;
+	x_serial[i] = old_value;
 	//save the old values to 
-	y_serial.get()[i] = x_serial.get()[i];
-	x_parallel.get()[i] = old_value;
+	y_serial[i] = x_serial[i];
+	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace_if(x_parallel.get(), x_parallel.get() + n_elements, unary_predicate, new_value);
-  std::replace_if(x_serial.get(), x_serial.get() + n_elements, unary_predicate, new_value);
+  zinhart::parallel::async::parallel_replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value);
+  std::replace_if(x_serial, x_serial + n_elements, unary_predicate, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -204,7 +219,7 @@ TEST(cpu_test, parallel_replace_if)
   //double check we have the new value 
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(x_parallel.get()[i], x_serial.get()[i]);
+	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
 }
 
@@ -228,11 +243,11 @@ TEST(cpu_test, parallel_replace_copy)
   float old_value = real_dist(mt);
   for(i = 0; i < n_elements; ++i )
   {
-	x_serial.get()[i] = old_value;
-	x_parallel.get()[i] = old_value;
+	x_serial[i] = old_value;
+	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace_copy(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), old_value, new_value );
-  std::replace_copy(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), old_value, new_value);
+  zinhart::parallel::async::parallel_replace_copy(x_parallel, x_parallel + n_elements, y_parallel, old_value, new_value );
+  std::replace_copy(x_serial, x_serial + n_elements, y_serial, old_value, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -241,7 +256,7 @@ TEST(cpu_test, parallel_replace_copy)
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
+	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
 }
 
@@ -267,11 +282,11 @@ TEST(cpu_test, parallel_replace_copy_if)
   //effectively force a replace on all elements
   for(i = 0; i < n_elements; ++i )
   {
-	x_serial.get()[i] = old_value;
-	x_parallel.get()[i] = old_value;
+	x_serial[i] = old_value;
+	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::parallel_replace_copy_if(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), unary_predicate, new_value);
-  std::replace_copy_if(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary_predicate, new_value);
+  zinhart::parallel::async::parallel_replace_copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, new_value);
+  std::replace_copy_if(x_serial, x_serial + n_elements, y_serial, unary_predicate, new_value);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -280,7 +295,7 @@ TEST(cpu_test, parallel_replace_copy_if)
   //double check we have the new value 
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
+	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
 }
 */
@@ -313,13 +328,13 @@ TEST(cpu_test, parallel_inner_product_first_overload)
   {
 	first = real_dist(mt);
 	second = real_dist(mt);
-	x_serial.get()[i] = first;
-	y_serial.get()[i] = second;
-	x_parallel.get()[i] = first;
-	y_parallel.get()[i] = second;
+	x_serial[i] = first;
+	y_serial[i] = second;
+	x_parallel[i] = first;
+	y_parallel[i] = second;
   }
-  parallel_ret =  zinhart::parallel::async::parallel_inner_product(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), init);
-  serial_ret = std::inner_product(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), init);
+  parallel_ret =  zinhart::parallel::async::parallel_inner_product(x_parallel, x_parallel + n_elements, y_parallel, init);
+  serial_ret = std::inner_product(x_serial, x_serial + n_elements, y_serial, init);
   ASSERT_EQ(parallel_ret, serial_ret); 
 }
 
@@ -343,13 +358,13 @@ TEST(cpu_test, parallel_inner_product_second_overload)
   {
 	first = real_dist(mt);
 	second = real_dist(mt);
-	x_serial.get()[i] = first;
-	y_serial.get()[i] = second;
-	x_parallel.get()[i] = first;
-	y_parallel.get()[i] = second;
+	x_serial[i] = first;
+	y_serial[i] = second;
+	x_parallel[i] = first;
+	y_parallel[i] = second;
   }
-  parallel_ret =  zinhart::parallel::async::parallel_inner_product(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(), init, std::plus<float>(), std::equal_to<float>());
-  serial_ret = std::inner_product(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), init,
+  parallel_ret =  zinhart::parallel::async::parallel_inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, std::plus<float>(), std::equal_to<float>());
+  serial_ret = std::inner_product(x_serial, x_serial + n_elements, y_serial, init,
 	  std::plus<float>(), std::equal_to<float>());
   ASSERT_EQ(parallel_ret, serial_ret);
 }
@@ -370,12 +385,12 @@ TEST(cpu_test, parallel_accumulate)
   for(i = 0; i < n_elements; ++i )
   {
 	float first = real_dist(mt);
-	x_serial.get()[i] = first;
-	x_parallel.get()[i] = first;
+	x_serial[i] = first;
+	x_parallel[i] = first;
   }
   //sum
-  float p_sum = zinhart::parallel::async::parallel_accumulate(x_parallel.get(), x_parallel.get() + n_elements, 0.0);
-  float s_sum = std::accumulate(x_serial.get(), x_serial.get() + n_elements, 0);
+  float p_sum = zinhart::parallel::async::parallel_accumulate(x_parallel, x_parallel + n_elements, 0.0);
+  float s_sum = std::accumulate(x_serial, x_serial + n_elements, 0);
   //double check we have the same values 
   ASSERT_EQ(p_sum,s_sum);
 }
@@ -396,15 +411,15 @@ TEST(cpu_test, parallel_for_each)
   for(i = 0; i < n_elements; ++i )
   {
 	float first = real_dist(mt);
-	x_serial.get()[i] = first;
-	x_parallel.get()[i] = first;
+	x_serial[i] = first;
+	x_parallel[i] = first;
   }
   auto unary = []( float & a )
 						{
 						  a = a * 2.0;
 						};
-  zinhart::parallel::async::parallel_for_each(x_parallel.get(), x_parallel.get() + n_elements, unary);
-  std::for_each(x_serial.get(), x_serial.get() + n_elements, unary);
+  zinhart::parallel::async::parallel_for_each(x_parallel, x_parallel + n_elements, unary);
+  std::for_each(x_serial, x_serial + n_elements, unary);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -412,7 +427,7 @@ TEST(cpu_test, parallel_for_each)
   }
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(x_parallel.get()[i], x_serial.get()[i]);
+	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
 }
 
@@ -440,11 +455,11 @@ TEST(cpu_test, parallel_transform)
   for(i = 0; i < n_elements; ++i )
   {
 	float first = real_dist(mt);
-	x_serial.get()[i] = first;
-	x_parallel.get()[i] = first;
+	x_serial[i] = first;
+	x_parallel[i] = first;
   }
-  zinhart::parallel::async::parallel_transform(x_parallel.get(), x_parallel.get() + n_elements, y_parallel.get(),unary );
-  std::transform(x_serial.get(), x_serial.get() + n_elements, y_serial.get(), unary);
+  zinhart::parallel::async::parallel_transform(x_parallel, x_parallel + n_elements, y_parallel,unary );
+  std::transform(x_serial, x_serial + n_elements, y_serial, unary);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -453,7 +468,7 @@ TEST(cpu_test, parallel_transform)
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(y_parallel.get()[i], y_serial.get()[i]);
+	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
 }
 
@@ -473,12 +488,12 @@ TEST(cpu_test, parallel_generate)
   for(i = 0; i < n_elements; ++i )
   {
 	float first = real_dist(mt);
-	x_serial.get()[i] = first;
-	x_parallel.get()[i] = first;
+	x_serial[i] = first;
+	x_parallel[i] = first;
   }
   auto generator = [](){ return -2.0; };
-  zinhart::parallel::async::parallel_generate(x_parallel.get(), x_parallel.get() + n_elements, generator);
-  std::generate(x_serial.get(), x_serial.get() + n_elements, generator);
+  zinhart::parallel::async::parallel_generate(x_parallel, x_parallel + n_elements, generator);
+  std::generate(x_serial, x_serial + n_elements, generator);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -486,7 +501,7 @@ TEST(cpu_test, parallel_generate)
   }
   for(i = 0; i < n_elements; ++i)
   {
-	ASSERT_EQ(x_parallel.get()[i], x_serial.get()[i]);
+	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
 }
 */

@@ -47,7 +47,7 @@ namespace zinhart
 			  );
 		}
 	  template< class ForwardIt, class T, class Container >
-		HOST void parallel_replace( ForwardIt first, ForwardIt last, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
+		HOST void parallel_replace(ForwardIt & first, const ForwardIt & last, const T & old_value, const T & new_value, Container & results, thread_pool & default_thread_pool )
 		{
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 
