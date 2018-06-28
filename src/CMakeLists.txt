@@ -29,8 +29,10 @@ if(BuildCuda)
   install(DIRECTORY ../include/concurrent_routines DESTINATION include)
 else()
   set(concurrent_routines_lib 
-	concurrent_routines.cc
-	thread_pool.cc
+	  concurrent_routines.cc
+	  serial/serial.cc
+	  #parallel/parallel.cc
+	  parallel/thread_pool.cc
      )	
    add_library(concurrent_routines ${concurrent_routines_lib} )
    
