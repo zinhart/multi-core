@@ -42,7 +42,7 @@ namespace zinhart
 										   );
 
 	  template< class InputIt, class OutputIt, class UnaryPredicate, class T, class Container >
-		HOST void parallel_replace_copy_if(InputIt first, InputIt last, OutputIt output_it, UnaryPredicate p, const T& new_value, Container & results,
+		HOST void replace_copy_if(const InputIt & first, const InputIt & last, OutputIt & output_it, UnaryPredicate p, const T& new_value, Container & results,
 		                                       thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 											   );
 
