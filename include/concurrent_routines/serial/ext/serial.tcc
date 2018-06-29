@@ -76,6 +76,15 @@ namespace zinhart
 		// Correction is applied once
 		return sum + compensation;
 	  }
+	// apply a divide and conquer strategy to reduce complexity
+	template <class Precision_Type>
+	  HOST Precision_Type recursive_kahan_sum(Precision_Type * in, const std::uint32_t & N)
+	  {
+	  }
+	template <class Precision_Type>
+	  HOST Precision_Type recursive_neumaier_sum(Precision_Type * in, const std::uint32_t & N)
+	  {
+	  }
   }// END NAMESPACE SERIAL
 }// END NAMESPACE ZINHART
 
