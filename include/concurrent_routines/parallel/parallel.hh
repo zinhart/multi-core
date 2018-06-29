@@ -71,7 +71,7 @@ namespace zinhart
 		                              );
 
 	template < class BidirectionalIt, class Generator, class Container >
-	  HOST void parallel_generate(BidirectionalIt first, BidirectionalIt last, Generator g, Container & results,
+	  HOST void generate(const BidirectionalIt & first, const BidirectionalIt & last, Generator g, Container & results,
 		                          thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 								 );
 

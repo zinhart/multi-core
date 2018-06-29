@@ -126,9 +126,7 @@ namespace zinhart
 			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
 			//same deal as copy really
 			for(std::uint32_t op = start; op < stop; ++op)
-			{
 				*(output_it + op) = unary_op( *(input_it + op) );
-			}
 		}
 	  template< class BidirectionalIt, class Generator >
 		HOST void generate(BidirectionalIt first, Generator g,
@@ -138,9 +136,7 @@ namespace zinhart
 			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
 			//call f on each element
 			for(std::uint32_t op = start; op < stop; ++op)
-			{
 				*(first + op) = g();
-			}
 		}
 	}// END NAMESPACE VECTORIZED
   } // END NAMESPACE PARALLEL
