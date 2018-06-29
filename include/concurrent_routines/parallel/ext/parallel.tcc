@@ -124,11 +124,15 @@ namespace zinhart
 			  );
 		}
 	  template< class InputIt, class T, class Container >
-		HOST T parallel_accumulate( InputIt first, InputIt last, T init, Container & results, thread_pool & default_thread_pool)
+		HOST void accumulate( const InputIt & first, const InputIt & last, T & init, Container & results, thread_pool & default_thread_pool)
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+	  	    for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  results.push_back(
+			  default_thread_pool.add_task(zinhart::parallel::vectorized::accumulate<InputIt, T>, std::ref(first), std::ref(init), thread_id, n_elements, default_thread_pool.size())
+			  );
 			/*
 			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			  thread_pool.add_task();

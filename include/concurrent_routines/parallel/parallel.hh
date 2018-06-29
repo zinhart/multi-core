@@ -56,7 +56,7 @@ namespace zinhart
 									 );
 	 
   	  template< class InputIt, class T, class Container >
-  		HOST T parallel_accumulate(InputIt first, InputIt last, T init, Container & results,
+  		HOST void accumulate(const InputIt & first, const InputIt & last, T & init, Container & results,
 		                         thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 								);
 

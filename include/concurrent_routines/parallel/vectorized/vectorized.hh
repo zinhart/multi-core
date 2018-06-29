@@ -99,7 +99,7 @@ namespace zinhart
 				value = op1(value, op2( *(first1 + op) ,  *(first2 + op) ));
 		}
 	  template< class InputIt, class T >
-		HOST void parallel_accumulate_init(InputIt first, T & init,
+		HOST void accumulate(InputIt first, T & init,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
@@ -111,7 +111,7 @@ namespace zinhart
 			}
 		}  
 	  template< class InputIt, class UnaryFunction >
-		HOST void parallel_for_each_init(InputIt first, UnaryFunction f,
+		HOST void for_each(InputIt first, UnaryFunction f,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
@@ -123,7 +123,7 @@ namespace zinhart
 			}
 		}
 	  template<class InputIt, class OutputIt, class UnaryOperation>
-		HOST void parallel_transform_init(InputIt input_it, OutputIt output_it, UnaryOperation unary_op,
+		HOST void transform(InputIt input_it, OutputIt output_it, UnaryOperation unary_op,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
@@ -135,7 +135,7 @@ namespace zinhart
 			}
 		}
 	  template< class BidirectionalIt, class Generator >
-		HOST void parallel_generate_init(BidirectionalIt first, Generator g,
+		HOST void generate(BidirectionalIt first, Generator g,
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
