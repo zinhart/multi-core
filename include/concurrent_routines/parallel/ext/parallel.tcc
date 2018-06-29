@@ -102,7 +102,6 @@ namespace zinhart
 	  template< class InputIt1, class InputIt2, class T, class Container>
 		HOST void inner_product( const InputIt1 & first, const InputIt1 & last, const InputIt2 & output_it, T & value, Container & results, thread_pool & default_thread_pool )
 		{
-
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 			//to identify each thread
 			std::uint32_t thread_id = 0;
@@ -111,27 +110,19 @@ namespace zinhart
 			  results.push_back(
 			  default_thread_pool.add_task(zinhart::parallel::vectorized::inner_product<InputIt1, InputIt2, T>, std::ref(first), std::ref(output_it), std::ref(value), thread_id, n_elements, default_thread_pool.size()  )
 			  );
-			/*for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
-			  thread_pool.add_task();
-			
-			std::vector<std::thread> threads(n_threads);
-			//initialize each thread
-			for(std::thread & t : threads)
-			{
-				t = std::thread(zinhart::parallel::vectorized::parallel_inner_product_init<InputIt, OutputIt, T>, std::ref(first), std::ref(output_it), std::ref(value), thread_id, n_elements, n_threads );
-				++thread_id;
-			}
-			for(std::thread & t : threads)
-				t.join();
-
-			return value;
-			*/
 		}
-	/*  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2, class Container>
-		HOST T parallel_inner_product( InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1,BinaryOperation2 op2, Container & results, thread_pool & default_thread_pool )
+	  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2, class Container>
+		HOST void inner_product( const InputIt1 & first1, const InputIt1 & last1, const InputIt2 & first2, T & value, BinaryOperation1 op1,BinaryOperation2 op2, Container & results, thread_pool & default_thread_pool )
 		{
-			return value;
-		}*/
+		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
+		  //to identify each thread
+		  std::uint32_t thread_id = 0;
+		  const std::uint32_t n_elements = std::distance(first1, last1);
+	  	  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  results.push_back(
+			  default_thread_pool.add_task(zinhart::parallel::vectorized::inner_product<InputIt1, InputIt2, T, BinaryOperation1, BinaryOperation2>, std::ref(first1), std::ref(first2), std::ref(value), op1, op2, thread_id, n_elements, default_thread_pool.size()  )
+			  );
+		}
 	  template< class InputIt, class T, class Container >
 		HOST T parallel_accumulate( InputIt first, InputIt last, T init, Container & results, thread_pool & default_thread_pool)
 		{

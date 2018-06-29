@@ -50,10 +50,10 @@ namespace zinhart
 		HOST void inner_product(const InputIt1 & first1, const InputIt1 & last1, const InputIt2 & first2, T & value, Container & results,
 		                              thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 									 );
-/*	  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2, class Container>
-		HOST T parallel_inner_product(InputIt1 first1, InputIt1 last1, InputIt2 first2, T value, BinaryOperation1 op1, BinaryOperation2 op2, Container & results,
+	  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2, class Container>
+		HOST void inner_product(const InputIt1 & first1, const InputIt1 & last1, const InputIt2 & first2, T & value, BinaryOperation1 op1, BinaryOperation2 op2, Container & results,
 		                              thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
-									 );*/
+									 );
 	 
   	  template< class InputIt, class T, class Container >
   		HOST T parallel_accumulate(InputIt first, InputIt last, T init, Container & results,
