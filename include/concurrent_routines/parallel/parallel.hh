@@ -61,7 +61,7 @@ namespace zinhart
 								);
 
 	template < class InputIt, class UnaryFunction, class Container >
-	  HOST void parallel_for_each(InputIt first, InputIt last, UnaryFunction f, Container & results,
+	  HOST void for_each(const InputIt & first, const InputIt & last, UnaryFunction f, Container & results,
 		                                   thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 		                                  );
 	

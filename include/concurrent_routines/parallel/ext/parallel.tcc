@@ -133,29 +133,17 @@ namespace zinhart
 			  results.push_back(
 			  default_thread_pool.add_task(zinhart::parallel::vectorized::accumulate<InputIt, T>, std::ref(first), std::ref(init), thread_id, n_elements, default_thread_pool.size())
 			  );
-			/*
-			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
-			  thread_pool.add_task();
-			std::vector<std::thread> threads(n_threads);
-			//initialize each thread
-			for(std::thread & t : threads)
-			{
-				t = std::thread(zinhart::parallel::vectorized::parallel_accumulate_init<InputIt,T>, std::ref(first), std::ref(init), thread_id, n_elements, n_threads );
-				++thread_id;
-			}
-			for(std::thread & t : threads)
-			{
-				t.join();
-			}
-			return init;
-			*/
 		}
 	  template < class InputIt, class UnaryFunction, class Container >
-		HOST void parallel_for_each(InputIt first, InputIt last, UnaryFunction f, Container & results, thread_pool & default_thread_pool )
+		HOST void for_each(const InputIt & first, const InputIt & last, UnaryFunction f, Container & results, thread_pool & default_thread_pool )
 		{
 			//to identify each thread
 			std::uint32_t thread_id = 0;
 			const std::uint32_t n_elements = std::distance(first, last);
+			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
+			  results.push_back(
+			  default_thread_pool.add_task(zinhart::parallel::vectorized::for_each<InputIt, UnaryFunction>, std::ref(first), std::ref(f), thread_id, n_elements, default_thread_pool.size())
+			  );
 			/*
 			for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			  thread_pool.add_task();

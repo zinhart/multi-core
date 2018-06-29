@@ -106,9 +106,7 @@ namespace zinhart
 			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
-			{
 				init = init + *(first + op);
-			}
 		}  
 	  template< class InputIt, class UnaryFunction >
 		HOST void for_each(InputIt first, UnaryFunction f,
@@ -118,9 +116,7 @@ namespace zinhart
 			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
 			//call f on each element
 			for(std::uint32_t op = start; op < stop; ++op)
-			{
 				f( *(first + op) );
-			}
 		}
 	  template<class InputIt, class OutputIt, class UnaryOperation>
 		HOST void transform(InputIt input_it, OutputIt output_it, UnaryOperation unary_op,
