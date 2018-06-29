@@ -813,7 +813,7 @@ TEST(cpu_test, parallel_for_each)
   delete x_parallel;
 }
 
-/*
+
 TEST(cpu_test, parallel_transform)
 {
   std::random_device rd;
@@ -823,10 +823,10 @@ TEST(cpu_test, parallel_transform)
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   std::uint32_t n_elements = uint_dist(mt);
-  std::shared_ptr<float> x_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_parallel = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> x_serial = std::shared_ptr<float>(new float [n_elements]);
-  std::shared_ptr<float> y_serial = std::shared_ptr<float>(new float [n_elements]);
+  float * x_parallel = new float [n_elements];
+  float * y_parallel = new float [n_elements];
+  float * x_serial = new float [n_elements];
+  float * y_serial = new float [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   auto unary = []( float & a )
@@ -840,7 +840,7 @@ TEST(cpu_test, parallel_transform)
 	x_serial[i] = first;
 	x_parallel[i] = first;
   }
-  zinhart::parallel::async::parallel_transform(x_parallel, x_parallel + n_elements, y_parallel,unary );
+  zinhart::parallel::async::transform(x_parallel, x_parallel + n_elements, y_parallel, unary, results );
   std::transform(x_serial, x_serial + n_elements, y_serial, unary);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -852,8 +852,12 @@ TEST(cpu_test, parallel_transform)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
+  delete x_parallel;
+  delete y_parallel;
+  delete x_serial;
+  delete y_serial;
 }
-
+/*
 TEST(cpu_test, parallel_generate)
 {
   std::random_device rd;

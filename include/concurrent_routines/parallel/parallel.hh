@@ -66,7 +66,7 @@ namespace zinhart
 		                                  );
 	
 	template < class InputIt, class OutputIt, class UnaryOperation, class Container >
-	  HOST void parallel_transform(InputIt first, InputIt last, OutputIt output_first, UnaryOperation unary_op, Container & results,
+	  HOST void transform(const InputIt & first, const InputIt & last, OutputIt & output_first, UnaryOperation unary_op, Container & results,
 		                               thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 		                              );
 
