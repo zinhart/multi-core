@@ -138,6 +138,15 @@ namespace zinhart
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(first + op) = g();
 		}
+  	  template <class Precision_Type>
+  		HOST Precision_Type kahan_sum(Precision_Type * data, Precision_Type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
+		{
+
+		}
+  	  template <class Precision_Type>
+	   	HOST Precision_Type neumaier_sum(Precision_Type * data, Precision_Type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
+		{
+		}
 	}// END NAMESPACE VECTORIZED
   } // END NAMESPACE PARALLEL
 }// END NAMESPACE ZINHART

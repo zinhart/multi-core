@@ -8,15 +8,9 @@ namespace zinhart
   namespace serial
   {
 	template <class Precision_Type>
-	  HOST Precision_Type kahan_sum(Precision_Type * in, const std::uint32_t & N);
+	  HOST Precision_Type kahan_sum(Precision_Type * data, const std::uint32_t & data_size);
 	template <class Precision_Type>
-	  HOST Precision_Type neumaier_sum(Precision_Type * in, const std::uint32_t & N);
-
-	// apply a divide and conquer strategy to reduce complexity
-	template <class Precision_Type>
-	  HOST Precision_Type recursive_kahan_sum(Precision_Type * in, const std::uint32_t & N);
-	template <class Precision_Type>
-	  HOST Precision_Type recursive_neumaier_sum(Precision_Type * in, const std::uint32_t & N);
+	  HOST Precision_Type neumaier_sum(Precision_Type * data, const std::uint32_t & data_size);
 
 	template<class Precision_Type>
 	  HOST void print_matrix_row_major(Precision_Type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s);
