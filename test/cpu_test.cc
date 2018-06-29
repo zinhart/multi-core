@@ -763,7 +763,7 @@ TEST(cpu_test, parallel_accumulate)
   //sum
   float p_sum{0.0};
   zinhart::parallel::async::accumulate(x_parallel, x_parallel + n_elements, p_sum, results);
-  float s_sum = std::accumulate(x_serial, x_serial + n_elements, 0);
+  float s_sum = std::accumulate(x_serial, x_serial + n_elements, 0.0);
   // make sure all threads are done before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
