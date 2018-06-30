@@ -158,7 +158,7 @@ namespace zinhart
 		  global_sum += local_sum;
 		}
 	  template <class Precision_Type>
-		HOST void neumaier_sum(Precision_Type * data, Precision_Type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
+		HOST void neumaier_sum(const Precision_Type * data, Precision_Type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 		  std::uint32_t start{0}, stop{0}, op{0};
 		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);

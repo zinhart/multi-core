@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 namespace zinhart
 {
   namespace serial

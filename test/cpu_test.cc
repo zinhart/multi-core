@@ -910,7 +910,7 @@ TEST(cpu_test_parallel, kahan_sum)
   {
 	results[i].get();
   }
-  ASSERT_EQ(parallel_sum, serial_sum);
+  ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
   delete x_serial;
   delete x_parallel;
 }
@@ -943,7 +943,7 @@ TEST(cpu_test_parallel, neumaier_sum)
   {
 	results[i].get();
   }
-  ASSERT_EQ(parallel_sum, serial_sum);
+  ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
   delete x_serial;
   delete x_parallel;
 }
