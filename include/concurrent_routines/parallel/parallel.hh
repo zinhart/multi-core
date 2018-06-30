@@ -75,15 +75,14 @@ namespace zinhart
 		                          thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool()
 								 );
 
-	template <class Precision_Type>
-	  HOST Precision_Type kahan_sum(Precision_Type * in, const std::uint32_t & N);
+	template <class Precision_Type, class Container>
+	  HOST void kahan_sum(Precision_Type *& data, const std::uint32_t & data_size, Precision_Type & sum, Container & results,
+		                  thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool());
 	
-	template <class Precision_Type>
-	  HOST Precision_Type neumaier_sum(Precision_Type * in, const std::uint32_t & N);
+	template <class Precision_Type, class Container>
+	  HOST void neumaier_sum(Precision_Type *& data, const std::uint32_t & data_size, Precision_Type & sum, Container & results,
+		                     thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool());
 
-	// to call the two methods above
-	//template <class Precision_Type>
-	 // Precision_Type pairwise_sum; 
 	}// END NAMESPACE ASYNC
   }// END NAMESPACE PARALLEL
 }// END NAMESPACE ZINHART

@@ -1,6 +1,4 @@
 #include "concurrent_routines/concurrent_routines.hh"
-//#include "concurrent_routines/thread_safe_queue.hh"
-//#include "concurrent_routines/thread_pool.hh"
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <iostream>
@@ -354,7 +352,7 @@ TEST(thread_pool, call_add_task_function)
   zinhart::parallel::thread_pool::task_future<std::int32_t> result = zinhart::parallel::default_thread_pool::push_task(plus_one,3);
   ASSERT_EQ(result.get(), 4);
 }
-TEST(cpu_test, parallel_saxpy)
+TEST(cpu_test_parallel, saxpy)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -390,7 +388,7 @@ TEST(cpu_test, parallel_saxpy)
 						};
   zinhart::parallel::async::saxpy(alpha, x_parallel, y_parallel, n_elements, results);
   serial_saxpy(alpha, x_serial, y_serial, n_elements);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -405,7 +403,7 @@ TEST(cpu_test, parallel_saxpy)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_copy)
+TEST(cpu_test_parallel, copy)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -428,7 +426,7 @@ TEST(cpu_test, parallel_copy)
   }
   zinhart::parallel::async::copy(x_parallel, x_parallel + n_elements, y_parallel, results );
   std::copy(x_serial, x_serial + n_elements, y_serial);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -444,7 +442,7 @@ TEST(cpu_test, parallel_copy)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_copy_if)
+TEST(cpu_test_parallel, copy_if)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -468,7 +466,7 @@ TEST(cpu_test, parallel_copy_if)
   auto unary_predicate = [](float & init){ return (init >= 1.0) ? true : false ;};
   zinhart::parallel::async::copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, results );
   std::copy_if(x_serial, x_serial + n_elements, y_serial, unary_predicate);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -484,7 +482,7 @@ TEST(cpu_test, parallel_copy_if)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_replace)
+TEST(cpu_test_parallel, replace)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -511,7 +509,7 @@ TEST(cpu_test, parallel_replace)
   }
   zinhart::parallel::async::replace(x_parallel, x_parallel + n_elements, old_value, new_value, results);
   std::replace(x_serial, x_serial + n_elements, old_value, new_value);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -527,7 +525,7 @@ TEST(cpu_test, parallel_replace)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_replace_if)
+TEST(cpu_test_parallel, replace_if)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -555,7 +553,7 @@ TEST(cpu_test, parallel_replace_if)
   }
   zinhart::parallel::async::replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value, results);
   std::replace_if(x_serial, x_serial + n_elements, unary_predicate, new_value);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -572,7 +570,7 @@ TEST(cpu_test, parallel_replace_if)
 }
 
 
-TEST(cpu_test, parallel_replace_copy)
+TEST(cpu_test_parallel, replace_copy)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -596,7 +594,7 @@ TEST(cpu_test, parallel_replace_copy)
   }
   zinhart::parallel::async::replace_copy(x_parallel, x_parallel + n_elements, y_parallel, old_value, new_value, results );
   std::replace_copy(x_serial, x_serial + n_elements, y_serial, old_value, new_value);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -612,7 +610,7 @@ TEST(cpu_test, parallel_replace_copy)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_replace_copy_if)
+TEST(cpu_test_parallel, replace_copy_if)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -638,7 +636,7 @@ TEST(cpu_test, parallel_replace_copy_if)
   }
   zinhart::parallel::async::replace_copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, new_value, results);
   std::replace_copy_if(x_serial, x_serial + n_elements, y_serial, unary_predicate, new_value);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -654,14 +652,7 @@ TEST(cpu_test, parallel_replace_copy_if)
   delete y_serial;
 }
 
-/*
-TEST(cpu_test, parallel_sample)
-{
-
-
-}
-*/
-TEST(cpu_test, parallel_inner_product_first_overload)
+TEST(cpu_test_parallel, inner_product_first_overload)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -688,7 +679,7 @@ TEST(cpu_test, parallel_inner_product_first_overload)
   }
   zinhart::parallel::async::inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, results);
   serial_ret = std::inner_product(x_serial, x_serial + n_elements, y_serial, init);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -701,7 +692,7 @@ TEST(cpu_test, parallel_inner_product_first_overload)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_inner_product_second_overload)
+TEST(cpu_test_parallel, inner_product_second_overload)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -728,7 +719,7 @@ TEST(cpu_test, parallel_inner_product_second_overload)
   }
   zinhart::parallel::async::inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, std::plus<float>(), std::equal_to<float>(), results);
   serial_ret = std::inner_product(x_serial, x_serial + n_elements, y_serial, init, std::plus<float>(), std::equal_to<float>());
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -741,7 +732,7 @@ TEST(cpu_test, parallel_inner_product_second_overload)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_accumulate)
+TEST(cpu_test_parallel, accumulate)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -764,7 +755,7 @@ TEST(cpu_test, parallel_accumulate)
   float p_sum{0.0};
   zinhart::parallel::async::accumulate(x_parallel, x_parallel + n_elements, p_sum, results);
   float s_sum = std::accumulate(x_serial, x_serial + n_elements, 0.0);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -775,7 +766,7 @@ TEST(cpu_test, parallel_accumulate)
   delete x_parallel;
 }
 
-TEST(cpu_test, parallel_for_each)
+TEST(cpu_test_parallel, for_each)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -800,7 +791,7 @@ TEST(cpu_test, parallel_for_each)
 						};
   zinhart::parallel::async::for_each(x_parallel, x_parallel + n_elements, unary, results);
   std::for_each(x_serial, x_serial + n_elements, unary);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -813,8 +804,7 @@ TEST(cpu_test, parallel_for_each)
   delete x_parallel;
 }
 
-
-TEST(cpu_test, parallel_transform)
+TEST(cpu_test_parallel, transform)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -842,7 +832,7 @@ TEST(cpu_test, parallel_transform)
   }
   zinhart::parallel::async::transform(x_parallel, x_parallel + n_elements, y_parallel, unary, results );
   std::transform(x_serial, x_serial + n_elements, y_serial, unary);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -858,7 +848,7 @@ TEST(cpu_test, parallel_transform)
   delete y_serial;
 }
 
-TEST(cpu_test, parallel_generate)
+TEST(cpu_test_parallel, generate)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
@@ -880,7 +870,7 @@ TEST(cpu_test, parallel_generate)
   auto generator = [](){ return -2.0; };
   zinhart::parallel::async::generate(x_parallel, x_parallel + n_elements, generator, results);
   std::generate(x_serial, x_serial + n_elements, generator);
-  // make sure all threads are done before comparing the final result
+  // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
 	results[i].get();
@@ -889,6 +879,71 @@ TEST(cpu_test, parallel_generate)
   {
 	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
+  delete x_serial;
+  delete x_parallel;
+}
+
+TEST(cpu_test_parallel, kahan_sum)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  double * x_parallel = new double [n_elements];
+  double * x_serial = new double [n_elements];
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::uint32_t i;
+  double parallel_sum{0.0}, serial_sum{0.0};
+  for(i = 0; i < n_elements; ++i )
+  {
+	double first = real_dist(mt);
+	x_serial[i] = first;
+	x_parallel[i] = first;
+  }
+  zinhart::parallel::async::kahan_sum(x_parallel, n_elements, parallel_sum, results);
+  serial_sum = zinhart::serial::kahan_sum(x_serial, n_elements);
+  // make sure all threads are done with their portion before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  }
+  ASSERT_EQ(parallel_sum, serial_sum);
+  delete x_serial;
+  delete x_parallel;
+}
+
+
+TEST(cpu_test_parallel, neumaier_sum)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  double * x_parallel = new double [n_elements];
+  double * x_serial = new double [n_elements];
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::uint32_t i;
+  double parallel_sum{0.0}, serial_sum{0.0};
+  for(i = 0; i < n_elements; ++i )
+  {
+	double first = real_dist(mt);
+	x_serial[i] = first;
+	x_parallel[i] = first;
+  }
+  zinhart::parallel::async::neumaier_sum(x_parallel, n_elements, parallel_sum, results);
+  serial_sum = zinhart::serial::neumaier_sum(x_serial, n_elements);
+  // make sure all threads are done with their portion before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  }
+  ASSERT_EQ(parallel_sum, serial_sum);
   delete x_serial;
   delete x_parallel;
 }
