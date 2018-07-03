@@ -202,7 +202,7 @@ namespace zinhart
        // when there is only one warp per block, we need to allocate two warps
        // worth of shared memory so that we don't index shared memory out of bounds
 	   std::uint32_t shared_memory_bytes = (threads_per_block.x <= 32) ? 2 * threads_per_block.x * sizeof(Precision_Type) : threads_per_block.x * sizeof(Precision_Type);
-	   if ( (N&(N - 1)) == 0 )// is N is a power of 2
+	   if ( ( N&(N - 1)) == 0 )// is N is a power of 2
 	   {
 		 switch (threads_per_block.x)
 		 {

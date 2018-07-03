@@ -14,8 +14,9 @@ namespace zinhart
 
 	template<class Precision_Type>
 	  HOST void print_matrix_row_major(Precision_Type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s);
+
 	  // HELPER FUNCTIONS
-	  // this function is used by each thread to determine what pieces of data it will operate on
+	  // this function is used by each thread to determine what pieces of data it will operate on, assuming that n_elements >= n_threads since n_elements / n_threads =  amount of work per threads
 	  HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop);
 	  // for reduce
 	  HOST std::uint32_t next_pow2(std::uint32_t x);

@@ -42,8 +42,8 @@ endif()
 
 # threading library
 find_package(Threads REQUIRED)
-# lapacke for matrix multiplications
-find_package(LAPACK REQUIRED)
+# mkl for matrix multiplications
+find_package(MKL REQUIRED)
 
 
 # find cuda package and set compute achitecture and nvcc compile flags
@@ -80,7 +80,7 @@ else()
 endif()
 
 # set include paths
-include_directories(. include include/concurrent_rountines/  ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
+include_directories(. include include/concurrent_rountines/ ${MKL_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
 
 # set cxx standard
 set(CMAKE_CXX_STANDARD 11)
@@ -120,6 +120,8 @@ message(STATUS " Sanitize Flags		  : ${Sanitize}")
 if(BuildCuda)
   message(STATUS " Found CUDA			  : ${CUDA_FOUND}")
   message(STATUS " CUDA_NVCC_FLAGS               : ${CUDA_NVCC_FLAGS}")
+else()
+  message(STATUS " Found MKL			  : ${MKL_FOUND}")
 endif()
 message(STATUS " CMAKE_CXX_FLAGS		  : ${CMAKE_CXX_FLAGS}")
 if("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")

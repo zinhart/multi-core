@@ -129,7 +129,7 @@ TEST(gpu_test, gemm_wrapper)
   }
   for(std::int32_t i = 0; i < C_total_elements; ++i)
   {
-	ASSERT_NEAR(C_host[i],C_host_copy[i], epsilon);
+	ASSERT_NEAR(C_host[i],C_host_copy[i], epsilon)<<"i: "<<i<<"\n";
   }
 
   zinhart::check_cuda_api(cudaFreeHost(A_host),__FILE__,__LINE__);
@@ -272,20 +272,29 @@ TEST(gpu_test, call_axps_async)
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFree(X_device),__FILE__,__LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaDeviceReset(),__FILE__, __LINE__));
 }
-
+/* commented out b/c not finished
 TEST(gpu_test, reduce_sum_async)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
-  //for any needed random uint
-  std::uniform_int_distribution<std::uint32_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max() );
-  std::uniform_int_distribution<std::uint8_t> stream_dist(1, 10/*std::numeric_limits<std::uint8_t>::max()*/ );
+
+  // the default thread pool size is std::hardware_concurrency
+  std::uniform_int_distribution<std::uint8_t> stream_dist(1, zinhart::parallel::default_thread_pool::get_default_thread_pool().size());
+
+  // total streams
+  const std::uint32_t n_streams{stream_dist(mt)};
+
+  //for any needed random uint, ensure that there are atleast as many data points as streams
+  std::uniform_int_distribution<std::uint32_t> uint_dist(n_streams, std::numeric_limits<std::uint16_t>::max() );
+
+  // base vector size
+  const std::uint32_t N{uint_dist(mt)};
+
   //for any needed random real, the distribution will be floats stored in double to reduce floating point error
   std::uniform_real_distribution<float> real_dist(-5.5, 5.5);
-
-  // base vector sizes
-  const std::uint32_t N{uint_dist(mt)};
-  const std::uint32_t n_streams{stream_dist(mt)};
+    
+  // host thread pool
+  zinhart::parallel::thread_pool pool(n_streams);
  
   // this is here to determine the size of x_host_out
   std::uint32_t max_threads{0};
@@ -310,10 +319,14 @@ TEST(gpu_test, reduce_sum_async)
   cudaStream_t * stream{nullptr};
 
   // Host threads
-  std::list<zinhart::parallel::thread_pool::task_future<double>> serial_reduction_results;
+  std::list<zinhart::parallel::thread_pool::task_future<void>> results;
 
   // Misc variables: loop counters temp values etc
-  std::uint32_t i, j, input_offset, output_offset, host_sum, device_sum, device_id;
+  std::uint32_t i, j, input_offset, output_offset, device_id;
+
+  // this for the host & summation
+  double host_sum[n_streams];
+  double device_sum{0.0};
 
   // Allocate page locked host memory and check for error, each host vector will have it's own workspace
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaHostAlloc((void**)&X_host, input_vector_lengths * sizeof(double),cudaHostAllocDefault),__FILE__,__LINE__));
@@ -333,10 +346,14 @@ TEST(gpu_test, reduce_sum_async)
   }
   for(i = 0; i < output_vector_lengths; ++i)
 	X_host_out[i] = 0.0;
+  std::cout<<"n_streams: "<<n_streams<<"\n";
+  std::cout<<"N: "<<N<<"\n";
+  std::cout<<"pool size: "<<pool.size()<<"\n";
+  //zinhart::serial::print_matrix_row_major(X_host_validation, N, 1, "X_host");
 
 
   // trial loop
-  for (std::uint32_t i = 0, input_offset = 0, output_offset = 0, device_id = 0; i < n_streams; ++i, input_offset += N, output_offset += num_blocks)
+  for (i = 0, input_offset = 0, output_offset = 0, device_id = 0; i < n_streams; ++i, input_offset += N, output_offset += num_blocks)
   {
 	// copy host memory to device 
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_device + input_offset, X_host + input_offset, N * sizeof(double), cudaMemcpyHostToDevice, stream[i]),__FILE__,__LINE__));
@@ -344,17 +361,21 @@ TEST(gpu_test, reduce_sum_async)
 	
     // call reduction kernel once per stream
 	zinhart::reduce(X_device + input_offset, X_device_out + output_offset, N, stream[i], device_id);
-  
-    // perform serial reduction (will summation algo's here in the interest of accuracy)
 	
+	// important!
+ 	host_sum[i] = 0.0; 
+    
+	// perform serial reduction (summation  algo's here in the interest of accuracy)
+	zinhart::parallel::async::neumaier_sum( X_host_validation + input_offset, N, host_sum[i], results, pool);
+
+///	std::cout<<"results_size: "<<results.size()<<"\n";
+
   }	
   // validation loop
-  for (std::uint32_t i = 0, input_offset = 0, output_offset = 0; i < n_streams; ++i, input_offset += N, output_offset += num_blocks)
+  for (i = 0, input_offset = 0, output_offset = 0; i < n_streams; ++i, input_offset += N, output_offset += num_blocks)
   {
-
 	// synchronize host thread w.r.t each stream to ensure reduction kernels have finished
 	cudaStreamSynchronize(stream[i]);
-
 
 	// copy device memory back to host
 	ASSERT_EQ(0, zinhart::check_cuda_api(cudaMemcpyAsync(X_host + input_offset, X_device + input_offset, N * sizeof(double), cudaMemcpyDeviceToHost, stream[i]),__FILE__,__LINE__));
@@ -363,12 +384,33 @@ TEST(gpu_test, reduce_sum_async)
 	// synchronize host thread w.r.t each stream to ensure each memory copy has finished before validation
 	cudaStreamSynchronize(stream[i]);
 
-    // validate the results of an individual stream and host thread pair 
+	// validate the results of an individual stream and host thread pair 
 	for(j = input_offset; j < input_offset + N; ++j)
-	 ASSERT_EQ(X_host[i], X_host_validation[i]);
+	 ASSERT_DOUBLE_EQ(X_host[i], X_host_validation[i]);
 
+	// sum blocks from gpu
+	for(j = output_offset; j < num_blocks; ++j)
+	  device_sum += X_host_out[j];
+
+	// synchronize host thread w.r.t to the thread that is the twin of the cuda stream, host_sum will contain a valid result from this line onwards
+	for(j = 0; j < n_streams; ++j)
+	{
+	  results.front().get();
+  	  // remove futures from the results list, for the next iteration
+	  results.pop_front();
+	}
+	std::cout<<"num_blocks: "<<num_blocks<<"\n";
+	zinhart::serial::print_matrix_row_major(X_host_validation + output_offset, 1, num_blocks, "X_host validation");
+	std::cout<<"iteration: "<<i<<" host_sum: "<<host_sum[i]<<" device_sum: "<<device_sum<<"\n";
+
+	//zinhart::serial::print_matrix_row_major(X_host_validation + output_offset, num_blocks, 1, "X_host validation");
+	//ASSERT_DOUBLE_EQ(host_sum[i], device_sum)<<"iteration: "<<i<<"\n";
+	//ASSERT_DOUBLE_EQ(host_sum[i], X_host_out[0])<<"iteration: "<<i<<"\n";
+
+
+	// for next iteration
+	device_sum = 0.0;
   }
-      
   // Deallocate host memory
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(X_host), __FILE__, __LINE__));
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaFreeHost(X_host_out), __FILE__, __LINE__));
@@ -382,3 +424,4 @@ TEST(gpu_test, reduce_sum_async)
   // Reset device and check for errors
   ASSERT_EQ(0, zinhart::check_cuda_api(cudaDeviceReset(),__FILE__, __LINE__));
 }
+*/

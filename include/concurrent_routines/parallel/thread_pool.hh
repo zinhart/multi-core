@@ -108,11 +108,7 @@ namespace zinhart
 
 		  //return basic_thread_pool.add_task(std::forward<Callable>(c), std::forward<Args>(args)...);
 		}
-
-	}
-	// end namespace default_thread_pool
-  }
-  // end namespace parallel
-}
-// end banesoace zinhart
+	}// END NAMESPACE DEFAULT_THREAD_POOL
+  }// END NAMESPACE PARALLEL
+}// END NAMESPACe ZINHART
 #endif

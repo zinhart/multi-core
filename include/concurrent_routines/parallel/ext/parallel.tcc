@@ -171,7 +171,7 @@ namespace zinhart
 		}
 
 	  template <class Precision_Type, class Container>
-		HOST void kahan_sum(Precision_Type *& data, const std::uint32_t & data_size, Precision_Type & global_sum, Container & results, thread_pool & default_thread_pool)
+		HOST void kahan_sum(const Precision_Type * data, const std::uint32_t & data_size, Precision_Type & global_sum, Container & results, thread_pool & default_thread_pool)
 		{
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 	  	  //to identify each thread
@@ -182,14 +182,14 @@ namespace zinhart
 			);
 		}
 	  template <class Precision_Type, class Container>
-		HOST void neumaier_sum(Precision_Type *& data, const std::uint32_t & data_size, Precision_Type & global_sum, Container & results, thread_pool & default_thread_pool)
+		HOST void neumaier_sum(const Precision_Type * data, const std::uint32_t & data_size, Precision_Type & global_sum, Container & results, thread_pool & default_thread_pool)
 		{
 		  static_assert(std::is_same<typename Container::value_type, zinhart::parallel::thread_pool::task_future<void> >::value, "Container value_type must be zinhart::parallel::thread_pool::task_future<void>\n");
 	  	  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			results.push_back(
-			default_thread_pool.add_task(zinhart::parallel::vectorized::neumaier_sum<Precision_Type>, std::ref(data), std::ref(global_sum), thread_id, data_size, default_thread_pool.size())
+			default_thread_pool.add_task(zinhart::parallel::vectorized::neumaier_sum<Precision_Type>, data, std::ref(global_sum), thread_id, data_size, default_thread_pool.size())
 			);
 		}
 	}// END NAMESPACE ASYNC

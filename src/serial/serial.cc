@@ -1,4 +1,6 @@
 #include "concurrent_routines/serial/serial.hh"
+#include <stdexcept>
+#include <string>
 namespace zinhart
 {
   namespace serial
@@ -6,17 +8,37 @@ namespace zinhart
 	// for embarrisingly parralell problems
 	HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop)
 	{
-	  // total number of operations that must be performed by each thread
-	  const std::uint32_t n_ops = n_elements / n_threads; 
-	  
-	  // may not divide evenly
-	  const std::uint32_t remaining_ops = n_elements % n_threads;
-	  
-	  // the first thread will handle remaining opssee stop
-	  start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-	  
-	  // the index of the next start essentially
-	  stop = n_ops * (thread_id + 1) + remaining_ops;
+	  try
+	  {
+		if(n_elements < n_threads)
+		{
+		  std::string exception_msg("thread_id: " + std::to_string(thread_id) + " less data_points than threads");
+		  throw std::runtime_error(exception_msg);
+		}
+		else
+		{
+		  // total number of operations that must be performed by each thread
+		  const std::uint32_t n_ops = n_elements / n_threads; 
+
+		  // may not divide evenly
+		   const std::uint32_t remaining_ops = n_elements % n_threads;
+		
+		  // the first thread will handle remaining opssee stop
+		  start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
+		
+		  // the index of the next start essentially
+		  stop = n_ops * (thread_id + 1) + remaining_ops;
+		}
+ 	  }
+	  catch(std::exception & e)
+	  {
+		std::cerr<<e.what()<<"\n";
+		std::abort();
+	  }
+	  catch(...)
+	  {
+		std::abort();
+	  }
 	}
 	// from cuda samples for reduce
 	HOST std::uint32_t next_pow2(std::uint32_t x)

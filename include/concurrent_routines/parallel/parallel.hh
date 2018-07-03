@@ -76,11 +76,11 @@ namespace zinhart
 								 );
 
 	template <class Precision_Type, class Container>
-	  HOST void kahan_sum(Precision_Type *& data, const std::uint32_t & data_size, Precision_Type & sum, Container & results,
+	  HOST void kahan_sum(const Precision_Type * data, const std::uint32_t & data_size, Precision_Type & sum, Container & results,
 		                  thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool());
 	
 	template <class Precision_Type, class Container>
-	  HOST void neumaier_sum(Precision_Type *& data, const std::uint32_t & data_size, Precision_Type & sum, Container & results,
+	  HOST void neumaier_sum(const Precision_Type * data, const std::uint32_t & data_size, Precision_Type & sum, Container & results,
 		                     thread_pool & default_thread_pool = zinhart::parallel::default_thread_pool::get_default_thread_pool());
 
 	}// END NAMESPACE ASYNC

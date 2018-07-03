@@ -31,14 +31,14 @@ else()
   set(concurrent_routines_lib 
 	  concurrent_routines.cc
 	  serial/serial.cc
-	  #parallel/parallel.cc
 	  parallel/thread_pool.cc
      )	
    add_library(concurrent_routines ${concurrent_routines_lib} )
    
-   #link cpu threading library
+   #link cpu threading library & MKL
    target_link_libraries(
    concurrent_routines 
+   ${MKL_LIBRARIES}
    ${CMAKE_THREAD_LIBS_INIT}
   )
 

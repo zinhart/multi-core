@@ -16,7 +16,7 @@
   #define DEVICE
   #define CONSTANT
   #define SHARED
-  #include <lapacke.h>
+  #include "mkl.h"
 #endif
 #include <cstdint>
 #define MAX_CPU_THREADS std::thread::hardware_concurrency()

@@ -7,351 +7,7 @@
 #include <memory>
 #include <functional>
 #include <future>
-TEST(thread_safe_queue, call_size_on_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint32_t> thread_dist(std::uint32_t{1}, std::uint32_t{MAX_CPU_THREADS});
-  std::uint32_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  auto call_size = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue)
-  {
-	ASSERT_EQ(std::uint32_t{0}, init_queue.size());
-  };
-  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
-  //called from the main thread
-  call_size(test_queue);
-  ASSERT_EQ(std::uint32_t{0}, test_queue.size());
-  //call size from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_size, std::ref(test_queue) );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-}
-TEST(thread_safe_queue, call_empty_on_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  auto call_empty = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue)
-  {
-	ASSERT_EQ(true, init_queue.empty());
-  };
-  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
-  //called from the main thread
-  call_empty(test_queue);
-  ASSERT_EQ(true, test_queue.empty());
-  //call empty from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_empty, std::ref(test_queue) );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-}
-TEST(thread_safe_queue, call_clear_on_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  auto call_clear = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue)
-  {
-	init_queue.clear();
-	//since these were already tested
-	ASSERT_EQ(bool{true}, init_queue.empty());
-	ASSERT_EQ(std::uint32_t{0}, init_queue.size());
-  };
-  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
-  //called from the main thread
-  call_clear(test_queue);
-  ASSERT_EQ(bool{true}, test_queue.empty());
-  ASSERT_EQ(std::uint32_t{0}, test_queue.size());
-  //call clear from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_clear, std::ref(test_queue) );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-}
-
-//this also implicitly tests push and size on nonempty queues
-TEST(thread_safe_queue, call_push)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint32_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  //to be called from each thread
-  auto call_push = [](zinhart::parallel::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
-  {
-	std::uint32_t old_size = init_queue.size();
-	init_queue.push(item);
-	ASSERT_TRUE( init_queue.size() >=  old_size);
-  };
-  zinhart::parallel::thread_safe_queue<std::uint32_t> test_queue;
-  call_push(test_queue,0);
-  ASSERT_EQ(bool{false}, test_queue.empty());
-  ASSERT_EQ(std::uint32_t{1}, test_queue.size());
-  //call push from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-  //should be the queue size
-  ASSERT_EQ( std::uint32_t{n_threads + 1}, test_queue.size());
-}
-
-
-TEST(thread_safe_queue, call_size_on_non_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint32_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  //to be called from each thread
-  auto call_push = [](zinhart::parallel::thread_safe_queue<std::uint32_t>  & init_queue, std::uint32_t item)
-  {
-	std::uint32_t old_size = init_queue.size();
-	init_queue.push(item);
-	ASSERT_TRUE( init_queue.size() >=  old_size);
-  };
-  zinhart::parallel::thread_safe_queue<std::uint32_t> test_queue;
-  call_push(test_queue, 0);
-  ASSERT_EQ(std::uint32_t{1}, test_queue.size());
-  //call push from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-  //should be the queue size
-  ASSERT_EQ( n_threads + 1, test_queue.size());
-}
-
-
-TEST(thread_safe_queue, call_empty_on_non_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  //to be called from each thread
-  auto call_push = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
-  {
-	init_queue.push(item);
-	ASSERT_EQ(bool{false} ,init_queue.empty());
-  };
-  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
-  call_push(test_queue, 0);
-  ASSERT_EQ(bool{false}, test_queue.empty());
-  //call push from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-  //should not be empty
-  ASSERT_EQ( bool{false}, test_queue.empty());
-}
-
-TEST(thread_safe_queue, call_pop_on_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  //to be called from each thread
-  auto call_pop = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
-  {
-	bool pop_result = init_queue.pop(item);
-	ASSERT_EQ(bool{false}, pop_result);
-  };
-  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
-  call_pop(test_queue, 0);
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_pop, std::ref(test_queue), i + 1 );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-}
-
-TEST(thread_safe_queue, call_pop_on_non_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint8_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  //to be called from each thread
-  auto call_push = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t item)
-  {
-	init_queue.push(item);
-  };
-  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
-  //call push from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(call_push, std::ref(test_queue), i + 1 );
-  }
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-  //should be the queue size
-  ASSERT_EQ( n_threads, test_queue.size());
-
-  //now the queue has n_threads  elements
-  auto test_call_pop = [](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
-  {
-	bool pop_result = init_queue.pop(item);
-	ASSERT_EQ(expected_result, pop_result);
-  };
-  std::int32_t ret_val;
-  for( i = 0; i < n_threads; ++i)
-  {
-	//since this is an empty queue every thread should return false;
-	threads[i] = std::thread(test_call_pop, std::ref(test_queue), std::ref(ret_val), bool(true) );
-  }
-
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-  ASSERT_EQ(test_queue.size(), std::uint32_t{0});
-  //on empty queues pop should return false
-  bool f = false;
-  test_call_pop(std::ref(test_queue), ret_val, f );
-}
-
-//calling it on an empty queue doesn't make sense after all
-TEST(thread_safe_queue, call_pop_on_available_on_non_empty_queue)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint8_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uint16_t n_threads = thread_dist(mt), i;
-  std::vector<std::thread> threads(n_threads); 
-  std::vector<std::future<void>> futures(n_threads);
-  std::vector< std::packaged_task<void(zinhart::parallel::thread_safe_queue<std::int32_t>&, std::int32_t&, bool)> > tasks(n_threads);
-
-  for(i = 0; i < n_threads; ++i)
-  {
-	// create tasks
-	std::packaged_task<void(zinhart::parallel::thread_safe_queue<std::int32_t>&, std::int32_t&, bool)> test_call_pop(
-	[](zinhart::parallel::thread_safe_queue<std::int32_t>  & init_queue, std::int32_t & item, bool expected_result)
-	{
-	  init_queue.push(1);
-	  bool pop_result = init_queue.pop_on_available(item);
-      ASSERT_EQ(expected_result, pop_result);
-	});
-	// assign futures
-	futures[i] = test_call_pop.get_future();
-	// move tasks to a more convenient place
-	tasks[i] = std::move(test_call_pop);
-  }
-  
-  std::int32_t ret_val;
-  
-  zinhart::parallel::thread_safe_queue<std::int32_t> test_queue;
-  //call pop_on_available from a random number of threads not exceding MAX_CPU_THREADS
-  for( i = 0; i < n_threads; ++i)
-  {
-	// since this is an empty queue every thread should return false;
-	 threads[i] = std::thread(std::move(tasks[i]), std::ref(test_queue), std::ref(ret_val), true);
-	 futures[i].get();
-  }
-  //destructor of queue called here
-  for(std::thread & t : threads)
-  {
-	t.join();
-  }
-
-}
-//no exceptions segfaults
-TEST(thread_pool, constructor_and_destructor)
-{
-	zinhart::parallel::thread_pool pool;
-}
-TEST(thread_pool, call_add_task)
-{
-  std::random_device rd;
-  std::mt19937 mt(rd());
-  std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
-  std::uniform_int_distribution<std::uint32_t> size_dist(1, MAX_CPU_THREADS);
-  std::uint32_t results_size = size_dist(mt);
-  std::vector<zinhart::parallel::thread_pool::task_future<std::uint32_t>> results;
-  for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
-  {	  
-	results.push_back(zinhart::parallel::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
-  }
-  std::uint32_t res;
-  for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
-  {	  
-	res = results[i].get();  
-	ASSERT_EQ(i + j, res);
-  }
-}
-TEST(thread_pool, call_add_task_member_function)
-{
-  class test
-  {
-	public:
-	  std::int32_t add_one(std::int32_t s)
-	  {
-	    return s + 1;
-	  }
-  };
-  test t;
-  zinhart::parallel::thread_pool::task_future<std::int32_t> result = zinhart::parallel::default_thread_pool::push_task([&t](){return t.add_one(3);});
-  ASSERT_EQ(result.get(), 4);
-}
-std::int32_t plus_one(std::int32_t s)
-{
-  return s + 1;
-}
-TEST(thread_pool, call_add_task_function)
-{
-  zinhart::parallel::thread_pool::task_future<std::int32_t> result = zinhart::parallel::default_thread_pool::push_task(plus_one,3);
-  ASSERT_EQ(result.get(), 4);
-}
+#include "mkl.h"
 TEST(cpu_test_parallel, saxpy)
 {
   std::random_device rd;
@@ -948,15 +604,15 @@ TEST(cpu_test_parallel, neumaier_sum)
   delete x_parallel;
 }
 
-/*TEST(cpu_test, serial_matrix_multiply)
+TEST(cpu_test, serial_matrix_multiply)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
   std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
-  std::uniform_int_distribution<std::uint16_t> size_dist(1, std::numeric_limits<std::uint8_t>::max());
+  std::uniform_int_distribution<std::uint16_t> size_dist(1, 10/*std::numeric_limits<std::uint8_t>::max()*/);
   //for any needed random real
-  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uniform_real_distribution<float> real_dist(-1.0/*std::numeric_limits<float>::min()*/, 1.0/*std::numeric_limits<float>::max()*/);
 
   // Matrix dimensions
   const std::uint32_t M{size_dist(mt)};
@@ -969,12 +625,12 @@ TEST(cpu_test_parallel, neumaier_sum)
   std::uint32_t C_elements = M * N;
 
   // Matrices
-  std::uint32_t * A_cache_aware = new std::uint32_t [A_elements];
-  std::uint32_t * B_cache_aware = new std::uint32_t [B_elements];
-  std::uint32_t * C_cache_aware = new std::uint32_t [C_elements];
-  std::uint32_t * A_naive = new std::uint32_t [A_elements];
-  std::uint32_t * B_naive = new std::uint32_t [B_elements];
-  std::uint32_t * C_naive = new std::uint32_t [C_elements];
+  double * A_cache_aware = new double [A_elements];
+  double * B_cache_aware = new double [B_elements];
+  double * C_cache_aware = new double [C_elements];
+  double * A_naive = new double [A_elements];
+  double * B_naive = new double [B_elements];
+  double * C_naive = new double [C_elements];
 
   // Misc variables: their usage is contextual
   std::uint32_t i = 0;
@@ -992,7 +648,7 @@ TEST(cpu_test_parallel, neumaier_sum)
   }
   for(i = 0; i < C_elements; ++i)
   {
-	C_cache_aware[i] = real_dist(mt);
+	C_cache_aware[i] = 0.0;
 	C_naive[i] = C_cache_aware[i];
   }
 
@@ -1003,6 +659,74 @@ TEST(cpu_test_parallel, neumaier_sum)
   {
 	ASSERT_EQ(C_cache_aware[i], C_naive[i])<<"i: "<< i <<" "<<__FILE__<< " "<<__LINE__<<"\n"; 
   }
+  delete A_naive;
+  delete B_naive;
+  delete C_naive;
+  delete A_cache_aware;
+  delete B_cache_aware;
+  delete C_cache_aware;
+}
 
-}*/
+TEST(mkl_test, gemm)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_real_distribution<float> real_dist(-0.5, 0.5/*std::numeric_limits<std::uint16_t>::max()*/);
+  std::uniform_int_distribution<std::uint16_t> size_dist(1, 30/*std::numeric_limits<std::uint8_t>::max()*/);
+  double * A{nullptr};
+  double * B{nullptr};
+  double * C{nullptr};
+  double * A_mkl{nullptr};
+  double * B_mkl{nullptr};
+  double * C_mkl{nullptr};
+  std::uint32_t M, N, K;
+  M = size_dist(mt);
+  N = size_dist(mt);
+  K = size_dist(mt);
+  std::uint32_t A_row{M}, A_col{K}, B_row{K}, B_col{N}, C_row{M}, C_col{N};
+  std::uint32_t i, j;
+  double alpha{1.0}, beta{0.0};
+  
+  A =  (double *)mkl_malloc( A_row * A_col * sizeof( double ), 64 );
+  B = (double *)mkl_malloc( B_row * B_col * sizeof( double ), 64 );
+  C = (double *)mkl_malloc( C_row * C_col * sizeof( double ), 64 );
+  A_mkl =  (double *)mkl_malloc( A_row * A_col * sizeof( double ), 64 );
+  B_mkl = (double *)mkl_malloc( B_row * B_col * sizeof( double ), 64 );
+  C_mkl = (double *)mkl_malloc( C_row * C_col * sizeof( double ), 64 );
+  
+  for(i = 0; i < A_row; ++i)
+	for(j = 0; j < A_col; ++j)
+	{
+  	  A[zinhart::serial::idx2r(i, j, A_col)] = real_dist(mt);
+	  A_mkl[zinhart::serial::idx2r(i, j, A_col)] = A[zinhart::serial::idx2r(i, j, A_col)];
+	}
 
+  for(i = 0; i < B_row; ++i)
+	for(j = 0; j < B_col; ++j)
+	{
+  	  B[zinhart::serial::idx2r(i, j, B_col)] = real_dist(mt);
+	  B_mkl[zinhart::serial::idx2r(i, j, B_col)] = B[zinhart::serial::idx2r(i, j, B_col)];
+	}
+
+  for(i = 0; i < C_row; ++i)
+	for(j = 0; j < C_col; ++j)
+	{
+  	  C[zinhart::serial::idx2r(i, j, C_col)] = 0.0;
+	  C_mkl[zinhart::serial::idx2r(i, j, C_col)] = C[zinhart::serial::idx2r(i, j, C_col)];
+	}
+
+
+  zinhart::serial::cache_aware_serial_matrix_product(A, B, C, M, N, K);
+  cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, A_mkl, K, B_mkl, N, beta, C_mkl, N);
+  for(i = 0; i < C_row; ++i)
+	for(j = 0; j < C_col; ++j)
+	  ASSERT_DOUBLE_EQ(C[zinhart::serial::idx2r(i, j, C_col)], C_mkl[zinhart::serial::idx2r(i, j, C_col)]);
+
+  mkl_free( A );
+  mkl_free( B );
+  mkl_free( C );
+  mkl_free( A_mkl );
+  mkl_free( B_mkl );
+  mkl_free( C_mkl );
+}

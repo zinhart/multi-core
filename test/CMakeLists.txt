@@ -12,7 +12,8 @@ if(BuildCuda)
   #unit test src
   set(unit_tests_src
    run_all.cc
-   cpu_test.cc
+   thread_pool_test.cc
+   # cpu_test.cc
    gpu_test.cc 
    )
 add_executable(unit_tests ${unit_tests_src})
@@ -31,6 +32,7 @@ else()
   #unit test src
   set(unit_tests_src
    run_all.cc
+   thread_pool_test.cc
    cpu_test.cc
    )
 add_executable(unit_tests ${unit_tests_src})
@@ -38,6 +40,7 @@ add_executable(unit_tests ${unit_tests_src})
 target_link_libraries(unit_tests 
 					  gtest_concurrent_routines
 					  concurrent_routines
+				   	  ${MKL_LIBRARIES}
 					  ${CMAKE_THREAD_LIBS_INIT}
 					  )
 add_test(

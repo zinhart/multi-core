@@ -48,19 +48,19 @@ namespace zinhart
 	  HOST void serial_matrix_product(const Precision_Type * A, const Precision_Type * B, Precision_Type * C, const std::uint32_t M, const std::uint32_t N, const std::uint32_t K)
 	  {
 		for(std::uint32_t a = 0; a < M; ++a)
-		  for(std::uint32_t b = 0; b < K; ++b)
-			for(std::uint32_t c = 0; c < N; ++c)
-			  C[idx2r(a, b, K)] += A[idx2r(a, c, N)] * B[idx2r(c, b, K)];
+		  for(std::uint32_t b = 0; b < N; ++b)
+  			for(std::uint32_t c = 0; c < K; ++c)
+			  C[idx2r(a, b, N)] += A[idx2r(a, c, K)] * B[idx2r(c, b, N)];
 	  }
 
 	template<class Precision_Type>
 	  HOST void cache_aware_serial_matrix_product(const Precision_Type * A, const Precision_Type * B, Precision_Type * C, const std::uint32_t M, const std::uint32_t N, const std::uint32_t K)
 	  {
 		for(std::uint32_t a = 0; a < M; ++a)
-		  for(std::uint32_t c = 0; c < N; ++c)
-			for(std::uint32_t b = 0; b < K; ++b)
-			  C[idx2r(a, c, K)] += A[idx2r(a, b, N)] * B[idx2r(c, b, K)];
-	  }
+		  for(std::uint32_t c = 0; c < K; ++c)
+  			for(std::uint32_t b = 0; b < N; ++b)
+			  C[idx2r(a, b, N)] += A[idx2r(a, c, K)] * B[idx2r(c, b, N)];
+  	  }
 	template<class Precision_Type>
 	  HOST void print_matrix_row_major(Precision_Type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
 	  {
