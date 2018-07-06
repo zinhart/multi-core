@@ -70,17 +70,19 @@ if(BuildCuda)
 	  set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -arch=sm_61 -Xptxas -O3")
 	endif()
   endif()
-
+  
+  # set include paths
+  include_directories(. include include/concurrent_rountines/ ${MKL_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
 else()
   string(REGEX MATCH "CUDA_ENABLED" result "${COMPILE_DEFINITIONS}")
   if(${result} MATCHES "CUDA_ENABLED")
   else()
 	add_definitions(-DCUDA_ENABLED=false)
   endif()
+  # set include paths
+  include_directories(. include include/concurrent_rountines/ ${MKL_INCLUDE_DIR} "${PROJECT_BINARY_DIR}")
 endif()
 
-# set include paths
-include_directories(. include include/concurrent_rountines/ ${MKL_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
 
 # set cxx standard
 set(CMAKE_CXX_STANDARD 11)
