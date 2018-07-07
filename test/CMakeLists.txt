@@ -1,10 +1,10 @@
-#includes
+# includes
 include_directories(.)
 
-#add google test library
+# add google test library
 add_library(gtest_concurrent_routines ./gtest/gtest-all.cc)
 
-#link google test
+# link google test
 target_link_libraries(gtest_concurrent_routines ${CMAKE_THREAD_LIBS_INIT})
 
 # cpu & gpu unit tests

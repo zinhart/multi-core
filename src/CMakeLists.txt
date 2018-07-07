@@ -18,7 +18,7 @@ if(BuildCuda)
   )
 
   if(BuildShared)
-	#install  libconcurrent_routines.a to <cmake output dir>/${CMAKE_CURRENT_DIR}/
+	#install  libconcurrent_routines.so to <cmake output dir>/${CMAKE_CURRENT_DIR}/
 	install(TARGETS concurrent_routines LIBRARY DESTINATION lib LIBRARY DESTINATION lib)
   else()
 	# install  libconcurrent_routines.a to <cmake output dir>/${CMAKE_CURRENT_DIR}/
@@ -43,7 +43,7 @@ else()
   )
 
   if(BuildShared)
-	#install  libconcurrent_routines.a to <cmake output dir>/${CMAKE_CURRENT_DIR}/
+	#install  libconcurrent_routines.so to <cmake output dir>/${CMAKE_CURRENT_DIR}/
 	install(TARGETS concurrent_routines LIBRARY DESTINATION lib LIBRARY DESTINATION lib)
   else()
 	# install  libconcurrent_routines.a to <cmake output dir>/${CMAKE_CURRENT_DIR}/
@@ -52,6 +52,6 @@ else()
 
   #to do
   install(DIRECTORY ../include/concurrent_routines DESTINATION include)
-  endif()
+endif()
 
 
