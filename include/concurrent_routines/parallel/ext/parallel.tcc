@@ -178,7 +178,7 @@ namespace zinhart
 		  std::uint32_t thread_id = 0;
 		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			results.push_back(
-			default_thread_pool.add_task(zinhart::parallel::vectorized::kahan_sum<Precision_Type>, std::ref(data), std::ref(global_sum), thread_id, data_size, default_thread_pool.size())
+			default_thread_pool.add_task(zinhart::parallel::vectorized::kahan_sum<Precision_Type>, data, std::ref(global_sum), thread_id, data_size, default_thread_pool.size())
 			);
 		}
 	  template <class Precision_Type, class Container>
