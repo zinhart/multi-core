@@ -155,7 +155,7 @@ namespace zinhart
 			compensation = (t - local_sum) - y;
 			local_sum = t;
 		  }
-		  global_sum += local_sum;
+		  global_sum += (local_sum);
 		}
 	  template <class precision_type>
 		HOST void neumaier_sum(const precision_type * data, precision_type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
@@ -198,7 +198,7 @@ namespace zinhart
 			compensation = (t - local_sum) - y;
 			local_sum = t;
 		  }
-		  global_sum += local_sum;
+		  global_sum += (local_sum) + compensation;
 		}
 	  template <class precision_type, class binary_predicate>
 		HOST void neumaier_sum(const precision_type * vec_1, const precision_type * vec_2, precision_type & global_sum, binary_predicate bp,

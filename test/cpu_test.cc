@@ -548,6 +548,7 @@ TEST(cpu_test_parallel, kahan_sum)
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   std::uint32_t n_elements = uint_dist(mt);
+  n_elements = 13;
   double * x_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
