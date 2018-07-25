@@ -198,7 +198,7 @@ namespace zinhart
 			compensation = (t - local_sum) - y;
 			local_sum = t;
 		  }
-		  global_sum += (local_sum) + compensation;
+		  global_sum += (local_sum);
 		}
 	  template <class precision_type, class binary_predicate>
 		HOST void neumaier_sum(const precision_type * vec_1, const precision_type * vec_2, precision_type & global_sum, binary_predicate bp,
