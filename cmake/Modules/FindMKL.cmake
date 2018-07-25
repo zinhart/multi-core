@@ -60,7 +60,7 @@ else()
      list(APPEND __mkl_libs sequential)
   endif()
 
-  #list(APPEND __mkl_libs core cdft_core)
+  #list(APPEND __mkl_libs core cdft_core) for cluster versions of the lib
   list(APPEND __mkl_libs core)
 endif()
 
