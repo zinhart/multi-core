@@ -42,9 +42,11 @@ endif()
 
 # threading library
 find_package(Threads REQUIRED)
-# mkl for matrix multiplications
-find_package(MKL REQUIRED)
 
+# mkl blas
+set(MKL_USE_SINGLE_DYNAMIC_LIBRARY OFF CACHE BOOL "Use single dynamic library interface")
+set(MKL_MULTI_THREADED OFF CACHE BOOL "Use multi-threading(intel tbb, omp etc)")
+find_package(MKL REQUIRED)
 
 # find cuda package and set compute achitecture and nvcc compile flags
 if(BuildCuda)
@@ -123,7 +125,8 @@ if(BuildCuda)
   message(STATUS " Found CUDA			  : ${CUDA_FOUND}")
   message(STATUS " CUDA_NVCC_FLAGS               : ${CUDA_NVCC_FLAGS}")
 else()
-  message(STATUS " Found MKL			  : ${MKL_FOUND}")
+  message(STATUS " Found MKL include             : ${MKL_INCLUDE_DIR}")
+  message(STATUS " Found MKL libraries           : ${MKL_LIBRARIES}")
 endif()
 message(STATUS " CMAKE_CXX_FLAGS		  : ${CMAKE_CXX_FLAGS}")
 if("${CMAKE_BUILD_TYPE}" STREQUAL "RELEASE")
