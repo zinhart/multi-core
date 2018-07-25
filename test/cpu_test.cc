@@ -604,6 +604,83 @@ TEST(cpu_test_parallel, neumaier_sum)
   delete [] x_parallel;
 }
 
+TEST(cpu_test_parallel, kahan_sum_two)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  double * x_parallel = new double [n_elements];
+  double * y_parallel = new double [n_elements];
+  double * x_serial = new double [n_elements];
+  double * y_serial = new double [n_elements];
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::uint32_t i;
+  double parallel_sum{0.0}, serial_sum{0.0};
+  for(i = 0; i < n_elements; ++i )
+  {
+	double first = real_dist(mt), second = real_dist(mt);
+	x_serial[i] = first;
+	y_serial[i] = second;
+	x_parallel[i] = first;
+	y_parallel[i] = second;
+  }
+  auto add_two_scalars = [](double x, double y){return x + y;};
+  zinhart::parallel::async::kahan_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
+  serial_sum = zinhart::serial::kahan_sum(x_serial, y_parallel, n_elements, add_two_scalars);
+  // make sure all threads are done with their portion before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  }
+  ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
+  delete [] x_serial;
+  delete [] x_parallel;
+  delete [] y_serial;
+  delete [] y_parallel;
+}
+
+TEST(cpu_test_parallel, neumair_sum_two)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  double * x_parallel = new double [n_elements];
+  double * y_parallel = new double [n_elements];
+  double * x_serial = new double [n_elements];
+  double * y_serial = new double [n_elements];
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::uint32_t i;
+  double parallel_sum{0.0}, serial_sum{0.0};
+  for(i = 0; i < n_elements; ++i )
+  {
+	double first = real_dist(mt), second = real_dist(mt);
+	x_serial[i] = first;
+	y_serial[i] = second;
+	x_parallel[i] = first;
+	y_parallel[i] = second;
+  }
+  auto add_two_scalars = [](double x, double y){return x + y;};
+  zinhart::parallel::async::neumaier_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
+  serial_sum = zinhart::serial::neumaier_sum(x_serial, y_parallel, n_elements, add_two_scalars);
+  // make sure all threads are done with their portion before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  }
+  ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
+  delete [] x_serial;
+  delete [] x_parallel;
+  delete [] y_serial;
+  delete [] y_parallel;
+}
 TEST(cpu_test, serial_matrix_multiply)
 {
   std::random_device rd;

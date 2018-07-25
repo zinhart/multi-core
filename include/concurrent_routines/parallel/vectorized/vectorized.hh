@@ -6,10 +6,10 @@ namespace zinhart
   {
 	namespace vectorized
 	{
-	  template <class Precision_Type>
+	  template <class precision_type>
 		HOST void saxpy(const std::uint32_t thread_id,
 					    const std::uint32_t & n_elements, const std::uint32_t & n_threads, 
-					    const Precision_Type a, Precision_Type * x, Precision_Type * y)
+					    const precision_type a, precision_type * x, precision_type * y)
 		{
 		  std::uint32_t start = 0, stop = 0;
 		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
@@ -138,42 +138,87 @@ namespace zinhart
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(first + op) = g();
 		}
-	  template <class Precision_Type>
-		HOST void kahan_sum(const Precision_Type * data, Precision_Type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
+	  template <class precision_type>
+		HOST void kahan_sum(const precision_type * data, precision_type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 		  std::uint32_t start{0}, stop{0}, op{0};
 		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
-		  Precision_Type local_sum{ data[start] };
+		  precision_type local_sum{ data[start] };
 		  // a running compensation for lost lower-order bits
-		  Precision_Type compensation{0.0};
+		  precision_type compensation{0.0};
 		  for(op = start + 1; op < stop; ++op)
 		  {
-			Precision_Type y{ data[op] - compensation };
+			precision_type y{ data[op] - compensation };
 			// lower order bits are lost here with this addition
-			Precision_Type t{ local_sum + y };
+			precision_type t{ local_sum + y };
 			// (t - local_sum) cancels the higher order part of y and subtracting y recorvers the low part of y
 			compensation = (t - local_sum) - y;
 			local_sum = t;
 		  }
 		  global_sum += local_sum;
 		}
-	  template <class Precision_Type>
-		HOST void neumaier_sum(const Precision_Type * data, Precision_Type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
+	  template <class precision_type>
+		HOST void neumaier_sum(const precision_type * data, precision_type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 		  std::uint32_t start{0}, stop{0}, op{0};
 		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
-		  Precision_Type local_sum{ data[start] };
+		  precision_type local_sum{ data[start] };
 		  // a running compensation for lost lower-order bits
-		  Precision_Type compensation{0.0};
+		  precision_type compensation{0.0};
 		  for(op = start + 1; op < stop; ++op)
 		  {
-			Precision_Type t{ local_sum + data[op] };
+			precision_type t{ local_sum + data[op] };
 			if(std::abs(local_sum) >= std::abs(data[op]))
 			  // if the local_sum is bigger lower order digitis of in[op] are lost
 			  compensation += (local_sum - t) + data[op];
 			else
 			  // if the local_sum is smaller lower order digits of local_sum are lost
 			  compensation += (data[op] - t) + local_sum;
+			local_sum = t;
+		  }
+		  // Correction is applied once
+		  global_sum += (local_sum + compensation);
+		}
+	  template <class precision_type, class binary_predicate>
+		HOST void kahan_sum(const precision_type * vec_1,const precision_type * vec_2, precision_type & global_sum, binary_predicate bp,
+							const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads
+						   )
+		{
+		  std::uint32_t start{0}, stop{0}, op{0};
+		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  precision_type local_sum{ bp(vec_1[start], vec_2[start]) };
+		  // a running compensation for lost lower-order bits
+		  precision_type compensation{0.0};
+		  for(op = start + 1; op < stop; ++op)
+		  {
+			precision_type y{ bp(vec_1[op], vec_2[op]) - compensation };
+			// lower order bits are lost here with this addition
+			precision_type t{ local_sum + y };
+			// (t - local_sum) cancels the higher order part of y and subtracting y recorvers the low part of y
+			compensation = (t - local_sum) - y;
+			local_sum = t;
+		  }
+		  global_sum += local_sum;
+		}
+	  template <class precision_type, class binary_predicate>
+		HOST void neumaier_sum(const precision_type * vec_1, const precision_type * vec_2, precision_type & global_sum, binary_predicate bp,
+							   const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads
+							  )
+		{
+		  std::uint32_t start{0}, stop{0}, op{0};
+		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  precision_type local_sum{ bp(vec_1[start], vec_2[start]) };
+		  // a running compensation for lost lower-order bits
+		  precision_type compensation{0.0};
+		  for(op = start + 1; op < stop; ++op)
+		  {
+			precision_type t{ local_sum + bp(vec_1[op], vec_2[op]) };
+			if(std::abs(local_sum) >= std::abs( bp(vec_1[op], vec_2[op]) ) )
+			  // if the local_sum is bigger lower order digitis of in[op] are lost
+			  compensation += (local_sum - t) + bp(vec_1[op], vec_2[op]);
+			else
+			  // if the local_sum is smaller lower order digits of local_sum are lost
+			  compensation += (bp(vec_1[op], vec_2[op]) - t) + local_sum;
 			local_sum = t;
 		  }
 		  // Correction is applied once
