@@ -48,7 +48,7 @@ namespace zinhart
 	template <class precision_type, class binary_predicate>
 	  HOST precision_type kahan_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
 	  {
-		precision_type post_bp = bp(vec_1[0], vec_2[0]);
+		precision_type post_bp{bp(vec_1[0], vec_2[0])};
 		precision_type sum{ post_bp };
 		// a running compensation for lost lower-order bits
 		precision_type compensation{0.0}; 		
