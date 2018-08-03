@@ -8,17 +8,20 @@ namespace zinhart
 	template <class precision_type>
 	  HOST precision_type kahan_sum(precision_type * data, const std::uint32_t & data_size)
 	  {
-		precision_type sum{data[0]};
+		precision_type * temp = data;
+		precision_type sum{*temp};
 		// a running compensation for lost lower-order bits
 		precision_type compensation{0.0}; 		
+		++temp;
 		for(std::uint32_t i  = 1; i < data_size; ++i)
 		{
-		  precision_type y{data[i] - compensation};
+		  precision_type y{*temp - compensation};
 		  // lower order bits are lost here with this addition
 		  precision_type t{sum + y}; 
 		  // (t - sum) cancels the higher order part of y and subtracting y recorvers the low part of y
 		  compensation = (t - sum) - y;		  
 		  sum = t;
+		  ++temp;
 		}
 		return sum;
 	  }
@@ -27,19 +30,22 @@ namespace zinhart
 	template <class precision_type>
 	  HOST precision_type neumaier_sum(precision_type * data, const std::uint32_t & data_size)
 	  {
-		precision_type sum{data[0]};
+		precision_type * temp = data;
+		precision_type sum{*temp};
 		// a running compensation for lost lower-order bits
 		precision_type compensation{0.0}; 		
+		++temp;
 		for(std::uint32_t i = 1; i < data_size; ++i)
 		{
 		  precision_type t{sum + data[i]};
-		  if(std::abs(sum) >= std::abs(data[i]))
+		  if(std::abs(sum) >= std::abs(*temp))
 			// if the sum is bigger lower order digitis of in[i] are lost
-			compensation += (sum - t) + data[i];
+			compensation += (sum - t) + *temp;
 		  else
 			// if the sum is smaller lower order digits of sum are lost
-			compensation += (data[i] - t) + sum;
+			compensation += (*temp - t) + sum;
 		  sum = t;
+		  ++temp;
 		}
 		// Correction is applied once
 		return sum + compensation;
