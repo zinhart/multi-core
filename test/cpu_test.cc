@@ -53,10 +53,10 @@ TEST(cpu_test_parallel, saxpy)
   {
 		ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, copy)
@@ -92,10 +92,10 @@ TEST(cpu_test_parallel, copy)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, copy_if)
@@ -132,10 +132,10 @@ TEST(cpu_test_parallel, copy_if)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, replace)
@@ -175,10 +175,10 @@ TEST(cpu_test_parallel, replace)
   {
 	ASSERT_EQ(x_parallel[i], new_value);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, replace_if)
@@ -219,10 +219,10 @@ TEST(cpu_test_parallel, replace_if)
   {
 	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 
@@ -260,10 +260,10 @@ TEST(cpu_test_parallel, replace_copy)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, replace_copy_if)
@@ -302,10 +302,10 @@ TEST(cpu_test_parallel, replace_copy_if)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, inner_product_first_overload)
@@ -342,10 +342,10 @@ TEST(cpu_test_parallel, inner_product_first_overload)
   } 
   parallel_ret = init;
   ASSERT_EQ(parallel_ret, serial_ret); 
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, inner_product_second_overload)
@@ -382,10 +382,10 @@ TEST(cpu_test_parallel, inner_product_second_overload)
   }
   parallel_ret = init;
   ASSERT_EQ(parallel_ret, serial_ret);
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, accumulate)
@@ -418,8 +418,8 @@ TEST(cpu_test_parallel, accumulate)
   }
   //double check we have the same values 
   ASSERT_EQ(p_sum, s_sum);
-  delete x_serial;
-  delete x_parallel;
+  delete [] x_serial;
+  delete [] x_parallel;
 }
 
 TEST(cpu_test_parallel, for_each)
@@ -456,8 +456,8 @@ TEST(cpu_test_parallel, for_each)
   {
 	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
-  delete x_serial;
-  delete x_parallel;
+  delete [] x_serial;
+  delete [] x_parallel;
 }
 
 TEST(cpu_test_parallel, transform)
@@ -498,10 +498,10 @@ TEST(cpu_test_parallel, transform)
   {
 	ASSERT_EQ(y_parallel[i], y_serial[i]);
   }
-  delete x_parallel;
-  delete y_parallel;
-  delete x_serial;
-  delete y_serial;
+  delete [] x_parallel;
+  delete [] y_parallel;
+  delete [] x_serial;
+  delete [] y_serial;
 }
 
 TEST(cpu_test_parallel, generate)
@@ -535,8 +535,8 @@ TEST(cpu_test_parallel, generate)
   {
 	ASSERT_EQ(x_parallel[i], x_serial[i]);
   }
-  delete x_serial;
-  delete x_parallel;
+  delete [] x_serial;
+  delete [] x_parallel;
 }
 
 TEST(cpu_test_parallel, kahan_sum)
@@ -548,6 +548,7 @@ TEST(cpu_test_parallel, kahan_sum)
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   std::uint32_t n_elements = uint_dist(mt);
+  n_elements = 13;
   double * x_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
   std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
@@ -567,8 +568,8 @@ TEST(cpu_test_parallel, kahan_sum)
 	results[i].get();
   }
   ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
-  delete x_serial;
-  delete x_parallel;
+  delete [] x_serial;
+  delete [] x_parallel;
 }
 
 
@@ -600,10 +601,87 @@ TEST(cpu_test_parallel, neumaier_sum)
 	results[i].get();
   }
   ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
-  delete x_serial;
-  delete x_parallel;
+  delete [] x_serial;
+  delete [] x_parallel;
 }
 
+TEST(cpu_test_parallel, kahan_sum_two)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  double * x_parallel = new double [n_elements];
+  double * y_parallel = new double [n_elements];
+  double * x_serial = new double [n_elements];
+  double * y_serial = new double [n_elements];
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::uint32_t i;
+  double parallel_sum{0.0}, serial_sum{0.0};
+  for(i = 0; i < n_elements; ++i )
+  {
+	double first = real_dist(mt), second = real_dist(mt);
+	x_serial[i] = first;
+	y_serial[i] = second;
+	x_parallel[i] = first;
+	y_parallel[i] = second;
+  }
+  auto add_two_scalars = [](double x, double y){return x + y;};
+  zinhart::parallel::async::kahan_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
+  serial_sum = zinhart::serial::kahan_sum(x_serial, y_parallel, n_elements, add_two_scalars);
+  // make sure all threads are done with their portion before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  }
+  ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
+  delete [] x_serial;
+  delete [] x_parallel;
+  delete [] y_serial;
+  delete [] y_parallel;
+}
+
+TEST(cpu_test_parallel, neumair_sum_two)
+{
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  //for any needed random uint
+  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  //for any needed random real
+  std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+  std::uint32_t n_elements = uint_dist(mt);
+  double * x_parallel = new double [n_elements];
+  double * y_parallel = new double [n_elements];
+  double * x_serial = new double [n_elements];
+  double * y_serial = new double [n_elements];
+  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::uint32_t i;
+  double parallel_sum{0.0}, serial_sum{0.0};
+  for(i = 0; i < n_elements; ++i )
+  {
+	double first = real_dist(mt), second = real_dist(mt);
+	x_serial[i] = first;
+	y_serial[i] = second;
+	x_parallel[i] = first;
+	y_parallel[i] = second;
+  }
+  auto add_two_scalars = [](double x, double y){return x + y;};
+  zinhart::parallel::async::neumaier_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
+  serial_sum = zinhart::serial::neumaier_sum(x_serial, y_parallel, n_elements, add_two_scalars);
+  // make sure all threads are done with their portion before comparing the final result
+  for(i = 0; i < results.size(); ++i)
+  {
+	results[i].get();
+  }
+  ASSERT_DOUBLE_EQ(parallel_sum, serial_sum);
+  delete [] x_serial;
+  delete [] x_parallel;
+  delete [] y_serial;
+  delete [] y_parallel;
+}
 TEST(cpu_test, serial_matrix_multiply)
 {
   std::random_device rd;
@@ -659,12 +737,12 @@ TEST(cpu_test, serial_matrix_multiply)
   {
 	ASSERT_EQ(C_cache_aware[i], C_naive[i])<<"i: "<< i <<" "<<__FILE__<< " "<<__LINE__<<"\n"; 
   }
-  delete A_naive;
-  delete B_naive;
-  delete C_naive;
-  delete A_cache_aware;
-  delete B_cache_aware;
-  delete C_cache_aware;
+  delete [] A_naive;
+  delete [] B_naive;
+  delete [] C_naive;
+  delete [] A_cache_aware;
+  delete [] B_cache_aware;
+  delete [] C_cache_aware;
 }
 
 TEST(mkl_test, gemm)
