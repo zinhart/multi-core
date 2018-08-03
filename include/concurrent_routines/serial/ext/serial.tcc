@@ -52,14 +52,18 @@ namespace zinhart
 	  }
 
 	template <class precision_type, class binary_predicate>
-	  HOST precision_type kahan_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
+	  HOST precision_type kahan_sum(precision_type * vec_1, precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
 	  {
-		precision_type post_bp{bp(vec_1[0], vec_2[0])};
+		precision_type * v1{vec_1}, * v2{vec_2};
+		precision_type post_bp{bp(*v1, *v2)};
 		precision_type sum{ post_bp };
 		// a running compensation for lost lower-order bits
 		precision_type compensation{0.0}; 		
 		for(std::uint32_t i  = 1; i < data_size; ++i)
 		{
+		  ++v1;
+		  ++v2;
+		  post_bp = bp(*v1, *v2);
 		  precision_type y{ post_bp - compensation };
 		  // lower order bits are lost here with this addition
 		  precision_type t{sum + y}; 
@@ -70,18 +74,21 @@ namespace zinhart
 		return sum;
 	  }
 	template <class precision_type, class binary_predicate>
-	  HOST precision_type neumaier_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
+	  HOST precision_type neumaier_sum(precision_type * vec_1, precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
 	  {
-		precision_type post_bp = bp(vec_1[0], vec_2[0]);
+		precision_type * v1{vec_1}, * v2{vec_2};
+		precision_type post_bp{bp(*v1, *v2)};
 		precision_type sum{ post_bp };
 		// a running compensation for lost lower-order bits
 		precision_type compensation{0.0}; 		
 		for(std::uint32_t i = 1; i < data_size; ++i)
 		{
-		  post_bp = bp(vec_1[i], vec_2[i]);
+		  ++v1;
+		  ++v2;
+		  post_bp = bp(*v1, *v2);
 		  precision_type t{sum + post_bp};
 		  if(std::abs(sum) >= std::abs(post_bp))
-			// if the sum is bigger lower order digitis of in[i] are lost
+			// if the sum is bigger lower order digits of in[i] are lost
 			compensation += (sum - t) + post_bp;
 		  else
 			// if the sum is smaller lower order digits of sum are lost
