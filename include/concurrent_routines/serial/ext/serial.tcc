@@ -52,12 +52,15 @@ namespace zinhart
 	  }
 
 	template <class precision_type, class binary_predicate>
-	  HOST precision_type kahan_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
+	  HOST precision_type kahan_sum(precision_type * vec_1, precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
 	  {
-		precision_type post_bp{bp(vec_1[0], vec_2[0])};
+		precision_type * v1 = vec_1, *v2 = vec_2;
+		precision_type post_bp{bp(*v1, *v2)};
 		precision_type sum{ post_bp };
 		// a running compensation for lost lower-order bits
 		precision_type compensation{0.0}; 		
+		++v1;
+		++v2;
 		for(std::uint32_t i  = 1; i < data_size; ++i)
 		{
 		  precision_type y{ post_bp - compensation };
@@ -66,16 +69,22 @@ namespace zinhart
 		  // (t - sum) cancels the higher order part of y and subtracting y recorvers the low part of y
 		  compensation = (t - sum) - y;		  
 		  sum = t;
+		  ++v1;
+		  ++v2;
+		  post_bp = bp(*v1, *v2);
 		}
 		return sum;
 	  }
 	template <class precision_type, class binary_predicate>
-	  HOST precision_type neumaier_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
+	  HOST precision_type neumaier_sum(precision_type * vec_1, precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp)
 	  {
+		precision_type * v1 = vec_1, *v2 = vec_2;
 		precision_type post_bp = bp(vec_1[0], vec_2[0]);
 		precision_type sum{ post_bp };
 		// a running compensation for lost lower-order bits
 		precision_type compensation{0.0}; 		
+		++v1;
+		++v2;
 		for(std::uint32_t i = 1; i < data_size; ++i)
 		{
 		  post_bp = bp(vec_1[i], vec_2[i]);
@@ -87,6 +96,9 @@ namespace zinhart
 			// if the sum is smaller lower order digits of sum are lost
 			compensation += ( post_bp - t) + sum;
 		  sum = t;
+		  ++v1;
+		  ++v2;
+		  post_bp = bp(*v1, *v2);
 		}
 		// Correction is applied once
 		return sum + compensation;
