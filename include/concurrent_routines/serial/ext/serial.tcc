@@ -104,7 +104,8 @@ namespace zinhart
 		for(std::uint32_t a = 0; a < M; ++a)
 		  for(std::uint32_t b = 0; b < N; ++b)
   			for(std::uint32_t c = 0; c < K; ++c)
-			  C[idx2r(a, b, N)] += A[idx2r(a, c, K)] * B[idx2r(c, b, N)];
+			  *(C + idx2r(a, b, N) ) += *(A + idx2r(a, c, K)) * *(B + idx2r(c, b, N));
+			  //C[idx2r(a, b, N)] += A[idx2r(a, c, K)] * B[idx2r(c, b, N)];assumes the pointer passed in is the pointer to the beginning of the memory segment which may not necesarily be the case
 	  }
 
 	template<class precision_type>
@@ -113,7 +114,8 @@ namespace zinhart
 		for(std::uint32_t a = 0; a < M; ++a)
 		  for(std::uint32_t c = 0; c < K; ++c)
   			for(std::uint32_t b = 0; b < N; ++b)
-			  C[idx2r(a, b, N)] += A[idx2r(a, c, K)] * B[idx2r(c, b, N)];
+			  *(C + idx2r(a, b, N) ) += *(A + idx2r(a, c, K)) * *(B + idx2r(c, b, N));
+			  //C[idx2r(a, b, N)] += A[idx2r(a, c, K)] * B[idx2r(c, b, N)];assumes the pointer passed in is the pointer to the beginning of the memory segment which may not necesarily be the case
   	  }
 	template<class precision_type>
 	  HOST void print_matrix_row_major(precision_type * mat, std::uint32_t mat_rows, std::uint32_t mat_cols, std::string s)
@@ -123,7 +125,8 @@ namespace zinhart
 		 {
 		   for(std::uint32_t j = 0; j < mat_cols; ++j)
 		   {
-			 std::cout<<mat[idx2r(i,j,mat_cols)]<<" ";
+			 // mat[idx2r(i,j,mat_cols)] assumes the pointer passed in is the pointer to the beginning of the memory segment which may not necesarily be the case
+			 std::cout<<*(mat + idx2r(i,j,mat_cols)) <<" ";
 		   }
 		   std::cout<<"\n";
 		 }
