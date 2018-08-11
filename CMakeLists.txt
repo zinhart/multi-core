@@ -9,7 +9,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # for unit tests using google test
-option(BuildTest "BuildTest" ON)
+option(UnitTest "UnitTest" ON)
 # for cuda
 option(BuildCuda "BuildCuda" ON)
 # library type
@@ -93,9 +93,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set cxx flags
 set(CMAKE_CXX_FLAGS "-Wall -std=c++11 ${CMAKE_CXX_FLAGS}")
 # set cxx release flags
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -fPIC")
 # set cxx debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC")
 
 
 # sanitize flags
@@ -107,7 +107,7 @@ endif()
 add_subdirectory(src)
 
 #enable testing and add test directory
-if(BuildTest)
+if(UnitTest)
   enable_testing()
   add_subdirectory(test)
 endif()
@@ -119,7 +119,7 @@ message(STATUS " CMAKE_GENERATOR		  : ${CMAKE_GENERATOR}")
 message(STATUS " Compiler ID			  : ${CMAKE_CXX_COMPILER_ID}")
 message(STATUS " Build Type			  : ${CMAKE_BUILD_TYPE}")
 message(STATUS " Library Type		  : ${LIB_TYPE}")
-message(STATUS " Build Tests			  : ${BuildTest}")
+message(STATUS " Build Tests			  : ${UnitTest}")
 message(STATUS " Sanitize Flags		  : ${Sanitize}")
 if(BuildCuda)
   message(STATUS " Found CUDA			  : ${CUDA_FOUND}")
