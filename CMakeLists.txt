@@ -139,8 +139,9 @@ if(BuildUnitTest)
   string(REGEX MATCH "${CMAKE_CURRENT_SOURCE_DIR}" result "${CMAKE_SOURCE_DIR}")
   if(${result} MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
 	add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-  				   ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-  				   EXCLUDE_FROM_ALL)
+  				     ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+  				     EXCLUDE_FROM_ALL 
+				    )
   endif()
   add_subdirectory(unit_test)
 
@@ -151,7 +152,7 @@ if(BuildBenchmarks)
   #  set(CMAKE_CACHE_ARGS "${CMAKE_CACHE_ARGS} -DBENCHMARK_ENABLE_TESTING${STRING}=OFF")
   set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
   if(BuildUnitTest)
-	set(GTEST_ROOT_LOCATION "${CMAKE_BINARY_DIR}/googletest-src/googletest" CACHE PATH "Path to externally added gtest")
+	set(GTEST_ROOT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/googletest-src/googletest" CACHE PATH "Path to externally added gtest")
 	#$  list(APPEND CMAKE_ARGS "-D${GTEST_ROOT}:${string}=\"${GTEST_ROOT_LOCATION}\"")
   endif()
 
@@ -159,13 +160,13 @@ if(BuildBenchmarks)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ExternalProjects/CMakeLists.txt.in.gbench googlebench-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googlebench-download )
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googlebench-download )
   if(result)
 	message(FATAL_ERROR "CMake step for googlebench failed: ${result}")
   endif()
   execute_process(COMMAND ${CMAKE_COMMAND} --build .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googlebench-download )
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googlebench-download )
   if(result)
 	message(FATAL_ERROR "Build step for googlebench failed: ${result}")
   endif()
@@ -173,9 +174,13 @@ if(BuildBenchmarks)
 
   # Add googlebench directly to our build. This defines
   # the gtest and gtest_main targets.
-  add_subdirectory(${CMAKE_BINARY_DIR}/googlebench-src
-				   ${CMAKE_BINARY_DIR}/googlebench-build
-				   EXCLUDE_FROM_ALL)
+  string(REGEX MATCH "${CMAKE_CURRENT_SOURCE_DIR}" result "${CMAKE_SOURCE_DIR}")
+  if(${result} MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
+   	add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googlebench-src
+					 ${CMAKE_CURRENT_BINARY_DIR}/googlebench-build
+				     EXCLUDE_FROM_ALL
+					)
+  endif()
   add_subdirectory(benchmarks)
 endif()
 
