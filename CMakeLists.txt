@@ -13,7 +13,6 @@ endif()
 # for unit tests using google test
 option(BuildUnitTest "BuildUnitTest" ON)
 # for benchmarking using google bench
-#set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
 option(BuildBenchmarks "BuildBenchmarks" ON)
 # for cuda
 option(BuildCuda "BuildCuda" ON)
