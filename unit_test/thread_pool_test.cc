@@ -1,8 +1,9 @@
-#include "concurrent_routines/concurrent_routines.hh"
-#include "gtest/gtest.h"
+#include <concurrent_routines/concurrent_routines.hh>
+#include <gtest/gtest.h>
 #include <iostream>
 #include <random>
 #include <limits>
+using namespace testing;
 TEST(thread_safe_queue, call_size_on_empty_queue)
 {
   std::random_device rd;
