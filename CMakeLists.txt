@@ -34,7 +34,7 @@ else()
 endif()
 
 #set module path
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 if(PTHREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -115,16 +115,16 @@ if(BuildUnitTest)
   enable_testing()
 
   # Download and unpack googletest at configure time
-  configure_file(${CMAKE_SOURCE_DIR}/cmake/ExternalProjects/CMakeLists.txt.in.gtest googletest-download/CMakeLists.txt)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ExternalProjects/CMakeLists.txt.in.gtest googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
   if(result)
 	message(FATAL_ERROR "CMake step for googletest failed: ${result}")
   endif()
   execute_process(COMMAND ${CMAKE_COMMAND} --build .
 	RESULT_VARIABLE result
-	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googletest-download )
+	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
   if(result)
 	message(FATAL_ERROR "Build step for googletest failed: ${result}")
   endif()
@@ -133,11 +133,15 @@ if(BuildUnitTest)
   # settings on Windows
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-  # Add googletest directly to our build. This defines
+
+  # Conditionally Add googletest directly to our build, if this is not a sub project. This defines
   # the gtest and gtest_main targets.
-  add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
-				   ${CMAKE_BINARY_DIR}/googletest-build
-				   EXCLUDE_FROM_ALL)
+  string(REGEX MATCH "${CMAKE_CURRENT_SOURCE_DIR}" result "${CMAKE_SOURCE_DIR}")
+  if(${result} MATCHES "${CMAKE_CURRENT_SOURCE_DIR}")
+	add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+  				   ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+  				   EXCLUDE_FROM_ALL)
+  endif()
   add_subdirectory(unit_test)
 
 endif()
@@ -152,7 +156,7 @@ if(BuildBenchmarks)
   endif()
 
   # Download and unpack googlebench at configure time
-  configure_file(${CMAKE_SOURCE_DIR}/cmake/ExternalProjects/CMakeLists.txt.in.gbench googlebench-download/CMakeLists.txt)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ExternalProjects/CMakeLists.txt.in.gbench googlebench-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
 	RESULT_VARIABLE result
 	WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/googlebench-download )
