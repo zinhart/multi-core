@@ -8,9 +8,9 @@ namespace zinhart
   namespace serial
   {
 	template <class precision_type>
-	  HOST precision_type kahan_sum(precision_type * data, const std::uint32_t & data_size);
+	  HOST precision_type kahan_sum(const precision_type * data, const std::uint32_t & data_size);
 	template <class precision_type>
-	  HOST precision_type neumaier_sum(precision_type * data, const std::uint32_t & data_size);
+	  HOST precision_type neumaier_sum(const precision_type * data, const std::uint32_t & data_size);
 	template <class precision_type, class binary_predicate>
 	  HOST precision_type kahan_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, binary_predicate bp);
 	template <class precision_type, class binary_predicate>

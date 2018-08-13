@@ -538,7 +538,8 @@ TEST(cpu_test_parallel, generate)
   delete [] x_serial;
   delete [] x_parallel;
 }
-
+// may delete these functions so tests comments for now
+/*
 TEST(cpu_test_parallel, kahan_sum)
 {
   std::random_device rd;
@@ -604,7 +605,7 @@ TEST(cpu_test_parallel, neumaier_sum)
   delete [] x_serial;
   delete [] x_parallel;
 }
-
+*/
 TEST(cpu_test_parallel, kahan_sum_two)
 {
   std::random_device rd;
