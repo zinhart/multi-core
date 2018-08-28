@@ -1,6 +1,12 @@
 dist: bionic
 sudo: false
 language: cpp
-
+branches: 
+  only:
+    - testing
+before_script:
+  - pip3 install --user cpp-coveralls
 script:
-  ./build-cpu
+  - ./build-cpu
+after_script:
+
