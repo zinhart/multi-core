@@ -4,6 +4,12 @@ language: cpp
 branches: 
   only:
     - testing
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-pip"
+    
 before_script:
   - pip3 install --user cpp-coveralls
 script:
