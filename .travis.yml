@@ -16,6 +16,15 @@ addons:
     
 before_script:
   - "pip3 install --user cpp-coveralls"
+  - "mkdir tmp && cd tmp && \
+     wget -q http://registrationcenter-download.intel.com/akdlm/irc_nas/tec/12414/l_mkl_2018.1.163.tgz &&  \
+    tar -xzf l_mkl_2018.1.163.tgz && \
+    cd l_mkl_2018.1.163 && \ 
+    sed -i 's/ACCEPT_EULA=decline/ACCEPT_EULA=accept/g' silent.cfg && \
+    sed -i 's/ACTIVATION_TYPE=exist_lic/ACTIVATION_TYPE=trial_lic/g' silent.cfg && \
+    ./install.sh -s silent.cfg && \
+    cd .. && rm -rf * \
+    cd .. "
 script:
   - "./build-cpu 2"
 after_script:
