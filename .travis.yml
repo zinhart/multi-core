@@ -11,7 +11,7 @@ addons:
       - "python3-pip"
     
 before_script:
-  - pip3 install --user cpp-coveralls
+  - "pip3 install --user cpp-coveralls"
 script:
   - ./build-cpu
 after_script:
