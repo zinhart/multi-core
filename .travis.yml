@@ -1,4 +1,4 @@
-dist: bionic
+dist: trusty #bionic
 sudo: false
 language: cpp
 branches: 
