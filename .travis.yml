@@ -13,6 +13,7 @@ addons:
       - "g++-6"
       - "python3"
       - "python3-pip"
+      - "cmake-data"
       - "cmake"
     
 before_script:
@@ -27,9 +28,10 @@ before_script:
 
 script:
   - "./build-cpu 2"
-    #after_script:
 
-    #after_success:
+after_script:
+
+after_success:
     #- "coveralls --exclude lib --exclude tests --gconv-options '\-lp'"
 
 notifications:
