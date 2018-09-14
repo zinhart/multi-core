@@ -28,7 +28,7 @@ before_script:
   - "sudo apt-get install -y intel-mkl-2019.0-045"
 cache:
   directories:
-    /opt/intel
+  - "/opt/intel"
 
 script:
   - "./build-cpu 2"
