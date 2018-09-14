@@ -150,9 +150,13 @@ endif()
 if(BuildBenchmarks)
   #  set(CMAKE_ARGS "${CMAKE_ARGS} -DBENCHMARK_ENABLE_TESTING${STRING}=OFF") would like to config this with cmake args
   #  set(CMAKE_CACHE_ARGS "${CMAKE_CACHE_ARGS} -DBENCHMARK_ENABLE_TESTING${STRING}=OFF")
-  set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
+  set(BENCHMARK_ENABLE_TESTING ON CACHE BOOL "Suppressing benchmark's tests" FORCE)
+
+  message(STATUS "RIGHT HERE: ${CMAKE_CURRENT_BINARY_DIR}")
+  set(GTEST_ROOT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/googletest-src/googlemock" CACHE PATH "Path to externally added gtest")
+
   if(BuildUnitTest)
-	set(GTEST_ROOT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/googletest-src/googletest" CACHE PATH "Path to externally added gtest")
+	#set(GTEST_ROOT_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/googletest-src/googletest" CACHE PATH "Path to externally added gtest")
 	#$  list(APPEND CMAKE_ARGS "-D${GTEST_ROOT}:${string}=\"${GTEST_ROOT_LOCATION}\"")
   endif()
 

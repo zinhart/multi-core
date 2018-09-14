@@ -7,7 +7,7 @@ ExternalProject_Add(googlebench
   GIT_REPOSITORY    https://github.com/google/benchmark.git
   GIT_TAG           master
   CMAKE_ARGS        "${CMAKE_ARGS}"
-  CMAKE_CACHE_ARGS        "${CMAKE_CACHE_ARGS}"
+  CMAKE_CACHE_ARGS  "${CMAKE_CACHE_ARGS}"
   SOURCE_DIR        "${CMAKE_BINARY_DIR}/googlebench-src"
   BINARY_DIR        "${CMAKE_BINARY_DIR}/googlebench-build"
   CONFIGURE_COMMAND ""
