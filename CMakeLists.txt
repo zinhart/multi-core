@@ -10,6 +10,7 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
 endif()
 
+
 # for unit tests using google test
 option(BuildUnitTest "BuildUnitTest" ON)
 # for benchmarking using google bench
@@ -35,6 +36,12 @@ endif()
 
 #set module path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+
+# code coverage
+if(CMAKE_COMPILER_IS_GNUCXX)
+    include(CodeCoverage)
+    setup_target_for_coverage(${PROJECT_NAME}_coverage tests coverage)
+endif() 
 
 if(PTHREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
