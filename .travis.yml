@@ -29,3 +29,8 @@ script:
   - "./build-cpu 2"
 after_script:
 
+after_success:
+
+notifications:
+  email: true
+
