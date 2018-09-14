@@ -36,12 +36,7 @@ endif()
 
 #set module path
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
-
-# code coverage
-if(CMAKE_COMPILER_IS_GNUCXX)
-    include(CodeCoverage)
-    setup_target_for_coverage(${PROJECT_NAME}_coverage tests coverage)
-endif() 
+ 
 
 if(PTHREADS)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -106,7 +101,7 @@ set(CMAKE_CXX_FLAGS "-Wall -std=c++11 ${CMAKE_CXX_FLAGS}")
 # set cxx release flags
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -fPIC")
 # set cxx debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC --coverage")
 
 
 # sanitize flags
@@ -193,6 +188,17 @@ if(BuildBenchmarks)
 					)
   endif()
   add_subdirectory(benchmarks)
+endif()
+
+
+# code coverage
+if(CMAKE_COMPILER_IS_GNUCXX)
+    include(CodeCoverage)
+	# ignore extraneous files
+	set(COVERAGE_LCOV_EXCLUDES '/usr/include/*' '${PROJECT_BINARY_DIR}/googlebench-src/*' '${PROJECT_BINARY_DIR}/googletest-src/*')
+	SETUP_TARGET_FOR_COVERAGE_LCOV(NAME         ${PROJECT_NAME}_coverage 
+								   EXECUTABLE   ./unit_tests/concurrent_routines_unit_tests 
+								   DEPENDENCIES ${PROJECT_NAME})
 endif()
 
 message(STATUS "")

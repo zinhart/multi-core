@@ -34,6 +34,7 @@ if [[ $# -eq 1 && $1 -eq 2 ]] ; then
   mkdir -p ${debug_folder} && cd $_
   cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF ..
   make -j 8
+  make -j 8 concurrent_routines_coverage
   printf "Finished make\n"
 fi
 
