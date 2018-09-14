@@ -26,10 +26,6 @@ before_script:
   - "sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'"
   - "sudo apt-get -y update"
   - "sudo apt-get install -y intel-mkl-2019.0-045"
-cache:
-  directories:
-  - "/opt/intel"
-
 script:
   - "./build-cpu 2"
 
