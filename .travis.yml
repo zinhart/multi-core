@@ -17,6 +17,7 @@ addons:
     
 before_script:
   - "pip3 install --user cpp-coveralls"
+  - "./configure --enable-gconv && make && make check"
   # next 4 lines are for mkl
   - "wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
   - "sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
@@ -24,12 +25,12 @@ before_script:
   - "sudo apt-get -y update"
   - "sudo apt-get install -y intel-mkl-2019.0-045"
 
-
 script:
   - "./build-cpu 2"
 after_script:
 
 after_success:
+  - "coveralls --exclude lib --exclude tests --gconv-options '\-lp'"
 
 notifications:
   email: true
