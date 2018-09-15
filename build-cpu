@@ -35,6 +35,8 @@ if [[ $# -eq 1 && $1 -eq 2 ]] ; then
   cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF ..
   make -j 8
   make -j 8 concurrent_routines_coverage
+  lcov --remove concurrent_routines_coverage.info '/usr/include/*' '/home/zinhart/Desktop/concurrent_routines/debug-concurrent_routines-cpu/googlebench-src/*' '/home/zinhart/Desktop/concurrent_routines/debug-concurrent_routines-cpu/googletest-src/*' -o concurrent_routines_coverage.info
+  #lcov --no-external concurrent_routines_coverage.info -o concurrent_routines_coverage.info
   printf "Finished make\n"
 fi
 
