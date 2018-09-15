@@ -17,7 +17,7 @@ I wrote this library for a few different reasons.
 
 ## CPU Examples
   Using the thread pool:
-
+''''cpp
   std::random_device rd;
   std::mt19937 mt(rd());
   std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
@@ -34,9 +34,12 @@ I wrote this library for a few different reasons.
 	res = results[i].get();  
 	ASSERT_EQ(i + j, res);
   }
- 
+ ''''
  A parallel std::generate
+
+''''cpp
  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
  zinhart::parallel::async::generate(x_parallel, x_parallel + n_elements, generator, results);
  for(i = 0; i < results.size(); ++i)
 	results[i].get();
+''''
