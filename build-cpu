@@ -1,51 +1,50 @@
 # To do
 # 1. Add control for how many threads during make
-# 2. Add control for building as shared or namic
+# 2. Add control for building as shared or static
 # 3. Add control for what OS build and thus which threading library (pthread/windows)
 
-debug_folder="debug-concurrent_routines-cpu"
-release_folder="release-concurrent_routines-cpu"
+DEBUG_FOLDER="debug-concurrent_routines-cpu"
+RELEASE_FOLDER="release-concurrent_routines-cpu"
+MAX_THREADS=$(nproc) # to speed up make
 
-if [ $# -eq 0 ]
+if [ "$#" == "0" ]
 then
 printf "USAGE: $0 <some valid number list below>\n"
-printf "0: Erase ${debug_folder}\n"
-printf "1: Erase ${release_folder}\n"
-printf "2: Build ${debug_folder}\n"
-printf "3: Build ${release_folder}\n"
+printf "0: Erase ${DEBUG_FOLDER}\n"
+printf "1: Erase ${RELEASE_FOLDER}\n"
+printf "2: Build ${DEBUG_FOLDER}\n"
+printf "3: Build ${RELEASE_FOLDER}\n"
 #possible future options here
 fi
 
-#change comparison of arg1 to string instead of int
-if [[ $# -eq 1 && $1 -eq 0 ]] ; then
-  printf "Removing ${debug_folder}\n"
-  rm -rf ${debug_folder}
+# if total number of cmd args is 1 and the first of them is zero
+if [[ "$#" == "1" && "$1" == "0" ]] ; then
+  printf "Removing ${DEBUG_FOLDER}\n"
+  rm -rf ${DEBUG_FOLDER}
 fi
 
-#change comparison of arg1 to string instead of int
-if [[ $# -eq 1 && $1 -eq 1 ]] ; then
-  printf "Removing ${release_folder}\n"
-  rm -rf ${release_folder}
+# if total number of cmd args is 1 and the first of them is one
+if [[ "$#" == "1" && "$1" == "1" ]] ; then
+  printf "Removing ${RELEASE_FOLDER}\n"
+  rm -rf ${RELEASE_FOLDER}
 fi
 
-#change comparison of arg1 to string instead of int
-if [[ $# -eq 1 && $1 -eq 2 ]] ; then
+# if total number of cmd args is 1 and the first of them is two
+if [[ "$#" == "1" && "$1" == "2" ]] ; then
   printf "Proceding with cmake\n"
-  mkdir -p ${debug_folder} && cd $_
+  mkdir -p ${DEBUG_FOLDER} && cd $_
   cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF ..
-  make -j 8
-  make -j 8 concurrent_routines_coverage
-  lcov --remove concurrent_routines_coverage.info '/usr/include/*' '/home/zinhart/Desktop/concurrent_routines/debug-concurrent_routines-cpu/googlebench-src/*' '/home/zinhart/Desktop/concurrent_routines/debug-concurrent_routines-cpu/googletest-src/*' -o concurrent_routines_coverage.info
-  #lcov --no-external concurrent_routines_coverage.info -o concurrent_routines_coverage.info
+  make -j $MAX_THREADS
+  make -j $MAX_THREADS concurrent_routines_coverage
+  lcov --remove concurrent_routines_coverage.info "/usr/include/*" "$PWD/googlebench-src/*" "$PWD/googletest-src/*" -o concurrent_routines_coverage.info
   printf "Finished make\n"
 fi
 
-
-#change comparison of arg1 to string instead of int
-if [[ $# -eq 1 && $1 -eq 3 ]] ; then
+# if total number of cmd args is 1 and the first of them is three
+if [[ "$#" == "1" && "$1" == "3" ]] ; then
   printf "Proceding with cmake\n"
-  mkdir -p ${release_folder} && cd $_
+  mkdir -p ${RELEASE_FOLDER} && cd $_
   cmake -DCMAKE_BUILD_TYPE=RELEASE -DBuildCuda=OFF ..
-  make -j 8
+  make -j $MAX_THREADS
   printf "Finished make\n"
 fi
