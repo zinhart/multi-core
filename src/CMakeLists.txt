@@ -33,7 +33,7 @@ else()
 	  serial/serial.cc
 	  parallel/thread_pool.cc
      )	
-   add_library(concurrent_routines ${concurrent_routines_lib} )
+   add_library(concurrent_routines ${LIB_TYPE} ${concurrent_routines_lib})
    
    #link cpu threading library & MKL
    target_link_libraries(
@@ -44,7 +44,7 @@ else()
 
   if(BuildShared)
 	#install  libconcurrent_routines.so to <cmake output dir>/${CMAKE_CURRENT_DIR}/
-	install(TARGETS concurrent_routines LIBRARY DESTINATION lib LIBRARY DESTINATION lib)
+	install(TARGETS concurrent_routines LIBRARY DESTINATION lib DESTINATION lib)
   else()
 	# install  libconcurrent_routines.a to <cmake output dir>/${CMAKE_CURRENT_DIR}/
 	install(TARGETS concurrent_routines LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)

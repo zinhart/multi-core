@@ -19,6 +19,7 @@ option(BuildBenchmarks "BuildBenchmarks" ON)
 option(BuildCuda "BuildCuda" ON)
 # library type
 option(BuildShared "BuildShared" OFF)
+# nesting protection
 option(ConcurrentRoutinesUseCodeCoverage "ConcurrentRoutinesUseCodeCoverage" ON)
 # sanitizer support
 option(Sanitize "Sanitize" OFF)
@@ -101,9 +102,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-Wall -std=c++11 ${CMAKE_CXX_FLAGS}")
 # set cxx release flags
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -fPIC")
-# set cxx debug flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC --coverage")
 
+# set cxx debug flags
+if(ConcurrentRoutinesUseCodeCoverage)
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC --coverage")
+else()
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC")
+endif()
 
 # sanitize flags
 if (Sanitize)
