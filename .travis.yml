@@ -18,7 +18,7 @@ addons:
       - "lcov"
     
 before_script:
-  - "pip3 install --user cpp-coveralls"
+  - "gem install coveralls-lcov"
     # - "./configure --enable-gconv && make && make check"
   # next 4 lines are for mkl
   - "wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
@@ -32,15 +32,8 @@ script:
 after_script:
 
 after_success:
-  - cd ${TRAVIS_BUILD_DIR}
-  - coveralls 
-  # Creating report
-  #-
-  #- lcov --directory . --capture --output-file coverage.info # capture coverage info
-  #- lcov --remove coverage.info '/usr/*' --output-file coverage.info # filter out system
-  #- lcov --list coverage.info #debug info
-  ## Uploading report to CodeCov
-  #- bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
+  - cd ${TRAVIS_BUILD_DIR}/debug-concurrent_routines-cpu
+  - coveralls-lcov --repo-token "$COVERALLS_REPO_TOKEN" concurrent_routines_coverage.info
 
 notifications:
   email: true

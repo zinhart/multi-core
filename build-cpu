@@ -36,6 +36,7 @@ if [[ "$#" == "1" && "$1" == "2" ]] ; then
   cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF ..
   make -j $MAX_THREADS
   make -j $MAX_THREADS concurrent_routines_coverage
+  # strip extraneous files
   lcov --remove concurrent_routines_coverage.info "/usr/include/*" "$PWD/googlebench-src/*" "$PWD/googletest-src/*" -o concurrent_routines_coverage.info
   printf "Finished make\n"
 fi
