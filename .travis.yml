@@ -11,15 +11,12 @@ addons:
     packages:
       - "gcc-6"
       - "g++-6"
-      - "python3"
-      - "python3-pip"
       - "cmake-data"
       - "cmake"
       - "lcov"
     
 before_script:
   - "gem install coveralls-lcov"
-    # - "./configure --enable-gconv && make && make check"
   # next 4 lines are for mkl
   - "wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
   - "sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB"
@@ -33,7 +30,7 @@ after_script:
 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}/debug-concurrent_routines-cpu
-  - coveralls-lcov --repo-token "$COVERALLS_REPO_TOKEN" concurrent_routines_coverage.info
+  - coveralls-lcov --repo-token "$CONCURRENT_ROUTINES_COVERALLS_REPO_TOKEN" concurrent_routines_coverage.info
 
 notifications:
   email: true
