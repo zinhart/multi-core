@@ -19,6 +19,7 @@ option(BuildBenchmarks "BuildBenchmarks" ON)
 option(BuildCuda "BuildCuda" ON)
 # library type
 option(BuildShared "BuildShared" OFF)
+option(ConcurrentRoutinesUseCodeCoverage "ConcurrentRoutinesUseCodeCoverage" ON)
 # sanitizer support
 option(Sanitize "Sanitize" OFF)
 
@@ -190,15 +191,16 @@ if(BuildBenchmarks)
   add_subdirectory(benchmarks)
 endif()
 
-
 # code coverage
-if(CMAKE_COMPILER_IS_GNUCXX)
-    include(CodeCoverage)
-	# ignore extraneous files
-	set(COVERAGE_LCOV_EXCLUDES '/usr/include/*' '${PROJECT_BINARY_DIR}/googlebench-src/*' '${PROJECT_BINARY_DIR}/googletest-src/*')
-	SETUP_TARGET_FOR_COVERAGE_LCOV(NAME         ${PROJECT_NAME}_coverage 
-								   EXECUTABLE   ./unit_tests/concurrent_routines_unit_tests 
-								   DEPENDENCIES ${PROJECT_NAME})
+if(ConcurrentRoutinesUseCodeCoverage)
+  if(CMAKE_COMPILER_IS_GNUCXX)
+	  include(CodeCoverage)
+	  # ignore extraneous files
+	  set(COVERAGE_LCOV_EXCLUDES '/usr/include/*' '${PROJECT_BINARY_DIR}/googlebench-src/*' '${PROJECT_BINARY_DIR}/googletest-src/*')
+	  SETUP_TARGET_FOR_COVERAGE_LCOV(NAME         ${PROJECT_NAME}_coverage 
+									 EXECUTABLE   ./unit_tests/concurrent_routines_unit_tests 
+									 DEPENDENCIES ${PROJECT_NAME})
+  endif()
 endif()
 
 message(STATUS "")
