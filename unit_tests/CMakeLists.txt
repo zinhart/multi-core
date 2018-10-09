@@ -29,7 +29,8 @@ else()
 add_executable(concurrent_routines_unit_tests ${concurrent_routines_unit_tests_src})
 
 target_link_libraries(concurrent_routines_unit_tests 
-                      gmock_main
+					  gtest
+					  #gmock_main # for google mock
 					  concurrent_routines
 				   	  ${MKL_LIBRARIES}
 					  ${CMAKE_THREAD_LIBS_INIT}

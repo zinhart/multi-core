@@ -1,5 +1,5 @@
 #include <concurrent_routines/concurrent_routines.hh>
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <algorithm>
 #include <iostream>
 #include <random>
