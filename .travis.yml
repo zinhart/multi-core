@@ -30,7 +30,7 @@ after_script:
 
 after_success:
   - cd ${TRAVIS_BUILD_DIR}/debug-concurrent_routines-cpu
-  - coveralls-lcov --repo-token $CONCURRENT_ROUTINES_COVERALLS_REPO_TOKEN concurrent_routines_coverage.info
+  - coveralls-lcov --repo-token $CONCURRENT_ROUTINES_COVERALLS_REPO_TOKEN multi_core_coverage.info
 
 notifications:
   email: true
