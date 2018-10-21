@@ -2,9 +2,9 @@
 # 1. Add control for how many threads during make
 # 2. Add control for what OS build and thus which threading library (pthread/windows)
 
-LIBRARY="concurrent_routines"
-DEBUG_FOLDER="debug-concurrent_routines-cpu"
-RELEASE_FOLDER="release-concurrent_routines-cpu"
+LIBRARY="multi_core"
+DEBUG_FOLDER="debug-multi_core-cpu"
+RELEASE_FOLDER="release-multi_core-cpu"
 MAX_THREADS=$(nproc) # to speed up make
 
 if [ "$#" == "0" ]
@@ -39,14 +39,14 @@ if [[ "$#" == "2" && ("$1" == "--bd" || "$1" == "--build-debug") ]] ; then
   then
     mkdir -p ${DEBUG_FOLDER} && cd $_
     printf "Proceding with cmake in debug mode\n"
-	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DConcurrentRoutinesUseCodeCoverage=OFF -DBuildShared=ON ..
+	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DMultiCoreUseCodeCoverage=OFF -DBuildShared=ON ..
 	make -j $MAX_THREADS
 	printf "Finished make\n"
   elif [[ "$2" == "--st" || "$2" == "--static" ]]
   then
    mkdir -p ${DEBUG_FOLDER} && cd $_
    printf "Proceding with cmake in debug mode\n"
-	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DConcurrentRoutinesUseCodeCoverage=OFF -DBuildShared=OFF ..
+	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DMultiCoreUseCodeCoverage=OFF -DBuildShared=OFF ..
 	make -j $MAX_THREADS
 	printf "Finished make\n"
   else
@@ -59,21 +59,21 @@ if [[ "$#" == "3" && ("$1" == "--bd" || "$1" == "--build-debug") ]] ; then
   then
     mkdir -p ${DEBUG_FOLDER} && cd $_
     printf "Proceding with cmake in debug mode\n"
-	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DBuildShared=ON -DConcurrentRoutinesUseCodeCoverage=ON ..
+	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DBuildShared=ON -DMultiCoreUseCodeCoverage=ON ..
 	make -j $MAX_THREADS
-	make -j $MAX_THREADS concurrent_routines_coverage
+	make -j $MAX_THREADS multi_core_coverage
 	# strip extraneous files
-	lcov --remove concurrent_routines_coverage.info "/usr/include/*" "$PWD/googlebench-src/*" "$PWD/googletest-src/*"  -o concurrent_routines_coverage.info
+	lcov --remove multi_core_coverage.info "/usr/include/*" "$PWD/googlebench-src/*" "$PWD/googletest-src/*"  -o multi_core_coverage.info
 	printf "Finished make\n"
   elif [[ ("$2" == "--st" || "$2" == "--static") && ("$3" == "--cc" || "$3" == "--code-coverage") ]]
   then
     mkdir -p ${DEBUG_FOLDER} && cd $_
     printf "Proceding with cmake in debug mode\n"
-	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DBuildShared=OFF -DConcurrentRoutinesUseCodeCoverage=ON ..
+	cmake -DCMAKE_BUILD_TYPE=DEBUG -DBuildCuda=OFF -DBuildBenchmarks=OFF -DBuildShared=OFF -DMultiCoreUseCodeCoverage=ON ..
 	make -j $MAX_THREADS
-	make -j $MAX_THREADS concurrent_routines_coverage
+	make -j $MAX_THREADS multi_core_coverage
 	# strip extraneous files
-	lcov --remove concurrent_routines_coverage.info "/usr/include/*" "$PWD/googlebench-src/*" "$PWD/googletest-src/*" -o concurrent_routines_coverage.info
+	lcov --remove multi_core_coverage.info "/usr/include/*" "$PWD/googlebench-src/*" "$PWD/googletest-src/*" -o multi_core_coverage.info
 	printf "Finished make\n"
   else
 	echo "Found an invalid build option: $2"
@@ -86,14 +86,14 @@ if [[ "$#" == "2" && ("$1" == "--br" || "$1" == "--build-release") ]] ; then
   then
     mkdir -p ${RELEASE_FOLDER} && cd $_
     printf "Proceding with cmake in debug mode\n"
-	cmake -DCMAKE_BUILD_TYPE=RELEASE -DBuildCuda=OFF -DBuildShared=ON -DConcurrentRoutinesUseCodeCoverage=OFF ..
+	cmake -DCMAKE_BUILD_TYPE=RELEASE -DBuildCuda=OFF -DBuildShared=ON -DMultiCoreUseCodeCoverage=OFF ..
 	make -j $MAX_THREADS
 	printf "Finished make\n"
   elif [[ "$2" == "--st" || "$2" == "--static" ]]
   then
     mkdir -p ${RELEASE_FOLDER} && cd $_
     printf "Proceding with cmake in debug mode\n"
-	cmake -DCMAKE_BUILD_TYPE=RELEASE -DBuildCuda=OFF -DBuildShared=OFF -DConcurrentRoutinesUseCodeCoverage=OFF ..
+	cmake -DCMAKE_BUILD_TYPE=RELEASE -DBuildCuda=OFF -DBuildShared=OFF -DMultiCoreUseCodeCoverage=OFF ..
 	make -j $MAX_THREADS
 	printf "Finished make\n"
   else

@@ -1,5 +1,5 @@
-#ifndef CONCURRENT_ROUTINES_ERROR_HH
-#define CONCURRENT_ROUTINES_ERROR_HH
+#ifndef MULTI_CORE_ERROR_ERROR_HH
+#define MULTI_CORE_ERROR_ERROR_HH
 #include "macros.hh"
 #if CUDA_ENABLED == true
 #include <cublas_v2.h>

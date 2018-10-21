@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 # library name
-project(concurrent_routines)
+project(multi_core)
 
 # set build type to release by default
 if (NOT CMAKE_BUILD_TYPE)
@@ -20,7 +20,7 @@ option(BuildCuda "BuildCuda" ON)
 # library type
 option(BuildShared "BuildShared" OFF)
 # nesting protection
-option(ConcurrentRoutinesUseCodeCoverage "ConcurrentRoutinesUseCodeCoverage" ON)
+option(MultiCoreUseCodeCoverage "MultiCoreUseCodeCoverage" ON)
 # sanitizer support
 option(Sanitize "Sanitize" OFF)
 
@@ -82,7 +82,7 @@ if(BuildCuda)
   endif()
   
   # set include paths
-  include_directories(. include include/concurrent_rountines/ ${MKL_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
+  include_directories(. include include/multi_core/ ${MKL_INCLUDE_DIR} ${CUDA_INCLUDE_DIRS} "${PROJECT_BINARY_DIR}")
 else()
   string(REGEX MATCH "CUDA_ENABLED" result "${COMPILE_DEFINITIONS}")
   if(${result} MATCHES "CUDA_ENABLED")
@@ -90,7 +90,7 @@ else()
 	add_definitions(-DCUDA_ENABLED=false)
   endif()
   # set include paths
-  include_directories(. include include/concurrent_rountines/ ${MKL_INCLUDE_DIR} "${PROJECT_BINARY_DIR}")
+  include_directories(. include include/multi_core/ ${MKL_INCLUDE_DIR} "${PROJECT_BINARY_DIR}")
 endif()
 
 
@@ -104,7 +104,7 @@ set(CMAKE_CXX_FLAGS "-Wall -std=c++11 ${CMAKE_CXX_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -fPIC")
 
 # set cxx debug flags
-if(ConcurrentRoutinesUseCodeCoverage)
+if(MultiCoreUseCodeCoverage)
     set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC --coverage")
 else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g -pedantic -fno-omit-frame-pointer -fno-inline-functions -fPIC")
@@ -204,13 +204,13 @@ if(BuildBenchmarks)
 endif()
 
 # code coverage
-if(ConcurrentRoutinesUseCodeCoverage)
+if(MultiCoreUseCodeCoverage)
   if(CMAKE_COMPILER_IS_GNUCXX)
 	  include(CodeCoverage)
 	  # ignore extraneous files
 	  set(COVERAGE_LCOV_EXCLUDES '/usr/include/*' '${PROJECT_BINARY_DIR}/googlebench-src/*' '${PROJECT_BINARY_DIR}/googletest-src/*')
 	  SETUP_TARGET_FOR_COVERAGE_LCOV(NAME         ${PROJECT_NAME}_coverage 
-									 EXECUTABLE   ./unit_tests/concurrent_routines_unit_tests 
+									 EXECUTABLE   ./unit_tests/multi_core_unit_tests 
 									 DEPENDENCIES ${PROJECT_NAME})
   endif()
 endif()

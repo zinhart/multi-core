@@ -20,24 +20,24 @@ add_test(
   )
 # cpu only unit tests
 else()
-  # concurrent_routines unit test src
-  set(concurrent_routines_unit_tests_src
+  # multi_core unit test src
+  set(multi_core_unit_tests_src
    run_all.cc
    thread_pool_test.cc
    cpu_test.cc
    )
-add_executable(concurrent_routines_unit_tests ${concurrent_routines_unit_tests_src})
+add_executable(multi_core_unit_tests ${multi_core_unit_tests_src})
 
-target_link_libraries(concurrent_routines_unit_tests 
+target_link_libraries(multi_core_unit_tests 
 					  gtest
 					  #gmock_main # for google mock
-					  concurrent_routines
+					  multi_core
 				   	  ${MKL_LIBRARIES}
 					  ${CMAKE_THREAD_LIBS_INIT}
 					  )
 add_test(
-  NAME concurrent_routines_unit_tests
-  COMMAND concurrent_routines_unit_tests
+  NAME multi_core_unit_tests
+  COMMAND multi_core_unit_tests
   )
 endif()
 

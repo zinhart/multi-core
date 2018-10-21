@@ -1,4 +1,4 @@
-#include "concurrent_routines/parallel/parallel.hh"
+#include "multi_core/parallel/parallel.hh"
 namespace zinhart
 {
   namespace multi_core

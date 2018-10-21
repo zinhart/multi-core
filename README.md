@@ -1,4 +1,4 @@
-# Concurrent Routines
+# Multi_Core
 [![Build Status](https://travis-ci.com/zinhart/concurrent_routines.svg?branch=testing)](https://travis-ci.com/zinhart/concurrent_routines)
 [![Coverage Status](https://coveralls.io/repos/github/zinhart/concurrent_routines/badge.svg?branch=testing)](https://coveralls.io/github/zinhart/concurrent_routines?branch=testing)
 
@@ -23,10 +23,10 @@ I wrote this library for a few different reasons.
   std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
   std::uniform_int_distribution<std::uint32_t> size_dist(1, MAX_CPU_THREADS);
   std::uint32_t results_size = size_dist(mt);
-  std::vector<zinhart::parallel::thread_pool::task_future<std::uint32_t>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<std::uint32_t>> results;
   for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
   {	  
-	results.push_back(zinhart::parallel::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
+	results.push_back(zinhart::multi_core::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
   }
   std::uint32_t res;
   for(std::uint32_t i = 0, j = 0; i < results_size; ++i, ++j)
@@ -37,8 +37,8 @@ I wrote this library for a few different reasons.
  ```
  A parallel std::generate
 ```cpp
- std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
- zinhart::parallel::async::generate(x_parallel, x_parallel + n_elements, generator, results);
+ std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+ zinhart::multi_core::async::generate(x_parallel, x_parallel + n_elements, generator, results);
  for(i = 0; i < results.size(); ++i)
 	results[i].get();
 ```

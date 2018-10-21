@@ -1,4 +1,4 @@
-#include "concurrent_routines/serial/serial.hh"
+#include "multi_core/serial/serial.hh"
 #include <stdexcept>
 #include <string>
 namespace zinhart

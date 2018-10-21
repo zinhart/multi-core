@@ -1,5 +1,5 @@
-#ifndef CONCURRENT_ROUTINES_HH
-#define CONCURRENT_ROUTINES_HH
+#ifndef MULTI_CORE_HH
+#define MULTI_CORE_HH
 #include "macros.hh"
 #include "parallel/parallel.hh"
 #include "serial/serial.hh"

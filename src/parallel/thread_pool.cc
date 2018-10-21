@@ -1,6 +1,6 @@
-#ifndef THREAD_POOL_TCC
-#define THREAD_POOL_TCC
-#include "concurrent_routines/parallel/thread_pool.hh"
+#ifndef THREAD_POOL_CC
+#define THREAD_POOL_CC
+#include "multi_core/parallel/thread_pool.hh"
 #include <type_traits>
 #include <memory>
 namespace zinhart

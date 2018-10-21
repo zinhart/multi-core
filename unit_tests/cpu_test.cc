@@ -1,4 +1,4 @@
-#include <concurrent_routines/concurrent_routines.hh>
+#include <multi_core/multi_core.hh>
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <iostream>
