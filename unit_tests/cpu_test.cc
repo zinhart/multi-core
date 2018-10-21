@@ -22,7 +22,7 @@ TEST(cpu_test_parallel, saxpy)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -42,7 +42,7 @@ TEST(cpu_test_parallel, saxpy)
 							y[i] = a * x[i] + y[i];
 						  }
 						};
-  zinhart::parallel::async::saxpy(alpha, x_parallel, y_parallel, n_elements, results);
+  zinhart::multi_core::async::saxpy(alpha, x_parallel, y_parallel, n_elements, results);
   serial_saxpy(alpha, x_serial, y_serial, n_elements);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -72,7 +72,7 @@ TEST(cpu_test_parallel, copy)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -80,7 +80,7 @@ TEST(cpu_test_parallel, copy)
 	x_serial[i] = first;
 	x_parallel[i] = first;
   }
-  zinhart::parallel::async::copy(x_parallel, x_parallel + n_elements, y_parallel, results );
+  zinhart::multi_core::async::copy(x_parallel, x_parallel + n_elements, y_parallel, results );
   std::copy(x_serial, x_serial + n_elements, y_serial);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -111,7 +111,7 @@ TEST(cpu_test_parallel, copy_if)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -120,7 +120,7 @@ TEST(cpu_test_parallel, copy_if)
 		x_parallel[i] = first;
   }
   auto unary_predicate = [](float & init){ return (init >= 1.0) ? true : false ;};
-  zinhart::parallel::async::copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, results );
+  zinhart::multi_core::async::copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, results );
   std::copy_if(x_serial, x_serial + n_elements, y_serial, unary_predicate);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -151,7 +151,7 @@ TEST(cpu_test_parallel, replace)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float old_value = real_dist(mt);
   float new_value = real_dist(mt);
@@ -163,7 +163,7 @@ TEST(cpu_test_parallel, replace)
 	y_serial[i] = x_serial[i];
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::replace(x_parallel, x_parallel + n_elements, old_value, new_value, results);
+  zinhart::multi_core::async::replace(x_parallel, x_parallel + n_elements, old_value, new_value, results);
   std::replace(x_serial, x_serial + n_elements, old_value, new_value);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -194,7 +194,7 @@ TEST(cpu_test_parallel, replace_if)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float old_value = real_dist(mt);
   float new_value = real_dist(mt);
@@ -207,7 +207,7 @@ TEST(cpu_test_parallel, replace_if)
 	y_serial[i] = x_serial[i];
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value, results);
+  zinhart::multi_core::async::replace_if(x_parallel, x_parallel + n_elements, unary_predicate, new_value, results);
   std::replace_if(x_serial, x_serial + n_elements, unary_predicate, new_value);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -239,7 +239,7 @@ TEST(cpu_test_parallel, replace_copy)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float new_value = real_dist(mt);
   float old_value = real_dist(mt);
@@ -248,7 +248,7 @@ TEST(cpu_test_parallel, replace_copy)
 	x_serial[i] = old_value;
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::replace_copy(x_parallel, x_parallel + n_elements, y_parallel, old_value, new_value, results );
+  zinhart::multi_core::async::replace_copy(x_parallel, x_parallel + n_elements, y_parallel, old_value, new_value, results );
   std::replace_copy(x_serial, x_serial + n_elements, y_serial, old_value, new_value);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -279,7 +279,7 @@ TEST(cpu_test_parallel, replace_copy_if)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float old_value = real_dist(mt);
   float new_value = real_dist(mt);
@@ -290,7 +290,7 @@ TEST(cpu_test_parallel, replace_copy_if)
 	x_serial[i] = old_value;
 	x_parallel[i] = old_value;
   }
-  zinhart::parallel::async::replace_copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, new_value, results);
+  zinhart::multi_core::async::replace_copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, new_value, results);
   std::replace_copy_if(x_serial, x_serial + n_elements, y_serial, unary_predicate, new_value);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -321,7 +321,7 @@ TEST(cpu_test_parallel, inner_product_first_overload)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float first, second, init = real_dist(mt), parallel_ret, serial_ret;
   for(i = 0; i < n_elements; ++i )
@@ -333,7 +333,7 @@ TEST(cpu_test_parallel, inner_product_first_overload)
 	x_parallel[i] = first;
 	y_parallel[i] = second;
   }
-  zinhart::parallel::async::inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, results);
+  zinhart::multi_core::async::inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, results);
   serial_ret = std::inner_product(x_serial, x_serial + n_elements, y_serial, init);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -361,7 +361,7 @@ TEST(cpu_test_parallel, inner_product_second_overload)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   float first, second, init = real_dist(mt), parallel_ret, serial_ret;
   for(i = 0; i < n_elements; ++i )
@@ -373,7 +373,7 @@ TEST(cpu_test_parallel, inner_product_second_overload)
 	x_parallel[i] = first;
 	y_parallel[i] = second;
   }
-  zinhart::parallel::async::inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, std::plus<float>(), std::equal_to<float>(), results);
+  zinhart::multi_core::async::inner_product(x_parallel, x_parallel + n_elements, y_parallel, init, std::plus<float>(), std::equal_to<float>(), results);
   serial_ret = std::inner_product(x_serial, x_serial + n_elements, y_serial, init, std::plus<float>(), std::equal_to<float>());
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -399,7 +399,7 @@ TEST(cpu_test_parallel, accumulate)
   std::uint32_t n_elements = uint_dist(mt);
   float * x_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -409,7 +409,7 @@ TEST(cpu_test_parallel, accumulate)
   }
   //sum
   float p_sum{0.0};
-  zinhart::parallel::async::accumulate(x_parallel, x_parallel + n_elements, p_sum, results);
+  zinhart::multi_core::async::accumulate(x_parallel, x_parallel + n_elements, p_sum, results);
   float s_sum = std::accumulate(x_serial, x_serial + n_elements, 0.0);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -433,7 +433,7 @@ TEST(cpu_test_parallel, for_each)
   std::uint32_t n_elements = uint_dist(mt);
   float * x_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -445,7 +445,7 @@ TEST(cpu_test_parallel, for_each)
 						{
 						  a = a * 2.0;
 						};
-  zinhart::parallel::async::for_each(x_parallel, x_parallel + n_elements, unary, results);
+  zinhart::multi_core::async::for_each(x_parallel, x_parallel + n_elements, unary, results);
   std::for_each(x_serial, x_serial + n_elements, unary);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -473,7 +473,7 @@ TEST(cpu_test_parallel, transform)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   auto unary = []( float & a )
 						{
@@ -486,7 +486,7 @@ TEST(cpu_test_parallel, transform)
 	x_serial[i] = first;
 	x_parallel[i] = first;
   }
-  zinhart::parallel::async::transform(x_parallel, x_parallel + n_elements, y_parallel, unary, results );
+  zinhart::multi_core::async::transform(x_parallel, x_parallel + n_elements, y_parallel, unary, results );
   std::transform(x_serial, x_serial + n_elements, y_serial, unary);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -515,7 +515,7 @@ TEST(cpu_test_parallel, generate)
   std::uint32_t n_elements = uint_dist(mt);
   float * x_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -524,7 +524,7 @@ TEST(cpu_test_parallel, generate)
 	x_parallel[i] = first;
   }
   auto generator = [](){ return -2.0; };
-  zinhart::parallel::async::generate(x_parallel, x_parallel + n_elements, generator, results);
+  zinhart::multi_core::async::generate(x_parallel, x_parallel + n_elements, generator, results);
   std::generate(x_serial, x_serial + n_elements, generator);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
@@ -552,7 +552,7 @@ TEST(cpu_test_parallel, kahan_sum)
   n_elements = 13;
   double * x_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -561,8 +561,8 @@ TEST(cpu_test_parallel, kahan_sum)
 	x_serial[i] = first;
 	x_parallel[i] = first;
   }
-  zinhart::parallel::async::kahan_sum(x_parallel, n_elements, parallel_sum, results);
-  serial_sum = zinhart::serial::kahan_sum(x_serial, n_elements);
+  zinhart::multi_core::async::kahan_sum(x_parallel, n_elements, parallel_sum, results);
+  serial_sum = zinhart::multi_core::kahan_sum(x_serial, n_elements);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -585,7 +585,7 @@ TEST(cpu_test_parallel, neumaier_sum)
   std::uint32_t n_elements = uint_dist(mt);
   double * x_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -594,8 +594,8 @@ TEST(cpu_test_parallel, neumaier_sum)
 	x_serial[i] = first;
 	x_parallel[i] = first;
   }
-  zinhart::parallel::async::neumaier_sum(x_parallel, n_elements, parallel_sum, results);
-  serial_sum = zinhart::serial::neumaier_sum(x_serial, n_elements);
+  zinhart::multi_core::async::neumaier_sum(x_parallel, n_elements, parallel_sum, results);
+  serial_sum = zinhart::multi_core::neumaier_sum(x_serial, n_elements);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -619,7 +619,7 @@ TEST(cpu_test_parallel, kahan_sum_two)
   double * y_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
   double * y_serial = new double [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -631,8 +631,8 @@ TEST(cpu_test_parallel, kahan_sum_two)
 	y_parallel[i] = second;
   }
   auto add_two_scalars = [](double x, double y){return x + y;};
-  zinhart::parallel::async::kahan_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
-  serial_sum = zinhart::serial::kahan_sum(x_serial, y_parallel, n_elements, add_two_scalars);
+  zinhart::multi_core::async::kahan_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
+  serial_sum = zinhart::multi_core::kahan_sum(x_serial, y_parallel, n_elements, add_two_scalars);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -658,7 +658,7 @@ TEST(cpu_test_parallel, neumair_sum_two)
   double * y_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
   double * y_serial = new double [n_elements];
-  std::vector<zinhart::parallel::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -670,8 +670,8 @@ TEST(cpu_test_parallel, neumair_sum_two)
 	y_parallel[i] = second;
   }
   auto add_two_scalars = [](double x, double y){return x + y;};
-  zinhart::parallel::async::neumaier_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
-  serial_sum = zinhart::serial::neumaier_sum(x_serial, y_parallel, n_elements, add_two_scalars);
+  zinhart::multi_core::async::neumaier_sum(x_parallel, y_parallel, n_elements, parallel_sum, add_two_scalars, results);
+  serial_sum = zinhart::multi_core::neumaier_sum(x_serial, y_parallel, n_elements, add_two_scalars);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -731,8 +731,8 @@ TEST(cpu_test, serial_matrix_multiply)
 	C_naive[i] = C_cache_aware[i];
   }
 
-  zinhart::serial::cache_aware_serial_matrix_product(A_cache_aware, B_cache_aware, C_cache_aware, M, N, K);
-  zinhart::serial::serial_matrix_product(A_naive, B_naive, C_naive, M, N, K);
+  zinhart::multi_core::cache_aware_serial_matrix_product(A_cache_aware, B_cache_aware, C_cache_aware, M, N, K);
+  zinhart::multi_core::serial_matrix_product(A_naive, B_naive, C_naive, M, N, K);
   
   for(i = 0; i < C_elements; ++i)
   {
@@ -777,30 +777,30 @@ TEST(mkl_test, gemm)
   for(i = 0; i < A_row; ++i)
 	for(j = 0; j < A_col; ++j)
 	{
-  	  A[zinhart::serial::idx2r(i, j, A_col)] = real_dist(mt);
-	  A_mkl[zinhart::serial::idx2r(i, j, A_col)] = A[zinhart::serial::idx2r(i, j, A_col)];
+  	  A[zinhart::multi_core::idx2r(i, j, A_col)] = real_dist(mt);
+	  A_mkl[zinhart::multi_core::idx2r(i, j, A_col)] = A[zinhart::multi_core::idx2r(i, j, A_col)];
 	}
 
   for(i = 0; i < B_row; ++i)
 	for(j = 0; j < B_col; ++j)
 	{
-  	  B[zinhart::serial::idx2r(i, j, B_col)] = real_dist(mt);
-	  B_mkl[zinhart::serial::idx2r(i, j, B_col)] = B[zinhart::serial::idx2r(i, j, B_col)];
+  	  B[zinhart::multi_core::idx2r(i, j, B_col)] = real_dist(mt);
+	  B_mkl[zinhart::multi_core::idx2r(i, j, B_col)] = B[zinhart::multi_core::idx2r(i, j, B_col)];
 	}
 
   for(i = 0; i < C_row; ++i)
 	for(j = 0; j < C_col; ++j)
 	{
-  	  C[zinhart::serial::idx2r(i, j, C_col)] = 0.0;
-	  C_mkl[zinhart::serial::idx2r(i, j, C_col)] = C[zinhart::serial::idx2r(i, j, C_col)];
+  	  C[zinhart::multi_core::idx2r(i, j, C_col)] = 0.0;
+	  C_mkl[zinhart::multi_core::idx2r(i, j, C_col)] = C[zinhart::multi_core::idx2r(i, j, C_col)];
 	}
 
 
-  zinhart::serial::cache_aware_serial_matrix_product(A, B, C, M, N, K);
+  zinhart::multi_core::cache_aware_serial_matrix_product(A, B, C, M, N, K);
   cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha, A_mkl, K, B_mkl, N, beta, C_mkl, N);
   for(i = 0; i < C_row; ++i)
 	for(j = 0; j < C_col; ++j)
-	  ASSERT_DOUBLE_EQ(C[zinhart::serial::idx2r(i, j, C_col)], C_mkl[zinhart::serial::idx2r(i, j, C_col)]);
+	  ASSERT_DOUBLE_EQ(C[zinhart::multi_core::idx2r(i, j, C_col)], C_mkl[zinhart::multi_core::idx2r(i, j, C_col)]);
 
   mkl_free( A );
   mkl_free( B );

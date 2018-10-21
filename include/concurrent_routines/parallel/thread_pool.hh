@@ -12,7 +12,7 @@
 #include <type_traits>
 namespace zinhart
 {
-  namespace parallel
+  namespace multi_core
   {
 	//an asynchonous thread pool
 	class thread_pool
@@ -109,6 +109,6 @@ namespace zinhart
 		  //return basic_thread_pool.add_task(std::forward<Callable>(c), std::forward<Args>(args)...);
 		}
 	}// END NAMESPACE DEFAULT_THREAD_POOL
-  }// END NAMESPACE PARALLEL
+  }// END NAMESPACE MULTI_CORE
 }// END NAMESPACe ZINHART
 #endif

@@ -2,7 +2,7 @@
 #define ZINHART_VECTORIZED_HH
 namespace zinhart
 {
-  namespace parallel
+  namespace multi_core
   {
 	namespace vectorized
 	{
@@ -12,7 +12,7 @@ namespace zinhart
 					    const precision_type a, precision_type * x, precision_type * y)
 		{
 		  std::uint32_t start = 0, stop = 0;
-		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 		  //operate on y's elements from start to stop
 		  for(std::uint32_t op = start; op < stop; ++op)
 		  {
@@ -24,7 +24,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			//here stop start is how much we should increment the (output/input)_it
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = *(input_it + op);
@@ -34,7 +34,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				if(pred( *(first + op) ))
 					*(output_it + op) = *(first + op);
@@ -44,7 +44,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				if(*(first + op) == old_value)
 					*(first + op) = new_value;
@@ -54,7 +54,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				if( unary_predicate( *(first + op) ) )
 					*(first + op) = new_value;
@@ -64,7 +64,7 @@ namespace zinhart
 			const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = (  *(first + op) == old_value) ? new_value : *(first + op);
 		}
@@ -73,7 +73,7 @@ namespace zinhart
 	  const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = ( pred( *(first + op) ) ) ? new_value : *(first + op);
 		}
@@ -82,7 +82,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
 				value = value + *(first1 + op) * *(first2 + op);
@@ -93,7 +93,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads )
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
 				value = op1(value, op2( *(first1 + op) ,  *(first2 + op) ));
@@ -103,7 +103,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			// all threads will contribute to the final value of this memory address
 			for(std::uint32_t op = start; op < stop; ++op)
 				init = init + *(first + op);
@@ -113,7 +113,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			//call f on each element
 			for(std::uint32_t op = start; op < stop; ++op)
 				f( *(first + op) );
@@ -123,7 +123,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			//same deal as copy really
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(output_it + op) = unary_op( *(input_it + op) );
@@ -133,7 +133,7 @@ namespace zinhart
 		const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 			std::uint32_t start = 0, stop = 0;
-			zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+			zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 			//call f on each element
 			for(std::uint32_t op = start; op < stop; ++op)
 				*(first + op) = g();
@@ -142,7 +142,7 @@ namespace zinhart
 		HOST void kahan_sum(const precision_type * data, precision_type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 		  std::uint32_t start{0}, stop{0}, op{0};
-		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 		  precision_type local_sum{ data[start] };
 		  // a running compensation for lost lower-order bits
 		  precision_type compensation{0.0};
@@ -161,7 +161,7 @@ namespace zinhart
 		HOST void neumaier_sum(const precision_type * data, precision_type & global_sum, const std::uint32_t & thread_id, const std::uint32_t & n_elements, const std::uint32_t & n_threads)
 		{
 		  std::uint32_t start{0}, stop{0}, op{0};
-		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 		  precision_type local_sum{ data[start] };
 		  // a running compensation for lost lower-order bits
 		  precision_type compensation{0.0};
@@ -185,7 +185,7 @@ namespace zinhart
 						   )
 		{
 		  std::uint32_t start{0}, stop{0}, op{0};
-		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 		  precision_type local_sum{ bp(vec_1[start], vec_2[start]) };
 		  // a running compensation for lost lower-order bits
 		  precision_type compensation{0.0};
@@ -206,7 +206,7 @@ namespace zinhart
 							  )
 		{
 		  std::uint32_t start{0}, stop{0}, op{0};
-		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  zinhart::multi_core::map(thread_id, n_threads, n_elements, start, stop);
 		  precision_type local_sum{ bp(vec_1[start], vec_2[start]) };
 		  // a running compensation for lost lower-order bits
 		  precision_type compensation{0.0};
@@ -225,6 +225,6 @@ namespace zinhart
 		  global_sum += (local_sum + compensation);
 		}
 	}// END NAMESPACE VECTORIZED
-  } // END NAMESPACE PARALLEL
+  } // END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
 #endif

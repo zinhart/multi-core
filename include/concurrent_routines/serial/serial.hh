@@ -5,7 +5,7 @@
 #include <cstdint>
 namespace zinhart
 {
-  namespace serial
+  namespace multi_core
   {
 	template <class precision_type>
 	  HOST precision_type kahan_sum(const precision_type * data, const std::uint32_t & data_size);
@@ -33,7 +33,7 @@ namespace zinhart
 
 	// assumed to be row major indices this generates the column indices
     HOST void gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
-  }
-}
+  }// END NAMESPACE MULTI_CORE
+}// END NAMESPACE ZINHART
 #include "ext/serial.tcc"
 #endif

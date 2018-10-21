@@ -7,7 +7,7 @@
 #include <atomic>
 namespace zinhart
 {
-  namespace parallel
+  namespace multi_core
   {
 	template <class T>
 	class thread_safe_queue
@@ -39,9 +39,7 @@ namespace zinhart
 		//manually shutdown the queue
 		HOST void shutdown();
 	};
-  }
-
-  
-}
+  }// END NAMESPACE MULTI_CORE
+}// END NAMESPACE ZINHART
 #include "ext/thread_safe_queue.tcc"
 #endif

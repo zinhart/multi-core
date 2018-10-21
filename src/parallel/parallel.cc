@@ -1,7 +1,7 @@
 #include "concurrent_routines/parallel/parallel.hh"
 namespace zinhart
 {
-  namespace parallel
+  namespace multi_core
   {
 	namespace async
 	{
@@ -14,7 +14,7 @@ namespace zinhart
 			)
 		{
 		  std::uint32_t start = 0, stop = 0;
-		  zinhart::serial::map(thread_id, n_threads, n_elements, start, stop);
+		  zinhart::map(thread_id, n_threads, n_elements, start, stop);
 		  //operate on y's elements from start to stop
 		  for(std::uint32_t op = start; op < stop; ++op)
 		  {

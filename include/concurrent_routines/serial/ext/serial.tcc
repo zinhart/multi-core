@@ -2,7 +2,7 @@
 #include <cmath>
 namespace zinhart
 {
-  namespace serial
+  namespace multi_core
   {
 	// taken from wikipedia https://en.wikipedia.org/wiki/Kahan_summation_algorithm	
 	template <class precision_type>
@@ -133,6 +133,6 @@ namespace zinhart
 		   std::cout<<"\n";
 		 }
 	  }
-  }// END NAMESPACE SERIAL
+  }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
 

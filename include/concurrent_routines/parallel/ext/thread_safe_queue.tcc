@@ -2,7 +2,7 @@
 #include <iostream>
 namespace zinhart
 {
-  namespace parallel
+  namespace multi_core
   {
 	template<class T>
 	  HOST thread_safe_queue<T>::thread_safe_queue()
@@ -15,7 +15,7 @@ namespace zinhart
 		cv.notify_all();
 	  }
 	template<class T>
-	  HOST thread_safe_queue<T>::~thread_safe_queue() /*= default*/
+	  HOST thread_safe_queue<T>::~thread_safe_queue()
 	  { shutdown(); }
 	template<class T>
 	  HOST void thread_safe_queue<T>::push(const T & item)
@@ -92,5 +92,5 @@ namespace zinhart
 		  queue.pop();
 		cv.notify_all();
 	  }
-  }
-}
+  }// END NAMESPACE MULTI_CORE
+}// END NAMESPACE ZINHART

@@ -3,7 +3,7 @@
 #include <string>
 namespace zinhart
 {
-  namespace serial
+  namespace multi_core
   {
 	// for embarrisingly parralell problems
 	HOST void map(const std::uint32_t thread_id, const std::uint32_t & n_threads, const std::uint32_t & n_elements, std::uint32_t & start, std::uint32_t & stop)
@@ -73,5 +73,5 @@ namespace zinhart
 	{ return j * ld + i; }
 	CUDA_CALLABLE_MEMBER std::uint32_t idx2r(std::int32_t i,std::int32_t j,std::int32_t ld)// for row major ordering, if A is MxN then ld is N
 	{ return i * ld + j; }
-  }
-}
+  }// END NAMESPACE MULTI_CORE
+}// END NAMESPACE ZINHART

@@ -5,7 +5,7 @@
 #include <memory>
 namespace zinhart
 {
-  namespace parallel
+  namespace multi_core
   {
 	HOST void thread_pool::up(const std::uint32_t & n_threads)
 	{
@@ -58,6 +58,6 @@ namespace zinhart
 	  }
 
 	}// END NAMESPACE DEFAULT_THREAD_POOL
-  }// END NAMESPACE PARALLEL
+  }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
 #endif
