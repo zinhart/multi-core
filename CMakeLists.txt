@@ -10,6 +10,9 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
 endif()
 
+# useful macros to check against
+add_definitions(-DMULTI_CORE_ENABLED=true)
+add_definitions(-DMULTI_CORE_DISABLED=false)
 
 # for unit tests using google test
 option(BuildUnitTest "BuildUnitTest" ON)
