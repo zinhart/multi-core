@@ -348,3 +348,31 @@ TEST(thread_pool, call_add_task_function)
   zinhart::multi_core::thread_pool::task_future<std::int32_t> result = zinhart::multi_core::default_thread_pool::push_task(plus_one,3);
   ASSERT_EQ(result.get(), 4);
 }
+TEST(thread_pool, resize)
+{	
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint32_t> thread_dist(1, 50);
+  std::vector<zinhart::multi_core::thread_pool::task_future<std::uint32_t>> results;
+  std::uint32_t i{0}, j{0};
+
+  for(i = 0, j = 0; i < zinhart::multi_core::default_thread_pool::size(); ++i, ++j)
+	results.push_back(zinhart::multi_core::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
+
+  for(i = 0, j = 0; i < zinhart::multi_core::default_thread_pool::size(); ++i, ++j)
+	ASSERT_EQ (i + j, results[i].get());
+
+  const std::uint32_t new_pool_size = thread_dist(mt);
+  zinhart::multi_core::default_thread_pool::resize(new_pool_size);
+  ASSERT_EQ(zinhart::multi_core::default_thread_pool::size(), new_pool_size);
+
+  results.clear();
+
+  for(i = 0, j = 0; i <zinhart::multi_core::default_thread_pool::size(); ++i, ++j)
+	results.push_back(zinhart::multi_core::default_thread_pool::push_task([](std::uint32_t a, std::uint32_t b){ return a + b;}, i , j));
+
+  for(i = 0, j = 0; i < zinhart::multi_core::default_thread_pool::size(); ++i, ++j)
+	ASSERT_EQ (i + j, results[i].get());
+
+  ASSERT_EQ(i, new_pool_size); // since it should have iterated i times
+}

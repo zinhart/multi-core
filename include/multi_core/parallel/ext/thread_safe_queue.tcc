@@ -6,7 +6,14 @@ namespace zinhart
   {
 	template<class T>
 	  HOST thread_safe_queue<T>::thread_safe_queue()
-  	  { queue_state = QUEUE_STATE::ACTIVE; }
+  	  { wakeup(); }
+	template<class T>
+	  HOST void thread_safe_queue<T>::wakeup()
+	  { 
+		std::lock_guard<std::mutex> local_lock(lock);
+		queue_state = QUEUE_STATE::ACTIVE; 
+		cv.notify_all();
+	  }
 	template<class T>
 	  HOST void thread_safe_queue<T>::shutdown()
 	  {

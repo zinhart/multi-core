@@ -3,6 +3,7 @@
 #include "multi_core/parallel/thread_pool.hh"
 #include <type_traits>
 #include <memory>
+#include <cassert>
 namespace zinhart
 {
   namespace multi_core
@@ -11,6 +12,7 @@ namespace zinhart
 	{
 	  try
 	  {
+		queue.wakeup();
 	   // set the queue state for work
 	   thread_pool_state = THREAD_POOL_STATE::UP;
 	   for(std::uint32_t i = 0; i < n_threads; ++i )
@@ -38,6 +40,14 @@ namespace zinhart
 	  for(std::thread & t : threads)
 		if(t.joinable())
 		  t.join();
+	  threads.clear();// new
+	}
+
+	HOST void thread_pool::resize(std::uint32_t n_threads)
+	{ 
+	  assert(n_threads > 0);
+	  down();
+	  up(n_threads);
 	}
 
 	HOST thread_pool::thread_pool(std::uint32_t n_threads)
@@ -56,6 +66,10 @@ namespace zinhart
 		static thread_pool default_thread_pool;
 		return default_thread_pool;
 	  }
+	  void resize(std::uint32_t n_threads)
+	  {	get_default_thread_pool().resize(n_threads); }
+	  const std::uint32_t size()
+	  { return get_default_thread_pool().size(); }
 
 	}// END NAMESPACE DEFAULT_THREAD_POOL
   }// END NAMESPACE MULTI_CORE

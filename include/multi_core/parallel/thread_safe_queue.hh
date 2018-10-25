@@ -19,13 +19,13 @@ namespace zinhart
 		std::condition_variable cv;
 		QUEUE_STATE queue_state;
 	  public:
-		HOST thread_safe_queue() /*= default*/;
+		HOST thread_safe_queue();
 		// disable everthing that requires synchonization
 		HOST thread_safe_queue(const thread_safe_queue&) = delete;
 		HOST thread_safe_queue(thread_safe_queue&&) = delete;
 		HOST thread_safe_queue & operator =(const thread_safe_queue&) = delete;
 		HOST thread_safe_queue & operator =(thread_safe_queue&&) = delete;
-		HOST ~thread_safe_queue() /*= default*/;
+		HOST ~thread_safe_queue();
 		HOST void push(const T & item);
 		HOST void push(T && item);
 		// item only contains the value popped from the queue if the queue is not empty
@@ -36,6 +36,7 @@ namespace zinhart
 		HOST std::uint32_t size();
 		HOST bool empty();
 		HOST void clear();
+		HOST void wakeup();
 		//manually shutdown the queue
 		HOST void shutdown();
 	};

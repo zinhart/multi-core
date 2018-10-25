@@ -76,6 +76,7 @@ namespace zinhart
 		HOST thread_pool(std::uint32_t n_threads = std::max(1U, MAX_CPU_THREADS - 1));
 		HOST ~thread_pool(); 
 		HOST std::uint32_t size() const;
+		HOST void resize(std::uint32_t size);
 		
 		template<class Callable, class ... Args>
 		  HOST auto add_task(Callable && c, Args&&...args) -> task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >
@@ -99,15 +100,13 @@ namespace zinhart
 	namespace default_thread_pool
 	{
 	  thread_pool & get_default_thread_pool();
+	  void resize(std::uint32_t n_threads);
+	  const std::uint32_t size();
 	  template <class Callable, class ... Args>
 		auto push_task(Callable && c, Args&&...args) -> thread_pool::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >	
-		{
-		  //thread_pool default_thread_pool{get_default_thread_pool()};
-		  //static thread_pool basic_thread_pool;
-		  return get_default_thread_pool().add_task(std::forward<Callable>(c), std::forward<Args>(args)...);
+		{ return get_default_thread_pool().add_task(std::forward<Callable>(c), std::forward<Args>(args)...); }
 
-		  //return basic_thread_pool.add_task(std::forward<Callable>(c), std::forward<Args>(args)...);
-		}
+
 	}// END NAMESPACE DEFAULT_THREAD_POOL
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACe ZINHART
