@@ -31,7 +31,6 @@ else()
   set(multi_core_lib 
 	  multi_core.cc
 	  serial/serial.cc
-	  parallel/thread_pool.cc
      )	
    add_library(multi_core ${LIB_TYPE} ${multi_core_lib})
    
