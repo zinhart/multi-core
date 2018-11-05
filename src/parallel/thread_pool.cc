@@ -8,62 +8,62 @@ namespace zinhart
 {
   namespace multi_core
   {
-	HOST void thread_pool::up(const std::uint32_t & n_threads)
+	namespace thread_pool
 	{
-	  try
+	  HOST void pool::up(const std::uint32_t & n_threads)
 	  {
-		queue.wakeup();
-	   // set the queue state for work
-	   thread_pool_state = THREAD_POOL_STATE::UP;
-	   for(std::uint32_t i = 0; i < n_threads; ++i )
-		threads.emplace_back(&thread_pool::work, this);
+		try
+		{
+		  queue.wakeup();
+		 // set the queue state for work
+		 thread_pool_state = THREAD_POOL_STATE::UP;
+		 for(std::uint32_t i = 0; i < n_threads; ++i )
+		  threads.emplace_back(&pool::work, this);
+		}
+		catch(...)
+		{
+			down();
+			throw;
+		}
+	  }	
+
+	  HOST void pool::work()
+	  {
+		std::shared_ptr<tasks::thread_task_interface> task;
+		while(thread_pool_state != THREAD_POOL_STATE::DOWN)
+		  if(queue.pop_on_available(task))
+			(*task)();	  
 	  }
-	  catch(...)
+
+	  HOST void pool::down()
 	  {
-		  down();
-		  throw;
+		thread_pool_state = THREAD_POOL_STATE::DOWN;
+		queue.shutdown();
+		for(std::thread & t : threads)
+		  if(t.joinable())
+			t.join();
+		threads.clear();// new
 	  }
-	}	
 
-	HOST void thread_pool::work()
-	{
-	  std::shared_ptr<thread_task_interface> task;
-	  while(thread_pool_state != THREAD_POOL_STATE::DOWN)
-		if(queue.pop_on_available(task))
-		  (*task)();	  
-	}
+	  HOST void pool::resize(std::uint32_t n_threads)
+	  { 
+		assert(n_threads > 0);
+		down();
+		up(n_threads);
+	  }
 
-	HOST void thread_pool::down()
-	{
-	  thread_pool_state = THREAD_POOL_STATE::DOWN;
-	  queue.shutdown();
-	  for(std::thread & t : threads)
-		if(t.joinable())
-		  t.join();
-	  threads.clear();// new
-	}
+	  HOST pool::pool(std::uint32_t n_threads)
+	  { up(n_threads); }
 
-	HOST void thread_pool::resize(std::uint32_t n_threads)
-	{ 
-	  assert(n_threads > 0);
-	  down();
-	  up(n_threads);
-	}
+	  HOST pool::~pool()
+	  {	down(); }
+	  
+	  HOST std::uint32_t pool::size() const
+	  {	return threads.size(); }
 
-	HOST thread_pool::thread_pool(std::uint32_t n_threads)
-	{ up(n_threads); }
-
-	HOST thread_pool::~thread_pool()
-	{	down(); }
-	
-	HOST std::uint32_t thread_pool::size() const
-	{	return threads.size(); }
-	
-	namespace default_thread_pool
-	{
-	  thread_pool & get_default_thread_pool()
+	  pool & get_default_thread_pool()
 	  {
-		static thread_pool default_thread_pool;
+		static pool default_thread_pool;
 		return default_thread_pool;
 	  }
 	  void resize(std::uint32_t n_threads)
@@ -71,7 +71,7 @@ namespace zinhart
 	  const std::uint32_t size()
 	  { return get_default_thread_pool().size(); }
 
-	}// END NAMESPACE DEFAULT_THREAD_POOL
+	}// END NAMESPACE THREAD_POOL
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
 #endif

@@ -11,10 +11,10 @@ namespace zinhart
 
 	  template <class precision_type, class container> 
 		HOST void saxpy(const precision_type & a, precision_type * x, precision_type * y, const std::uint32_t & n_elements, container & results,
-			                     thread_pool & default_thread_pool
+			                     thread_pool::pool & default_thread_pool
 	                            )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 	  	  std::uint32_t thread_id = 0;
 		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
 			results.push_back(
@@ -23,9 +23,9 @@ namespace zinhart
 
 		}
 	  template<class InputIt, class OutputIt, class container>
-		HOST void copy(const InputIt & first, const InputIt & last, OutputIt & output_first, container & results, thread_pool & default_thread_pool)
+		HOST void copy(const InputIt & first, const InputIt & last, OutputIt & output_first, container & results, thread_pool::pool & default_thread_pool)
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -35,9 +35,9 @@ namespace zinhart
 			);
 		}
 	  template<class InputIt, class OutputIt, class UnaryPredicate, class container>
-		HOST void copy_if(const InputIt & first, const InputIt & last, OutputIt & output_it, UnaryPredicate pred, container & results, thread_pool & default_thread_pool)
+		HOST void copy_if(const InputIt & first, const InputIt & last, OutputIt & output_it, UnaryPredicate pred, container & results, thread_pool::pool & default_thread_pool)
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -47,9 +47,9 @@ namespace zinhart
 			);
 		}
 	  template< class ForwardIt, class T, class container >
-		HOST void replace(ForwardIt & first, const ForwardIt & last, const T & old_value, const T & new_value, container & results, thread_pool & default_thread_pool )
+		HOST void replace(ForwardIt & first, const ForwardIt & last, const T & old_value, const T & new_value, container & results, thread_pool::pool & default_thread_pool )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -59,9 +59,9 @@ namespace zinhart
 			);
 		}
 	  template< class ForwardIt, class UnaryPredicate, class T, class container >
-		HOST void replace_if( ForwardIt & first, const ForwardIt & last, UnaryPredicate unary_predicate, const T& new_value, container & results, thread_pool & default_thread_pool )
+		HOST void replace_if( ForwardIt & first, const ForwardIt & last, UnaryPredicate unary_predicate, const T& new_value, container & results, thread_pool::pool & default_thread_pool )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -71,10 +71,10 @@ namespace zinhart
 			);
 		}
 	  template< class InputIt, class OutputIt, class T, class container >
-		HOST void replace_copy( InputIt & first, const InputIt & last, OutputIt & output_it, const T & old_value, const T & new_value, container & results, thread_pool & default_thread_pool )
+		HOST void replace_copy( InputIt & first, const InputIt & last, OutputIt & output_it, const T & old_value, const T & new_value, container & results, thread_pool::pool & default_thread_pool )
 		{
 
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -85,10 +85,10 @@ namespace zinhart
 		}
 	  //new
 	  template< class InputIt, class OutputIt, class UnaryPredicate, class T, class container >
-		HOST void replace_copy_if( const InputIt & first, const InputIt & last, OutputIt & output_it, UnaryPredicate unary_predicate, const T& new_value, container & results, thread_pool & default_thread_pool )
+		HOST void replace_copy_if( const InputIt & first, const InputIt & last, OutputIt & output_it, UnaryPredicate unary_predicate, const T& new_value, container & results, thread_pool::pool & default_thread_pool )
 		{
 
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -98,9 +98,9 @@ namespace zinhart
 			);
 		}
 	  template< class InputIt1, class InputIt2, class T, class container>
-		HOST void inner_product( const InputIt1 & first, const InputIt1 & last, const InputIt2 & output_it, T & value, container & results, thread_pool & default_thread_pool )
+		HOST void inner_product( const InputIt1 & first, const InputIt1 & last, const InputIt2 & output_it, T & value, container & results, thread_pool::pool & default_thread_pool )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -110,9 +110,9 @@ namespace zinhart
 			);
 		}
 	  template<class InputIt1, class InputIt2, class T, class BinaryOperation1, class BinaryOperation2, class container>
-		HOST void inner_product( const InputIt1 & first1, const InputIt1 & last1, const InputIt2 & first2, T & value, BinaryOperation1 op1,BinaryOperation2 op2, container & results, thread_pool & default_thread_pool )
+		HOST void inner_product( const InputIt1 & first1, const InputIt1 & last1, const InputIt2 & first2, T & value, BinaryOperation1 op1,BinaryOperation2 op2, container & results, thread_pool::pool & default_thread_pool )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first1, last1);
@@ -122,9 +122,9 @@ namespace zinhart
 			  );
 		}
 	  template< class InputIt, class T, class container >
-		HOST void accumulate( const InputIt & first, const InputIt & last, T & init, container & results, thread_pool & default_thread_pool)
+		HOST void accumulate( const InputIt & first, const InputIt & last, T & init, container & results, thread_pool::pool & default_thread_pool)
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -134,9 +134,9 @@ namespace zinhart
 			);
 		}
 	  template < class InputIt, class UnaryFunction, class container >
-		HOST void for_each(const InputIt & first, const InputIt & last, UnaryFunction f, container & results, thread_pool & default_thread_pool )
+		HOST void for_each(const InputIt & first, const InputIt & last, UnaryFunction f, container & results, thread_pool::pool & default_thread_pool )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -146,9 +146,9 @@ namespace zinhart
 			);
 		}
 	  template < class InputIt, class OutputIt, class UnaryOperation, class container >
-		HOST void transform(const InputIt & first, const InputIt & last, OutputIt & output_first, UnaryOperation unary_op, container & results, thread_pool & default_thread_pool )
+		HOST void transform(const InputIt & first, const InputIt & last, OutputIt & output_first, UnaryOperation unary_op, container & results, thread_pool::pool & default_thread_pool )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 		  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -158,9 +158,9 @@ namespace zinhart
 			);
 		}
 	  template < class BidirectionalIt, class Generator, class container >
-		HOST void generate(const BidirectionalIt & first, const BidirectionalIt & last, Generator g, container & results, thread_pool & default_thread_pool)
+		HOST void generate(const BidirectionalIt & first, const BidirectionalIt & last, Generator g, container & results, thread_pool::pool & default_thread_pool)
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 	  	  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  const std::uint32_t n_elements = std::distance(first, last);
@@ -171,9 +171,9 @@ namespace zinhart
 		}
 
 	  template <class precision_type, class container>
-		HOST void kahan_sum(const precision_type * data, const std::uint32_t & data_size, precision_type & global_sum, container & results, thread_pool & default_thread_pool)
+		HOST void kahan_sum(const precision_type * data, const std::uint32_t & data_size, precision_type & global_sum, container & results, thread_pool::pool & default_thread_pool)
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 	  	  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
@@ -182,9 +182,9 @@ namespace zinhart
 			);
 		}
 	  template <class precision_type, class container>
-		HOST void neumaier_sum(const precision_type * data, const std::uint32_t & data_size, precision_type & global_sum, container & results, thread_pool & default_thread_pool)
+		HOST void neumaier_sum(const precision_type * data, const std::uint32_t & data_size, precision_type & global_sum, container & results, thread_pool::pool & default_thread_pool)
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 	  	  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
@@ -196,10 +196,10 @@ namespace zinhart
   		HOST void kahan_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, 
 							precision_type & global_sum, 
 							binary_predicate bp, 
-							container & results, thread_pool & default_thread_pool
+							container & results, thread_pool::pool & default_thread_pool
 						   )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 	  	  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)
@@ -212,10 +212,10 @@ namespace zinhart
   		HOST void neumaier_sum(const precision_type * vec_1, const precision_type * vec_2, const std::uint32_t & data_size, 
 							   precision_type & global_sum,
 							   binary_predicate bp,
-							   container & results, thread_pool & default_thread_pool
+							   container & results, thread_pool::pool & default_thread_pool
 							  )
 		{
-		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::task_future<void>\n");
+		  static_assert(std::is_same<typename container::value_type, zinhart::multi_core::thread_pool::tasks::task_future<void> >::value, "container value_type must be zinhart::multi_core::thread_pool::tasks::task_future<void>\n");
 	  	  //to identify each thread
 		  std::uint32_t thread_id = 0;
 		  for(thread_id = 0; thread_id < default_thread_pool.size(); ++thread_id)

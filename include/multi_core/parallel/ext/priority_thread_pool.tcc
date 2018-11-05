@@ -1,5 +1,5 @@
-#ifndef THREAD_POOL_TCC
-#define THREAD_POOL_TCC
+#ifndef PRIORITY_THREAD_POOL_TCC
+#define PRIORITY_THREAD_POOL_TCC
 #include <type_traits>
 #include <memory>
 #include <cassert>
@@ -60,7 +60,7 @@ namespace zinhart
 	template<class T>
 	  HOST std::uint32_t thread_pool_new<T, thread_safe_queue<T>>::size() const
 	  { return threads.size(); }
-	  */
+	*/
 /*	
 	namespace default_thread_pool
 	{
