@@ -1,8 +1,8 @@
 #ifndef ZINHART_SERIAL_HH
 #define ZINHART_SERIAL_HH
-#include "../macros.hh"
+#include <multi_core/macros.hh>
 #include <string>
-#include <cstdint>
+//#include <cstdint>
 namespace zinhart
 {
   namespace multi_core
@@ -35,5 +35,5 @@ namespace zinhart
     HOST void gemm_wrapper(std::int32_t & m, std::int32_t & n, std::int32_t & k, std::int32_t & lda, std::int32_t & ldb, std::int32_t & ldc, const std::uint32_t LDA, const std::uint32_t SDA, const std::uint32_t LDB, std::uint32_t SDB);
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
-#include "ext/serial.tcc"
+#include <multi_core/serial/ext/serial.tcc>
 #endif

@@ -24,7 +24,7 @@ else()
   set(multi_core_unit_tests_src
    run_all.cc
    thread_pool_test.cc
-   #cpu_test.cc
+   cpu_test.cc
    )
 add_executable(multi_core_unit_tests ${multi_core_unit_tests_src})
 

@@ -1,4 +1,4 @@
-#include <multi_core/multi_core.hh>
+//#include <multi_core/multi_core.hh>
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <iostream>
@@ -7,23 +7,25 @@
 #include <memory>
 #include <functional>
 #include <future>
-#include "mkl.h"
+/*
 TEST(cpu_test_parallel, saxpy)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  std::uniform_int_distribution<std::uint16_t> uint_dist(50, std::numeric_limits<std::uint16_t>::max());
+  std::uniform_int_distribution<std::uint16_t> thread_dist(MAX_CPU_THREADS, 50);
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
   float alpha = real_dist(mt);
-  std::uint32_t n_elements = uint_dist(mt);
+  const std::uint32_t n_threads{thread_dist(mt)};
+  const std::uint32_t n_elements{uint_dist(mt)};
   float * x_parallel = new float [n_elements];
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
-  std::uint32_t i = 0;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
+  std::uint32_t i{0}, thread_id{0};
   for(i = 0; i < n_elements; ++i )
   {
 		float first = real_dist(mt);
@@ -42,8 +44,9 @@ TEST(cpu_test_parallel, saxpy)
 							y[i] = a * x[i] + y[i];
 						  }
 						};
-  zinhart::multi_core::async::saxpy(alpha, x_parallel, y_parallel, n_elements, results);
-  serial_saxpy(alpha, x_serial, y_serial, n_elements);
+  for(thread_id = 0; thread_id < n_threads; ++ thread_id)
+	results.push_back(zinhart::multi_core::thread_pool::push_task(zinhart::multi_core::async::saxpy<float>, alpha, x_parallel, y_parallel, n_elements, n_threads, thread_id));
+  zinhart::multi_core::async::saxpy<float>(alpha, x_serial, y_serial, n_elements);
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -72,7 +75,7 @@ TEST(cpu_test_parallel, copy)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -111,7 +114,7 @@ TEST(cpu_test_parallel, copy_if)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -151,7 +154,7 @@ TEST(cpu_test_parallel, replace)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   float old_value = real_dist(mt);
   float new_value = real_dist(mt);
@@ -194,7 +197,7 @@ TEST(cpu_test_parallel, replace_if)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   float old_value = real_dist(mt);
   float new_value = real_dist(mt);
@@ -239,7 +242,7 @@ TEST(cpu_test_parallel, replace_copy)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   float new_value = real_dist(mt);
   float old_value = real_dist(mt);
@@ -279,7 +282,7 @@ TEST(cpu_test_parallel, replace_copy_if)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   float old_value = real_dist(mt);
   float new_value = real_dist(mt);
@@ -321,7 +324,7 @@ TEST(cpu_test_parallel, inner_product_first_overload)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   float first, second, init = real_dist(mt), parallel_ret, serial_ret;
   for(i = 0; i < n_elements; ++i )
@@ -361,7 +364,7 @@ TEST(cpu_test_parallel, inner_product_second_overload)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   float first, second, init = real_dist(mt), parallel_ret, serial_ret;
   for(i = 0; i < n_elements; ++i )
@@ -399,7 +402,7 @@ TEST(cpu_test_parallel, accumulate)
   std::uint32_t n_elements = uint_dist(mt);
   float * x_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -433,7 +436,7 @@ TEST(cpu_test_parallel, for_each)
   std::uint32_t n_elements = uint_dist(mt);
   float * x_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -473,7 +476,7 @@ TEST(cpu_test_parallel, transform)
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   auto unary = []( float & a )
 						{
@@ -515,7 +518,7 @@ TEST(cpu_test_parallel, generate)
   std::uint32_t n_elements = uint_dist(mt);
   float * x_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i = 0;
   for(i = 0; i < n_elements; ++i )
   {
@@ -552,7 +555,7 @@ TEST(cpu_test_parallel, kahan_sum)
   n_elements = 13;
   double * x_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -585,7 +588,7 @@ TEST(cpu_test_parallel, neumaier_sum)
   std::uint32_t n_elements = uint_dist(mt);
   double * x_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -606,6 +609,7 @@ TEST(cpu_test_parallel, neumaier_sum)
   delete [] x_parallel;
 }
 */
+/*
 TEST(cpu_test_parallel, kahan_sum_two)
 {
   std::random_device rd;
@@ -619,7 +623,7 @@ TEST(cpu_test_parallel, kahan_sum_two)
   double * y_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
   double * y_serial = new double [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -658,7 +662,7 @@ TEST(cpu_test_parallel, neumair_sum_two)
   double * y_parallel = new double [n_elements];
   double * x_serial = new double [n_elements];
   double * y_serial = new double [n_elements];
-  std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
+  std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
   std::uint32_t i;
   double parallel_sum{0.0}, serial_sum{0.0};
   for(i = 0; i < n_elements; ++i )
@@ -689,9 +693,9 @@ TEST(cpu_test, serial_matrix_multiply)
   std::mt19937 mt(rd());
   //for any needed random uint
   std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
-  std::uniform_int_distribution<std::uint16_t> size_dist(1, 10/*std::numeric_limits<std::uint8_t>::max()*/);
+  std::uniform_int_distribution<std::uint16_t> size_dist(1, 10 );
   //for any needed random real
-  std::uniform_real_distribution<float> real_dist(-1.0/*std::numeric_limits<float>::min()*/, 1.0/*std::numeric_limits<float>::max()*/);
+  std::uniform_real_distribution<float> real_dist(-1.0, 1.0);
 
   // Matrix dimensions
   const std::uint32_t M{size_dist(mt)};
@@ -751,8 +755,8 @@ TEST(mkl_test, gemm)
   std::random_device rd;
   std::mt19937 mt(rd());
   //for any needed random uint
-  std::uniform_real_distribution<float> real_dist(-0.5, 0.5/*std::numeric_limits<std::uint16_t>::max()*/);
-  std::uniform_int_distribution<std::uint16_t> size_dist(1, 30/*std::numeric_limits<std::uint8_t>::max()*/);
+  std::uniform_real_distribution<float> real_dist(-0.5, 0.5);
+  std::uniform_int_distribution<std::uint16_t> size_dist(1, 30);
   double * A{nullptr};
   double * B{nullptr};
   double * C{nullptr};
@@ -808,4 +812,4 @@ TEST(mkl_test, gemm)
   mkl_free( A_mkl );
   mkl_free( B_mkl );
   mkl_free( C_mkl );
-}
+}*/

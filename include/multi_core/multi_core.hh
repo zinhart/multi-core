@@ -1,12 +1,14 @@
 #ifndef MULTI_CORE_HH
 #define MULTI_CORE_HH
-#include "macros.hh"
-#include "parallel/parallel.hh"
-#include "serial/serial.hh"
+#include <multi_core/macros.hh>
+#include <multi_core/parallel/thread_pool.hh>
+#include <multi_core/parallel/parallel.hh>
+#include <multi_core/serial/serial.hh>
 #include "timer.hh"
-#include <cstdint>
 namespace zinhart
 {
+  namespace multi_core
+  {
 #if CUDA_ENABLED == 1
 	// Device properties
 	namespace cuda_device_properties
@@ -181,10 +183,7 @@ namespace zinhart
 	
 	template <class Precision_Type>
 	  HOST std::int32_t reduce(const Precision_Type * in, Precision_Type * out, const std::uint32_t & N, const cudaStream_t & stream, const std::uint32_t & device_id = 0);
-
-
-
-	
 #endif
-}
+  }// END NAMESPACE MULTI_CORE
+}// END NAMESPACE ZINHART
 #endif

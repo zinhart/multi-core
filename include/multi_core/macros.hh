@@ -18,6 +18,7 @@
   #define SHARED
   #include "mkl.h"
 #endif
+#include <thread>
 #include <cstdint>
 #define MAX_CPU_THREADS std::thread::hardware_concurrency()
 #endif
