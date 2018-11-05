@@ -180,59 +180,23 @@ namespace zinhart
 	  using pool = thread_pool< thread_safe_queue< std::shared_ptr<tasks::thread_task_interface> > >;
 	  using priority_pool = thread_pool< thread_safe_priority_queue< std::shared_ptr<tasks::thread_task_interface> > >;
 
-/*
-	    // an asynchonous thread pool
-		class pool
-		{
-		  public:
-			HOST void down();
-			// disable everthing
-			HOST pool(const pool&) = delete;
-			HOST pool(pool&&) = delete;
-			HOST pool & operator =(const pool&) = delete;
-			HOST pool & operator =(pool&&) = delete;
-			HOST pool(std::uint32_t n_threads = std::max(1U, MAX_CPU_THREADS - 1));
-			HOST ~pool(); 
-			HOST std::uint32_t size() const;
-			HOST void resize(std::uint32_t size);
-			
-			template<class Callable, class ... Args>
-			  HOST auto add_task(Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >
-			  {
-				auto bound_task = std::bind(std::forward<Callable>(c), std::forward<Args>(args)...); 
-				using result_type = typename std::result_of<decltype(bound_task)()>::type;
-				using packaged_task = std::packaged_task<result_type()>;
-				using task_type = tasks::thread_task<packaged_task>;
-				packaged_task task{std::move(bound_task)};
-				tasks::task_future<result_type> result{task.get_future()};
-				queue.push(std::make_shared<task_type>(std::move(task)));
-				return result;
-			  }
-		  private:
-			THREAD_POOL_STATE thread_pool_state;
-			std::vector<std::thread> threads;
-			thread_safe_queue< std::shared_ptr<tasks::thread_task_interface> > queue;
-			HOST void up(const std::uint32_t & n_threads);
-			HOST void work();
-		  };
 
-*/
-		  pool & get_default_thread_pool()
-		  {
-			static pool thread_pool;
-			return thread_pool;
-		  }
-		  void resize(std::uint32_t n_threads)
-		  {
-			get_default_thread_pool().resize(n_threads);
-		  }
-		  const std::uint32_t size()
-		  {
-			return get_default_thread_pool().size();
-		  }
-		  template <class Callable, class ... Args>
-			auto push_task(Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >	
-			{ return get_default_thread_pool().add_task(std::forward<Callable>(c), std::forward<Args>(args)...); }
+	  pool & get_default_thread_pool()
+	  {
+		static pool thread_pool;
+		return thread_pool;
+	  }
+	  void resize(std::uint32_t n_threads)
+	  {
+		get_default_thread_pool().resize(n_threads);
+	  }
+	  const std::uint32_t size()
+	  {
+		return get_default_thread_pool().size();
+	  }
+	  template <class Callable, class ... Args>
+		auto push_task(Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >	
+		{ return get_default_thread_pool().add_task(std::forward<Callable>(c), std::forward<Args>(args)...); }
 
 
 	}// END NAMESPACE THREAD_POOL
