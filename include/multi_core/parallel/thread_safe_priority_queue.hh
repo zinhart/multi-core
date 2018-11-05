@@ -42,4 +42,5 @@ namespace zinhart
 	  };
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
+#include <multi_core/parallel/ext/thread_safe_priority_queue.tcc>
 #endif

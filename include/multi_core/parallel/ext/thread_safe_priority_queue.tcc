@@ -2,28 +2,28 @@ namespace zinhart
 {
   namespace multi_core
   {
-	template<class T>
-	  HOST thread_safe_priority_queue<T>::thread_safe_priority_queue()
+	template<class T, class Container, class Compare>
+	  HOST thread_safe_priority_queue<T, Container, Compare>::thread_safe_priority_queue()
   	  { wakeup(); }
-	template<class T>
-	  HOST void thread_safe_priority_queue<T>::wakeup()
+	template<class T, class Container, class Compare>
+	  HOST void thread_safe_priority_queue<T, Container, Compare>::wakeup()
 	  { 
 		std::lock_guard<std::mutex> local_lock(lock);
 		queue_state = QUEUE_STATE::ACTIVE; 
 		cv.notify_all();
 	  }
-	template<class T>
-	  HOST void thread_safe_priority_queue<T>::shutdown()
+	template<class T, class Container, class Compare>
+	  HOST void thread_safe_priority_queue<T, Container, Compare>::shutdown()
 	  {
 		std::lock_guard<std::mutex> local_lock(lock);
 		queue_state = QUEUE_STATE::INACTIVE;
 		cv.notify_all();
 	  }
-	template<class T>
-	  HOST thread_safe_priority_queue<T>::~thread_safe_priority_queue()
+	template<class T, class Container, class Compare>
+	  HOST thread_safe_priority_queue<T, Container, Compare>::~thread_safe_priority_queue()
 	  { shutdown(); }
-	template<class T>
-	  HOST void thread_safe_priority_queue<T>::push(const T & item)
+	template<class T, class Container, class Compare>
+	  HOST void thread_safe_priority_queue<T, Container, Compare>::push(const T & item)
 	  {
 		std::lock_guard<std::mutex> local_lock(lock);
 		// add item to the queue
@@ -31,8 +31,8 @@ namespace zinhart
 		// notify a thread that an item is ready to be removed from the queue
 		cv.notify_one();
 	  }
-	template<class T>
-	  HOST void thread_safe_priority_queue<T>::push(T && item)
+	template<class T, class Container, class Compare>
+	  HOST void thread_safe_priority_queue<T, Container, Compare>::push(T && item)
 	  {
 		std::lock_guard<std::mutex> local_lock(lock);
 		// add item to the queue
@@ -40,8 +40,8 @@ namespace zinhart
 		// notify a thread that an item is ready to be removed from the queue
 		cv.notify_one();
 	  }
-	template<class T>
-	  HOST bool thread_safe_priority_queue<T>::pop(T & item)
+	template<class T, class Container, class Compare>
+	  HOST bool thread_safe_priority_queue<T, Container, Compare>::pop(T & item)
 	  {
 		std::lock_guard<std::mutex> local_lock(lock);
 		if(priority_queue.size() > 0)
@@ -56,8 +56,8 @@ namespace zinhart
 		// unsuccessfull write
 		return false;
 	  }
-	template<class T>
-	  HOST bool thread_safe_priority_queue<T>::pop_on_available(T & item)
+	template<class T, class Container, class Compare>
+	  HOST bool thread_safe_priority_queue<T, Container, Compare>::pop_on_available(T & item)
 	  {
 		// Since the cv is locked upon -> std::unique_lock
 		std::unique_lock<std::mutex> local_lock(lock);
@@ -77,20 +77,20 @@ namespace zinhart
 		return true;
 	  }
 
-	template<class T>
-	  HOST std::uint32_t thread_safe_priority_queue<T>::size()
+	template<class T, class Container, class Compare>
+	  HOST std::uint32_t thread_safe_priority_queue<T, Container, Compare>::size()
 	  {
 		std::lock_guard<std::mutex> local_lock(lock);
 		return priority_queue.size();
 	  }
-	template<class T>
-	  HOST bool thread_safe_priority_queue<T>::empty()
+	template<class T, class Container, class Compare>
+	  HOST bool thread_safe_priority_queue<T, Container, Compare>::empty()
 	  {
 		std::lock_guard<std::mutex> local_lock(lock);
 		return priority_queue.empty();
 	  }
-	template<class T>
-	  HOST void thread_safe_priority_queue<T>::clear()
+	template<class T, class Container, class Compare>
+	  HOST void thread_safe_priority_queue<T, Container, Compare>::clear()
 	  {
 		std::lock_guard<std::mutex> local_lock(lock);
 		while(priority_queue.size() > 0)
