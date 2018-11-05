@@ -16,9 +16,15 @@ namespace zinhart
   namespace multi_core
   {
 /*
-	template <class T, class Container = thread_safe_queue<T>, class Compare = std::less<typename Container::value_type>>
-	  class thread_pool;
-*/
+	template <class T, class Thread_SafeContainer = thread_safe_queue<T>, class Compare = std::less<typename Container::value_type>>
+	  class thread_pool_new;
+
+	template <class T, class ThreadSafe_Container> //thread_safe_queue<T>
+	  class thread_pool_new<T, Container>;
+
+	template <class T, class ThreadSafe_Container, class Compare>
+	  class thread_pool_new<T, Container, Compare>;*/
+
 	// an asynchonous thread pool
 //	template<class T>
 	  class thread_pool//<T, thread_safe_queue<T>>
