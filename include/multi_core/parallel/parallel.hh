@@ -1,8 +1,8 @@
 #ifndef ZINHART_PARALLELL_HH
 #define ZINHART_PARALLELL_HH
-#include "../serial/serial.hh" // for map 
-#include "vectorized/vectorized.hh"
-#include "thread_pool.hh"
+#include <multi_core/serial/serial.hh> // for map 
+#include <multi_core/parallel/vectorized/vectorized.hh>
+#include <multi_core/parallel/thread_pool.hh>
 namespace zinhart
 {
   namespace multi_core
