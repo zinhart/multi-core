@@ -37,6 +37,10 @@ namespace zinhart
 		std::abort();
 	  }
 	}
+	CUDA_CALLABLE_MEMBER std::uint32_t idx2c(std::int32_t i,std::int32_t j,std::int32_t ld)// for column major ordering, if A is MxN then ld is M
+	{ return j * ld + i; }
+	CUDA_CALLABLE_MEMBER std::uint32_t idx2r(std::int32_t i,std::int32_t j,std::int32_t ld)// for row major ordering, if A is MxN then ld is N
+	{ return i * ld + j; }
 	// from cuda samples for reduce
 	HOST std::uint32_t next_pow2(std::uint32_t x)
 	{
@@ -66,9 +70,5 @@ namespace zinhart
 	  ldb = k;
 	  ldc = m;
 	}
-	CUDA_CALLABLE_MEMBER std::uint32_t idx2c(std::int32_t i,std::int32_t j,std::int32_t ld)// for column major ordering, if A is MxN then ld is M
-	{ return j * ld + i; }
-	CUDA_CALLABLE_MEMBER std::uint32_t idx2r(std::int32_t i,std::int32_t j,std::int32_t ld)// for row major ordering, if A is MxN then ld is N
-	{ return i * ld + j; }
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART

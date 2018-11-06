@@ -2,7 +2,6 @@
 #define ZINHART_SERIAL_HH
 #include <multi_core/macros.hh>
 #include <string>
-//#include <cstdint>
 namespace zinhart
 {
   namespace multi_core

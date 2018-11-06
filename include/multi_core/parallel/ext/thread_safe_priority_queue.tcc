@@ -47,7 +47,7 @@ namespace zinhart
 		if(priority_queue.size() > 0)
 		{
 		  // avoid copying
-		  item = std::move(priority_queue.front());
+		  item = std::move(priority_queue.top());
 		  // update queue
 		  priority_queue.pop();
 		  // successfull write
@@ -70,7 +70,7 @@ namespace zinhart
 		if (queue_state == QUEUE_STATE::INACTIVE)
 			return false;
 		// avoid copying
-		item = std::move(priority_queue.front());
+		item = std::move(priority_queue.top());
 		// update queue
 		priority_queue.pop();
 		// successfull write
