@@ -9,15 +9,9 @@ namespace zinhart
 {
   namespace multi_core
   {
-	template <class T>
+	template <class T, class Container = std::deque<T>>
 	  class thread_safe_queue
 	  {
-		enum class QUEUE_STATE : bool {ACTIVE = true, INACTIVE = false};
-		private:
-		  std::mutex lock;
-		  std::queue<T> queue;
-		  std::condition_variable cv;
-		  QUEUE_STATE queue_state;
 		public:
 		  HOST thread_safe_queue();
 		  // disable everthing that requires synchonization
@@ -39,6 +33,12 @@ namespace zinhart
 		  HOST void wakeup();
 		  //manually shutdown the queue
 		  HOST void shutdown();
+		  enum class QUEUE_STATE : bool {ACTIVE = true, INACTIVE = false};
+		private:
+		  std::mutex lock;
+		  std::queue<T, Container> queue;
+		  std::condition_variable cv;
+		  QUEUE_STATE queue_state;
 	  };
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART

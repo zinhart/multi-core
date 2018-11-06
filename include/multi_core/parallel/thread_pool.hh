@@ -102,7 +102,7 @@ namespace zinhart
 		enum class THREAD_POOL_STATE : bool {UP = true, DOWN = false};
 
 		
-	  template <class ThreadSafeContainer = std::shared_ptr<tasks::thread_task_interface> >
+	  template <class Thread_Safe_Queue, class Container = Thread_Safe_Queue, class Compare = Container>
 		class thread_pool;
 
 	  // an asynchonous thread pool
