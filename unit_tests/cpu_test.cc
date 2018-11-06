@@ -7,6 +7,7 @@
 #include <memory>
 #include <functional>
 #include <future>
+#include <algorithm>
 
 TEST(cpu_test_parallel, saxpy)
 {
@@ -54,34 +55,40 @@ TEST(cpu_test_parallel, saxpy)
   delete [] x_serial;
   delete [] y_serial;
 }
-/*
+
 TEST(cpu_test_parallel, copy)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint16_t> thread_dist(MAX_CPU_THREADS, 50);
   //for any needed random uint
-  std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
+  std::uniform_int_distribution<std::uint16_t> uint_dist(50, std::numeric_limits<std::uint16_t>::max());
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
-  std::uint32_t n_elements = uint_dist(mt);
+  const std::uint32_t n_threads{thread_dist(mt)};
+  const std::uint32_t n_elements{uint_dist(mt)};
   float * x_parallel = new float [n_elements];
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
   std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
-  std::uint32_t i = 0;
+  std::uint32_t i{0};
+  std::uint32_t thread_id{0};
   for(i = 0; i < n_elements; ++i )
   {
 	float first = real_dist(mt);
 	x_serial[i] = first;
 	x_parallel[i] = first;
   }
-  zinhart::multi_core::async::copy(x_parallel, x_parallel + n_elements, y_parallel, results );
-  std::copy(x_serial, x_serial + n_elements, y_serial);
+  
+  for(thread_id = 0; thread_id < n_threads; ++thread_id)
+	results.push_back(zinhart::multi_core::thread_pool::push_task(zinhart::multi_core::async::copy<float>, x_parallel, y_parallel, n_elements, n_threads, thread_id ));
+
+  zinhart::multi_core::async::copy<float>(x_serial, y_serial, n_elements);
   // make sure all threads are done with their portion before comparing the final result
-  for(i = 0; i < results.size(); ++i)
+  for(thread_id = 0; thread_id < results.size(); ++thread_id)
   {
-	results[i].get();
+	results[thread_id].get();
   }
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -98,30 +105,35 @@ TEST(cpu_test_parallel, copy_if)
 {
   std::random_device rd;
   std::mt19937 mt(rd());
+  std::uniform_int_distribution<std::uint16_t> thread_dist(MAX_CPU_THREADS, 50);
   //for any needed random uint
   std::uniform_int_distribution<std::uint16_t> uint_dist(1, std::numeric_limits<std::uint16_t>::max());
   //for any needed random real
   std::uniform_real_distribution<float> real_dist(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
-  std::uint32_t n_elements = uint_dist(mt);
+  const std::uint32_t n_threads{thread_dist(mt)};
+  const std::uint32_t n_elements{uint_dist(mt)};
   float * x_parallel = new float [n_elements];
   float * y_parallel = new float [n_elements];
   float * x_serial = new float [n_elements];
   float * y_serial = new float [n_elements];
   std::vector<zinhart::multi_core::thread_pool::tasks::task_future<void>> results;
-  std::uint32_t i = 0;
+  std::uint32_t i{0};
+  std::uint32_t thread_id{0};
   for(i = 0; i < n_elements; ++i )
   {
 		float first = real_dist(mt);
 		x_serial[i] = first;
 		x_parallel[i] = first;
   }
-  auto unary_predicate = [](float & init){ return (init >= 1.0) ? true : false ;};
-  zinhart::multi_core::async::copy_if(x_parallel, x_parallel + n_elements, y_parallel, unary_predicate, results );
-  std::copy_if(x_serial, x_serial + n_elements, y_serial, unary_predicate);
+  auto unary_predicate = [](const float & init){ return (init >= 1.0) ? true : false ;};
+  for(thread_id = 0; thread_id < n_threads; ++thread_id)
+	results.push_back(zinhart::multi_core::thread_pool::push_task(zinhart::multi_core::async::copy_if<float,decltype(unary_predicate)>, x_parallel, y_parallel, unary_predicate, n_elements, n_threads, thread_id ));
+
+  zinhart::multi_core::async::copy_if<float,decltype(unary_predicate)>( x_serial, y_serial, unary_predicate, n_elements);
   // make sure all threads are done with their portion before comparing the final result
-  for(i = 0; i < results.size(); ++i)
+  for(thread_id = 0; thread_id < results.size(); ++thread_id)
   {
-	results[i].get();
+	results[thread_id].get();
   }
   //double check we have the same values 
   for(i = 0; i < n_elements; ++i)
@@ -133,7 +145,7 @@ TEST(cpu_test_parallel, copy_if)
   delete [] x_serial;
   delete [] y_serial;
 }
-
+/*
 TEST(cpu_test_parallel, replace)
 {
   std::random_device rd;

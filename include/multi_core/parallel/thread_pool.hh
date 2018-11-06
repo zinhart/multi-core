@@ -182,18 +182,9 @@ namespace zinhart
 
 
 	  pool & get_thread_pool();
-	 /* {
-		static pool thread_pool;
-		return thread_pool;
-	  }*/
 	  void resize(std::uint32_t n_threads);
-	  /*{
-		get_thread_pool().resize(n_threads);
-	  }*/
 	  const std::uint32_t size();
-	 /* {
-		return get_thread_pool().size();
-	  }*/
+
 	  template <class Callable, class ... Args>
 		auto push_task(Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >	
 		{ return get_thread_pool().add_task(std::forward<Callable>(c), std::forward<Args>(args)...); }
@@ -202,6 +193,4 @@ namespace zinhart
 	}// END NAMESPACE THREAD_POOL
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
-#include <multi_core/parallel/ext/thread_pool.tcc>
-#include <multi_core/parallel/ext/priority_thread_pool.tcc>
 #endif

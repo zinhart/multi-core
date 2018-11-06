@@ -1,4 +1,4 @@
-#include "multi_core/serial/serial.hh"
+#include <multi_core/serial/serial.hh>
 #include <stdexcept>
 #include <string>
 namespace zinhart
@@ -15,20 +15,17 @@ namespace zinhart
 		  std::string exception_msg("thread_id: " + std::to_string(thread_id) + " less data_points than threads");
 		  throw std::runtime_error(exception_msg);
 		}
-		else
-		{
-		  // total number of operations that must be performed by each thread
-		  const std::uint32_t n_ops = n_elements / n_threads; 
+		// total number of operations that must be performed by each thread
+		const std::uint32_t n_ops = n_elements / n_threads; 
 
-		  // may not divide evenly
-		   const std::uint32_t remaining_ops = n_elements % n_threads;
-		
-		  // the first thread will handle remaining opssee stop
-		  start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
-		
-		  // the index of the next start essentially
-		  stop = n_ops * (thread_id + 1) + remaining_ops;
-		}
+		// may not divide evenly
+		 const std::uint32_t remaining_ops = n_elements % n_threads;
+	  
+		// the first thread will handle remaining opssee stop
+		start = (thread_id == 0) ? n_ops * thread_id : n_ops * thread_id + remaining_ops;
+	  
+		// the index of the next start essentially
+		stop = n_ops * (thread_id + 1) + remaining_ops;
  	  }
 	  catch(std::exception & e)
 	  {
