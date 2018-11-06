@@ -24,6 +24,7 @@ else()
   set(multi_core_unit_tests_src
    run_all.cc
    thread_pool_test.cc
+   priority_thread_pool_test.cc
    cpu_test.cc
    thread_safe_queue_test.cc
    thread_safe_priority_queue_test.cc

@@ -70,7 +70,23 @@ namespace zinhart
 
 	  HOST std::uint32_t thread_pool<thread_safe_priority_queue<std::shared_ptr<tasks::thread_task_interface>>>::size() const
 	  { return threads.size(); }
-
+	  namespace priority_thread_pool
+	  {
+		priority_pool & get_priority_thread_pool()
+		{
+		  static priority_pool thread_pool;
+		  return thread_pool;
+		}
+		void resize(std::uint32_t n_threads)
+		{
+		  get_priority_thread_pool().resize(n_threads);
+		}
+		const std::uint32_t size()
+		{
+		  return get_priority_thread_pool().size();
+		}
+	  }
+	  
 	}// END NAMESPACE_THREAD_POOL
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART

@@ -21,7 +21,7 @@ namespace zinhart
 		{
 		  class thread_task_interface
 		  {
-			private:
+			protected:
 			  std::uint64_t priority;
 			public:
 			  HOST thread_task_interface() = default;
@@ -29,7 +29,10 @@ namespace zinhart
 			  thread_task_interface & operator =(thread_task_interface&&) = default;
 			  HOST virtual void operator()() = 0;
 			  HOST virtual bool operator < (const thread_task_interface & tti){return false;};
-
+			  HOST virtual void set_priority(std::uint64_t priority)
+			  {  }
+			  HOST virtual std::uint64_t get_priority()const
+			  { return 0; }
 			  thread_task_interface(const thread_task_interface&) = delete;
 			  thread_task_interface & operator =(const thread_task_interface&) = delete;
 
@@ -47,8 +50,6 @@ namespace zinhart
 				  HOST virtual ~thread_task() = default;
 				  HOST void operator()() override
 				  { this->callable(); }
-//				  HOST virtual bool operator < (const thread_task_interface & tti) override {}
-
 				  thread_task(const thread_task&) = delete;
 				  thread_task & operator =(const thread_task&) = delete;
 			};	
@@ -70,7 +71,11 @@ namespace zinhart
 				  HOST void operator()() override
 				  { this->callable(); }
 				  HOST virtual bool operator < (const thread_task_interface & tti) override
-				  { return this->priority < tti.priority; }
+				  { return get_priority() < tti.get_priority(); }
+				  HOST virtual void set_priority(std::uint64_t priority) override
+				  { this->priority = priority; }
+				  HOST virtual std::uint64_t get_priority() const override
+				  { return priority; }
 
 				  priority_thread_task(const priority_thread_task&) = delete;
 				  priority_thread_task & operator =(const priority_thread_task&) = delete;
@@ -163,16 +168,16 @@ namespace zinhart
 				auto bound_task = std::bind(std::forward<Callable>(c), std::forward<Args>(args)...); 
 				using result_type = typename std::result_of<decltype(bound_task)()>::type;
 				using packaged_task = std::packaged_task<result_type()>;
-				using task_type = tasks::thread_task<packaged_task>;
+				using task_type = tasks::priority_thread_task<packaged_task>;
 				packaged_task task{std::move(bound_task)};
 				tasks::task_future<result_type> result{task.get_future()};
-				queue.push(std::make_shared<task_type>(std::move(task)));
+				queue.push(std::make_shared<task_type>(priority, std::move(task)));
 				return result;
 			  }
 		  private:
 			THREAD_POOL_STATE thread_pool_state;
 			std::vector<std::thread> threads;
-			thread_safe_queue< std::shared_ptr<tasks::thread_task_interface> > queue;
+			thread_safe_priority_queue< std::shared_ptr<tasks::thread_task_interface> > queue;
 			HOST void up(const std::uint32_t & n_threads);
 			HOST void down();
 			HOST void work();
@@ -188,7 +193,17 @@ namespace zinhart
 	  template <class Callable, class ... Args>
 		auto push_task(Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >	
 		{ return get_thread_pool().add_task(std::forward<Callable>(c), std::forward<Args>(args)...); }
+	  
+	  namespace priority_thread_pool
+	  {
+		priority_pool & get_priority_thread_pool();
+		void resize(std::uint32_t n_threads);
+		const std::uint32_t size();
 
+		template <class Callable, class ... Args>
+		  auto push_task(std::uint64_t priority, Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >	
+		  { return get_priority_thread_pool().add_task(priority, std::forward<Callable>(c), std::forward<Args>(args)...); }
+	  }
 
 	}// END NAMESPACE THREAD_POOL
   }// END NAMESPACE MULTI_CORE

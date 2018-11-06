@@ -19,7 +19,6 @@ namespace zinhart
 		  HOST thread_safe_priority_queue & operator =(const thread_safe_priority_queue&) = delete;
 		  HOST thread_safe_priority_queue & operator =(thread_safe_priority_queue&&) = delete;
 		  HOST ~thread_safe_priority_queue();
-		  const T & top();
 		  HOST void push(const T & item);
 		  HOST void push(T && item);
 		  // item only contains the value popped from the queue if the queue is not empty
