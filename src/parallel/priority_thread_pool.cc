@@ -1,9 +1,9 @@
-/*
 #ifndef PRIORITY_THREAD_POOL_TCC
 #define PRIORITY_THREAD_POOL_TCC
 #include <type_traits>
 #include <memory>
 #include <cassert>
+#include <multi_core/multi_core.hh>
 namespace zinhart
 {
   namespace multi_core
@@ -60,4 +60,3 @@ namespace zinhart
   }// END NAMESPACE MULTI_CORE
 }// END NAMESPACE ZINHART
 #endif
-*/

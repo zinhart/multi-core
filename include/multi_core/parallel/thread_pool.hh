@@ -102,7 +102,7 @@ namespace zinhart
 		enum class THREAD_POOL_STATE : bool {UP = true, DOWN = false};
 
 		
-	  template <class Thread_Safe_Queue, class Container = Thread_Safe_Queue, class Compare = Container>
+	  template <class Thread_Safe_Queue>
 		class thread_pool;
 
 	  // an asynchonous thread pool
@@ -181,19 +181,19 @@ namespace zinhart
 	  using priority_pool = thread_pool< thread_safe_priority_queue< std::shared_ptr<tasks::thread_task_interface> > >;
 
 
-	  pool & get_thread_pool()
-	  {
+	  pool & get_thread_pool();
+	 /* {
 		static pool thread_pool;
 		return thread_pool;
-	  }
-	  void resize(std::uint32_t n_threads)
-	  {
+	  }*/
+	  void resize(std::uint32_t n_threads);
+	  /*{
 		get_thread_pool().resize(n_threads);
-	  }
-	  const std::uint32_t size()
-	  {
+	  }*/
+	  const std::uint32_t size();
+	 /* {
 		return get_thread_pool().size();
-	  }
+	  }*/
 	  template <class Callable, class ... Args>
 		auto push_task(Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >	
 		{ return get_thread_pool().add_task(std::forward<Callable>(c), std::forward<Args>(args)...); }

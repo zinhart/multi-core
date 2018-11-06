@@ -1,4 +1,4 @@
-//#include <multi_core/multi_core.hh>
+#include <multi_core/multi_core.hh>
 #include <gtest/gtest.h>
 #include <algorithm>
 #include <iostream>
@@ -7,7 +7,7 @@
 #include <memory>
 #include <functional>
 #include <future>
-/*
+
 TEST(cpu_test_parallel, saxpy)
 {
   std::random_device rd;
@@ -35,18 +35,11 @@ TEST(cpu_test_parallel, saxpy)
 		x_parallel[i] = first;
 		y_parallel[i] = second;
   }
-  auto serial_saxpy = [](
-						const float & a, float * x, float * y,
-						const std::uint32_t & n_elements )
-						{
-						  for(std::uint32_t i = 0; i < n_elements; ++i)
-						  {
-							y[i] = a * x[i] + y[i];
-						  }
-						};
+
   for(thread_id = 0; thread_id < n_threads; ++ thread_id)
 	results.push_back(zinhart::multi_core::thread_pool::push_task(zinhart::multi_core::async::saxpy<float>, alpha, x_parallel, y_parallel, n_elements, n_threads, thread_id));
   zinhart::multi_core::async::saxpy<float>(alpha, x_serial, y_serial, n_elements);
+
   // make sure all threads are done with their portion before comparing the final result
   for(i = 0; i < results.size(); ++i)
   {
@@ -61,7 +54,7 @@ TEST(cpu_test_parallel, saxpy)
   delete [] x_serial;
   delete [] y_serial;
 }
-
+/*
 TEST(cpu_test_parallel, copy)
 {
   std::random_device rd;
