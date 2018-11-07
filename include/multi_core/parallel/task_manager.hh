@@ -18,6 +18,8 @@ namespace zinhart
 		  HOST ~task_manager(); 
 		  HOST T get(std::uint64_t index);	
 		  HOST bool valid(std::uint64_t index);
+		  HOST void resize(std::uint64_t n_threads);
+		  HOST std::uint64_t size()const;
 		  template<class Callable, class ... Args>
 			HOST auto push_wait(std::uint64_t priority, Callable && c, Args&&...args)-> typename std::result_of<Callable(Args...)>::type
 			{

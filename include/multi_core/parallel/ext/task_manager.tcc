@@ -29,6 +29,11 @@ namespace zinhart
 	  { 
 		thread_pool.resize(n_threads);
 	  }
+	template <class T>
+	  HOST std::uint64_t task_manager<T>::size()const
+	  { 
+		return thread_pool.size();
+	  }
   
 	template <class T>
 	  template<class Callable, class ... Args>
