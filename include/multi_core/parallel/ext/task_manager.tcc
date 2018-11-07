@@ -23,6 +23,12 @@ namespace zinhart
 	template <class T>
 	  HOST bool task_manager<T>::valid(std::uint64_t index)
 	  { return pending_tasks.at(index).valid(); }
+
+	template <class T>
+	  HOST void task_manager<T>::resize(std::uint64_t n_threads)
+	  { 
+		thread_pool.resize(n_threads);
+	  }
   
 	template <class T>
 	  template<class Callable, class ... Args>
