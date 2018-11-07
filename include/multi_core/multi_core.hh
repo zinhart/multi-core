@@ -1,6 +1,7 @@
 #ifndef MULTI_CORE_HH
 #define MULTI_CORE_HH
 #include <multi_core/macros.hh>
+#include <multi_core/parallel/task_manager.hh>
 #include <multi_core/parallel/thread_pool.hh>
 #include <multi_core/parallel/parallel.hh>
 #include <multi_core/serial/serial.hh>

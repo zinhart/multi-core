@@ -102,7 +102,7 @@ set(CMAKE_CXX_STANDARD 11)
 # force cxx standard
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set cxx flags
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}")
 # set cxx release flags
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -fPIC")
 

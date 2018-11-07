@@ -28,6 +28,7 @@ else()
    cpu_test.cc
    thread_safe_queue_test.cc
    thread_safe_priority_queue_test.cc
+   task_manager_test.cc
    )
 add_executable(multi_core_unit_tests ${multi_core_unit_tests_src})
 

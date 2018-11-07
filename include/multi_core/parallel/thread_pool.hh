@@ -1,7 +1,6 @@
 #ifndef THREAD_POOL_HH
 #define THREAD_POOL_HH
 #include <mutex>
-#include <cstdint>
 #include <thread>
 #include <future>
 #include <functional>
@@ -80,7 +79,8 @@ namespace zinhart
 				  priority_thread_task(const priority_thread_task&) = delete;
 				  priority_thread_task & operator =(const priority_thread_task&) = delete;
 			};
-		  
+
+
 		  template <class T>
 			class task_future
 			{
@@ -98,6 +98,8 @@ namespace zinhart
 					if (future.valid())
 						future.get();
 				  }
+				  HOST bool valid()
+				  { return future.valid(); }
 				  HOST T get()
 				  { return future.get(); }
 			};
@@ -163,17 +165,18 @@ namespace zinhart
 			HOST void resize(std::uint32_t size);
 			
 			template<class Callable, class ... Args>
-			  HOST auto add_task(std::uint64_t priority, Callable && c, Args&&...args) -> tasks::task_future<typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >
+			  HOST auto add_task(std::uint64_t priority, Callable && c, Args&&...args) -> tasks::task_future< typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >
 			  {
-				auto bound_task = std::bind(std::forward<Callable>(c), std::forward<Args>(args)...); 
-				using result_type = typename std::result_of<decltype(bound_task)()>::type;
+				auto bound_task     = std::bind(std::forward<Callable>(c), std::forward<Args>(args)...); 
+				using result_type   = typename std::result_of<decltype(bound_task)()>::type;
 				using packaged_task = std::packaged_task<result_type()>;
-				using task_type = tasks::priority_thread_task<packaged_task>;
+				using task_type     = tasks::priority_thread_task<packaged_task>;
 				packaged_task task{std::move(bound_task)};
 				tasks::task_future<result_type> result{task.get_future()};
 				queue.push(std::make_shared<task_type>(priority, std::move(task)));
 				return result;
 			  }
+
 		  private:
 			THREAD_POOL_STATE thread_pool_state;
 			std::vector<std::thread> threads;
