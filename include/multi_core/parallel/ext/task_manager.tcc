@@ -34,6 +34,15 @@ namespace zinhart
 	  { 
 		return thread_pool.size();
 	  }
+
+	template <class T>
+	  template<class Callable, class ... Args>
+	  HOST T task_manager<T>::push_wait(std::uint64_t priority, Callable && c, Args&&...args)
+	  {
+		// use std::forward to send to thread_pool::add_task
+		thread_pool::tasks::task_future<T> pending_task{thread_pool.add_task(priority, std::forward<Callable>(c), std::forward<Args>(args)...)};
+		return pending_task.get();
+	  }
   
 	template <class T>
 	  template<class Callable, class ... Args>

@@ -21,14 +21,7 @@ namespace zinhart
 		  HOST void resize(std::uint64_t n_threads);
 		  HOST std::uint64_t size()const;
 		  template<class Callable, class ... Args>
-			HOST auto push_wait(std::uint64_t priority, Callable && c, Args&&...args)-> typename std::result_of<Callable(Args...)>::type
-			{
-			  // return type of future
-			  using task_type = typename std::result_of<Callable(Args...)>::type;
-			  // use std::forward to send to thread_pool::add_task
-			  thread_pool::tasks::task_future<task_type> pending_task{thread_pool.add_task(priority, std::forward<Callable>(c), std::forward<Args>(args)...)};
-			  return pending_task.get();
-			}
+			HOST T push_wait(std::uint64_t priority, Callable && c, Args&&...args);
 		  template<class Callable, class ... Args>
 			HOST void push(std::uint64_t priority, Callable && c, Args&&...args);
 

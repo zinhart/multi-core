@@ -5,179 +5,160 @@
 #include <limits>
 #include <chrono>
 using namespace testing;
-TEST(task_manager, push_wait)
+struct example
 {
-  /*
-  union test
-  {
-	std::int32_t i32;
-	std::uint32_t ui32;
-	float  f;
-	double d;
-  };
-  zinhart::multi_core::task_manager<test> t;
-  t.push_wait(0, [](){ std::cout<<"apples\n";});
-  test x.i32 = t.push_wait(0, []()->int{return 1;});
-  ASSERT_EQ(x.i32, 1);
-  */
-}
-
-TEST(task_manager, push)
-{
-  union test
-  {
-
-	private:
-      enum class tags{uchar, uint, string} tag;
-	  std::uint8_t ui8;
-	  std::uint32_t ui32;
-      std::string str;
-	public:
-
-	test()
+  enum class tags{uchar = 0, uint, string} tag;
+  public:
+    example()
 	{
-	  ui8 = 0;
-	  ui32 = 0;
 	}
-	test(const test & t)
+	example(const example & e)
 	{
-	  if(t.get_tag() == tags::uchar)
-	  {
-		ui8 = t.get_uchar();
-	  }
-	  else if(t.get_tag() == tags::uint)
-	  {
-		ui32 = t.get_uint();
-	  }
-	  else if(t.get_tag() == tags::string)
-	  {
-		set_string(t.get_string());
-	  }
-
-	  set_tag(t.get_tag());
+	  if(e.get_tag() == tags::uchar)
+  		set_uchar(e.get_uchar());
+	  else if(e.get_tag() == tags::uint)
+		set_uint(e.get_uint());
+	  else if(e.get_tag() == tags::string)
+		set_string(e.get_string());
+	  set_tag(get_tag());
 	}
-	
-	explicit test(std::uint8_t x)
+	example(example && e)
 	{
-	  ui8 = x;
-	  tag = tags::uchar;
+	  if(e.get_tag() == tags::uchar)
+  		set_uchar(e.get_uchar());
+	  else if(e.get_tag() == tags::uint)
+		set_uint(e.get_uint());
+	  else if(e.get_tag() == tags::string)
+		set_string(e.get_string());
+	  set_tag(get_tag());
+	}
+	example & operator = (const example & e)
+	{
+	  if(e.get_tag() == tags::uchar)
+  		set_uchar(e.get_uchar());
+	  else if(e.get_tag() == tags::uint)
+		set_uint(e.get_uint());
+	  else if(e.get_tag() == tags::string)
+		set_string(e.get_string());
+	  set_tag(get_tag());
+	  return *this;
 	}
 
-	explicit test(std::uint32_t x)
+	example & operator = (example && e)
 	{
-	  ui8 = x;
-	  tag = tags::uint;
+	  if(e.get_tag() == tags::uchar)
+  		set_uchar(e.get_uchar());
+	  else if(e.get_tag() == tags::uint)
+		set_uint(e.get_uint());
+	  else if(e.get_tag() == tags::string)
+		set_string(e.get_string());
+	  set_tag(get_tag());
+	  return *this;
 	}
 	void set_uchar(std::uint8_t x)
 	{
-	  tag = tags::uchar;
-	  ui8 = x;
+	  set_tag(tags::uchar);
+	  type.ui8 = x;
 	}
 
 	void set_uint(std::uint32_t x)
 	{
-	  tag = tags::uint;
-	  ui32 = x;
+	  set_tag(tags::uint);
+	  type.ui32 = x;
 	}
 	void set_string(std::string s)
 	{
-	  tag = tags::string;
-	  new (&str) std::string(s);// here
+	  set_tag(tags::string);
+	  new (&type.str) std::string(s);
 	}
-	std::uint8_t get_uchar()const
-	{
-	  return ui8;
-	}
-
-	std::uint32_t get_uint()const
-	{
-	  return ui32;
-	}
-	std::string get_string()const
-	{
-	  return str;
-	}
-
-	tags get_tag()const
-	{
-	  return tag;
-	}
-	void set_tag(tags tag)
-	{
-	  this->tag = tag;
-	}
-
-	test & operator = (const test & t)
-	{
-
-	  if(t.get_tag() == tags::uchar)
+	  std::uint8_t get_uchar()const
+	  { return type.ui8; }
+	  std::uint32_t get_uint()const
+	  { return type.ui32; }
+	  std::string get_string()const
+	  { return type.str; }
+	  tags get_tag()const
+	  { return tag; }
+	  void set_tag(tags tag)
+	  { this->tag = tag; }
+  private:
+	  union types
 	  {
-		ui8 = t.get_uchar();
-	  }
-	  else if(t.get_tag() == tags::uint)
-	  {
-		ui32 = t.get_uint();
-	  }
-	  else if(t.get_tag() == tags::string)
-	  {
-		set_string(t.get_string());
-	  }
-	  return *this;
-	}
-/*
-	explicit test(std::string x)
+		types()
+		{}
+		types(const types & t)
+		{}
+		types(types && t)
+		{}
+		std::uint8_t ui8;
+		std::uint32_t ui32;
+		std::string str;
+		~types()
+		{}
+	  } type;
+};
+
+TEST(task_manager, push_wait)
+{
+  example ret;
+  zinhart::multi_core::task_manager<example> t;
+  ret = t.push_wait(0, [](char a)
 	{
-	  str = x;
-	}
-
-	test(const test & x)
-	{
-	  str =  x.str;
-	}
-*/
-
-	~test()
-	{
-	  if(get_tag() == tags::string)
-		str.~basic_string();
-	}
-
-
-  };
-  
-  zinhart::multi_core::task_manager<test> t;
-
-  t.push(0, []()
-	{
-	  test x;//('a'); 
-	  x.set_uchar('a');
+	  example x; 
+	  x.set_uchar(a);
 	  return x;
-	}
+	}, 'a'
+  );
+  ASSERT_EQ(ret.get_uchar(), 'a');
+
+  ret = t.push_wait(0, [](std::uint32_t num)
+	{
+	  example x; 
+	  x.set_uint(num);
+	  return x;
+	}, 1
+  );
+  ASSERT_EQ(ret.get_uint(), 1);
+
+  ret = t.push_wait(0, [](std::string s)
+	{
+	  example x; 
+	  x.set_string(s);
+	  return x;
+	}, "apples"
+  );
+  ASSERT_EQ(ret.get_string(), "apples");
+}
+
+TEST(task_manager, push)
+{
+  zinhart::multi_core::task_manager<example> t;
+  t.push(0, [](char a)
+	{
+	  example x; 
+	  x.set_uchar(a);
+	  return x;
+	}, 'a'
   );
   ASSERT_EQ(t.get(0).get_uchar(), 'a');
   
-  t.push(0, []()
+  t.push(0, [](std::uint32_t num)
 	{
-	  test x;//(1); 
-	  x.set_uint(1);
-	  return x;}
+	  example x; 
+	  x.set_uint(num);
+	  return x;
+	},
+	1
   );
   ASSERT_EQ(t.get(1).get_uint(), 1);
 
-  t.push(0, []()
+  t.push(0, [](std::string s)
 	{
-	  test x;//(1); 
-	  x.set_string("apples");
+	  example x; 
+	  x.set_string(s);
 	  return x;
-	}
+	}, "apples"
   );
-//  ASSERT_EQ(t.get(2).get_string(), "apples");
-
-/*
-  t.push(0, []()->test{test x{"apples"}; x.str = "apples"; return x;});
-  ASSERT_EQ(t.get(2).str, "apples");
-  std::cout<<"here"<<"\n";
-*/
- /* t.push(0,[](){std::cout<<"apples\n";test x; x.i32 = 1; return x;});
-  t.get(2);*/
+ example p(t.get(2));
+ ASSERT_EQ(p.get_string(), "apples"); 
 }
