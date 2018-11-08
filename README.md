@@ -34,14 +34,6 @@ I wrote this library for a few different reasons.
 	ASSERT_EQ(i + j, res);
   }
  ```
- A parallel std::generate
-
-```cpp
- std::vector<zinhart::multi_core::thread_pool::task_future<void>> results;
- zinhart::multi_core::async::generate(x_parallel, x_parallel + n_elements, generator, results);
- for(i = 0; i < results.size(); ++i)
-	results[i].get();
-```
 Using the task manager:
 
 ```cpp
