@@ -166,3 +166,73 @@ TEST(task_manager, push)
  example p(t.get(2));
  ASSERT_EQ(p.get_string(), "apples"); 
 }
+
+TEST(task_manager, push_at)
+{
+  zinhart::multi_core::task_manager<example> t;
+  t.push(0, [](char a)
+	{
+	  example x; 
+	  x.set_uchar(a);
+	  return x;
+	}, 'a'
+  );
+  ASSERT_EQ(t.get(0).get_uchar(), 'a');
+  
+  t.push(0, [](std::uint32_t num)
+	{
+	  example x; 
+	  x.set_uint(num);
+	  return x;
+	},
+	1
+  );
+  ASSERT_EQ(t.get(1).get_uint(), 1);
+
+  t.push(0, [](std::string s)
+	{
+	  example x; 
+	  x.set_string(s);
+	  return x;
+	}, "apples"
+  );
+ example p(t.get(2));
+ ASSERT_EQ(p.get_string(), "apples"); 
+
+
+ t.push_at(1, 0, [](char a)
+	{
+	  example x; 
+	  x.set_uchar(a);
+	  return x;
+	}, 'a'
+  );
+ ASSERT_EQ(t.get(1).get_uchar(), 'a');
+  
+ t.push_at(2,0, [](std::uint32_t num)
+	{
+	  example x; 
+	  x.set_uint(num);
+	  return x;
+	},
+	1
+  );
+ ASSERT_EQ(t.get(2).get_uint(), 1);
+
+ t.push_at(0, 0, [](std::string s)
+	{
+	  example x; 
+	  x.set_string(s);
+	  return x;
+	}, "apples"
+  );
+ example w(t.get(0));
+ ASSERT_EQ(w.get_string(), "apples"); 
+}
+TEST(task_manager, resize)
+{
+  zinhart::multi_core::task_manager<example> t;
+  std::uint32_t old_size = t.size();
+  t.resize(old_size + 10);
+  ASSERT_EQ(t.size(), old_size +10);
+}

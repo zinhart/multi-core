@@ -39,7 +39,6 @@ namespace zinhart
 	  template<class Callable, class ... Args>
 	  HOST T task_manager<T>::push_wait(std::uint64_t priority, Callable && c, Args&&...args)
 	  {
-		// use std::forward to send to thread_pool::add_task
 		thread_pool::tasks::task_future<T> pending_task{thread_pool.add_task(priority, std::forward<Callable>(c), std::forward<Args>(args)...)};
 		return pending_task.get();
 	  }
@@ -49,8 +48,14 @@ namespace zinhart
 	  HOST void task_manager<T>::push(std::uint64_t priority, Callable && c, Args&&...args)
 	  {
 		thread_pool::tasks::task_future<T> pending_task{thread_pool.add_task(priority, std::forward<Callable>(c), std::forward<Args>(args)...)};
-		// wrap the future in a void function object
 		pending_tasks.push_back(std::move(pending_task));
+	  }
+	template <class T>
+	  template<class Callable, class ... Args>
+	  HOST void task_manager<T>::push_at(std::uint64_t at, std::uint64_t priority, Callable && c, Args&&...args)
+	  {
+		thread_pool::tasks::task_future<T> pending_task{thread_pool.add_task(priority, std::forward<Callable>(c), std::forward<Args>(args)...)};
+		pending_tasks.at(at) = std::move(pending_task);
 	  }
 
 	

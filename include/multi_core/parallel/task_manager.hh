@@ -24,6 +24,8 @@ namespace zinhart
 			HOST T push_wait(std::uint64_t priority, Callable && c, Args&&...args);
 		  template<class Callable, class ... Args>
 			HOST void push(std::uint64_t priority, Callable && c, Args&&...args);
+		  template<class Callable, class ... Args>
+			HOST void push_at(std::uint64_t at, std::uint64_t priority, Callable && c, Args&&...args);
 
 		private:
 		  std::vector< thread_pool::tasks::task_future<T> > pending_tasks;// should be a task future not task interface
