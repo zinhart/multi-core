@@ -5,6 +5,10 @@
 #include <limits>
 #include <chrono>
 using namespace testing;
+
+
+// when you need to represent more than one return type 
+// a structure that is a wrapper over multiple data_types represented as a union
 struct example
 {
   enum class tags{uchar = 0, uint, string} tag;
