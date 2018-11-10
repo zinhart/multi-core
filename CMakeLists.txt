@@ -55,9 +55,9 @@ endif()
 find_package(Threads REQUIRED)
 
 # mkl blas
-set(MKL_USE_SINGLE_DYNAMIC_LIBRARY OFF CACHE BOOL "Use single dynamic library interface")
-set(MKL_MULTI_THREADED OFF CACHE BOOL "Use multi-threading(intel tbb, omp etc)")
-find_package(MKL REQUIRED)
+#set(MKL_USE_SINGLE_DYNAMIC_LIBRARY OFF CACHE BOOL "Use single dynamic library interface")
+#set(MKL_MULTI_THREADED OFF CACHE BOOL "Use multi-threading(intel tbb, omp etc)")
+#find_package(MKL REQUIRED)
 
 # find cuda package and set compute achitecture and nvcc compile flags
 if(BuildCuda)

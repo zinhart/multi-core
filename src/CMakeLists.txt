@@ -39,7 +39,7 @@ else()
    #link cpu threading library & MKL
    target_link_libraries(
    multi_core 
-   ${MKL_LIBRARIES}
+   #   ${MKL_LIBRARIES}
    ${CMAKE_THREAD_LIBS_INIT}
   )
 

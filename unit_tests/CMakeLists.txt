@@ -36,7 +36,7 @@ target_link_libraries(multi_core_unit_tests
 					  gtest
 					  #gmock_main # for google mock
 					  multi_core
-				   	  ${MKL_LIBRARIES}
+					  #			   	  ${MKL_LIBRARIES}
 					  ${CMAKE_THREAD_LIBS_INIT}
 					  )
 add_test(
