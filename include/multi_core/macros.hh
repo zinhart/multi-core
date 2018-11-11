@@ -16,7 +16,6 @@
   #define DEVICE
   #define CONSTANT
   #define SHARED
-  #include "mkl.h"
 #endif
 #include <thread>
 #include <cstdint>
