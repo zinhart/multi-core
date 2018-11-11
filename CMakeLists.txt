@@ -10,6 +10,9 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "RELEASE")
 endif()
 
+# for other libraries 
+set(MULTI_CORE_INCLUDE_DIR include/multi_core/) 
+
 # useful macros to check against
 add_definitions(-DMULTI_CORE_ENABLED=true)
 add_definitions(-DMULTI_CORE_DISABLED=false)
@@ -93,7 +96,7 @@ else()
 	add_definitions(-DCUDA_ENABLED=false)
   endif()
   # set include paths
-  include_directories(. include include/multi_core/ ${MKL_INCLUDE_DIR} "${PROJECT_BINARY_DIR}")
+  include_directories(. include "${PROJECT_BINARY_DIR}")
 endif()
 
 
