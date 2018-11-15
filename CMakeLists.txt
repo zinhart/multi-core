@@ -11,7 +11,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # for other libraries 
-set(MULTI_CORE_INCLUDE_DIR multi_core/include CACHE STRING "MULTI INCLUDE DIRS") 
+set(MULTI_CORE_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include CACHE STRING "MULTI_CORE INCLUDE DIRS") 
 
 # useful macros to check against
 add_definitions(-DMULTI_CORE_ENABLED=true)
@@ -95,8 +95,6 @@ else()
   else()
 	add_definitions(-DCUDA_ENABLED=false)
   endif()
-  # set include paths
-  include_directories(. include "${PROJECT_BINARY_DIR}")
 endif()
 
 

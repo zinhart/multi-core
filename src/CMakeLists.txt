@@ -35,6 +35,8 @@ else()
 	  parallel/priority_thread_pool.cc
      )	
    add_library(multi_core ${LIB_TYPE} ${multi_core_lib})
+
+   target_include_directories(multi_core PUBLIC ${MULTI_CORE_INCLUDE_DIR} ${MKL_INCLUDE_DIR})
    
    #link cpu threading library & MKL
    target_link_libraries(
