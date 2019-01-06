@@ -52,12 +52,18 @@ namespace zinhart
 	  }
 
 	template <class T>
+	  HOST void task_manager<T>::push(task && t)
+	  {
+	  }
+
+	template <class T>
 	  template<class Callable, class ... Args>
 	  HOST void task_manager<T>::push_at(std::uint64_t at, std::uint64_t priority, Callable && c, Args&&...args)
 	  {
 		thread_pool::tasks::task_future<T> pending_task{thread_pool.add_task(priority, std::forward<Callable>(c), std::forward<Args>(args)...)};
 		pending_tasks.at(at) = std::move(pending_task);
 	  }
+
 
 	
   }// END NAMESPACE MULTI_CORE
