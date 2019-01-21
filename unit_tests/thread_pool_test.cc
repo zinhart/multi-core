@@ -82,3 +82,14 @@ TEST(thread_pool, resize)
 
   ASSERT_EQ(i, new_pool_size); // since it should have iterated i times
 }
+TEST(thread_pool, deffered)
+{
+  /*
+  auto lambda = [](double arg){std::cout<<"DEFERRED FUNCTION ARGS: "<< arg <<"\n";};
+  zinhart::multi_core::thread_pool::pool::deffered<decltype(lambda), double> deffered_function_test;
+
+  deffered_function_test.setup(lambda, 3.0);
+  deffered_function_test();
+  zinhart::multi_core::thread_pool::pool thread_pool;
+  thread_pool.store_task([](double arg){std::cout<<"DEFERRED FUNCTION ARGS: "<< arg <<"\n"; return 0;}, 3.0);*/
+}

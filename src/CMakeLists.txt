@@ -29,6 +29,7 @@ if(BuildCuda)
   install(DIRECTORY ../include/concurrent_routines DESTINATION include)
 else()
   set(multi_core_lib 
+	  task_manager.cc
 	  multi_core.cc
 	  serial/serial.cc
 	  parallel/thread_pool.cc

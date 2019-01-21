@@ -101,7 +101,7 @@ struct example
 		{}
 	  } type;
 };
-
+/*
 TEST(task_manager, push_wait)
 {
   example ret;
@@ -229,10 +229,25 @@ TEST(task_manager, push_at)
  example w(t.get(0));
  ASSERT_EQ(w.get_string(), "apples"); 
 }
+*/
 TEST(task_manager, resize)
 {
-  zinhart::multi_core::task_manager<example> t;
+  zinhart::multi_core::task_manager t;
   std::uint32_t old_size = t.size();
   t.resize(old_size + 10);
   ASSERT_EQ(t.size(), old_size +10);
+}
+TEST(task_manager, task_immediate)
+{
+  using namespace zinhart::multi_core;
+  typedef task_manager::task< task_manager::task_type::immediate, double, double> task_type;
+  double result{0};
+  {
+    std::shared_ptr<task_manager::task_interface> test1 = std::make_shared<task_type>([](double x){return x;}, 4.0);
+	test1->safe_wait();
+	task_type * pt;
+
+	ASSERT_DOUBLE_EQ(test1->result(pt), 4.0);
+
+  }
 }

@@ -140,9 +140,81 @@ namespace zinhart
 				queue.push(std::make_shared<task_type>(std::move(task)));
 				return result;
 			  }
+			
+		    struct deffered_base
+			{
+			  virtual void operator ()() = 0;
+			};
+			// 1 idea
+			template<class Callable, class ... Args>
+			  struct deffered : public deffered_base
+			  {
+				std::function<void()> call_back;
+				auto setup(Callable c, Args &&... args)->typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>
+				{
+				  call_back = [c, args...]()
+				  {
+					(c)(args...);
+				  };
+				}
+				void operator()() override
+				{
+				  call_back();
+				}
+			  };
+
+			template<class Callable, class ... Args>
+			  struct deffered2 : public deffered_base
+			  {
+				std::function<void()> call_back;
+				Callable callable;
+				std::tuple<Args...> params;
+				/*
+				deffered2(Callable && c,Args &&... args)
+				{
+				  callable = std::move(c);
+				  params = std::make_tuple<Args...>(args...);
+				}*/
+				void setup2(Callable && c, Args &&... args)
+				{ 
+//				  callable = std::move(c);
+//				  params = std::make_tuple<Args...>(args...);
+				}
+				auto get_function()-> Callable
+				{
+				  return callable;
+				}
+				auto get_params()->std::tuple<Args...>
+				{
+				  return params;
+				}
+				auto setup(Callable c, Args &&... args)->typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>
+				{
+				  call_back = [c, args...]()
+				  {
+					(c)(args...);
+				  };
+				}
+				void operator()() override
+				{
+				  call_back();
+				}
+			  };
+			template<class Callable, class ... Args>
+			  HOST void store_task(Callable && c, Args&&...args)
+			  {
+				// new strategy
+				// since moving a packaged task affects the shared state of the right hand side
+				// will save the Callable and args and invoke as a deferred function
+				std::unique_ptr<deffered<Callable, Args...>> test;
+				test->setup(std::forward<Callable>(c), std::forward<Args>(args)...);
+				std::unique_ptr<deffered2<Callable, Args...>> test1;
+				test1->setup2(std::forward<Callable>(c), std::forward<Args>(args)...);
+			  }
 		  private:
 			THREAD_POOL_STATE thread_pool_state;
 			std::vector<std::thread> threads;
+			//std::queue<std::unique_ptr<deffered_base>> function_backlog;
 			thread_safe_queue< std::shared_ptr<tasks::thread_task_interface> > queue;
 			HOST void up(const std::uint32_t & n_threads);
 			HOST void work();
@@ -163,7 +235,6 @@ namespace zinhart
 			HOST ~thread_pool(); 
 			HOST std::uint32_t size() const;
 			HOST void resize(std::uint32_t size);
-			
 			template<class Callable, class ... Args>
 			  HOST auto add_task(std::uint64_t priority, Callable && c, Args&&...args) -> tasks::task_future< typename std::result_of<decltype(std::bind(std::forward<Callable>(c), std::forward<Args>(args)...))()>::type >
 			  {
@@ -176,7 +247,6 @@ namespace zinhart
 				queue.push(std::make_shared<task_type>(priority, std::move(task)));
 				return result;
 			  }
-
 		  private:
 			THREAD_POOL_STATE thread_pool_state;
 			std::vector<std::thread> threads;
