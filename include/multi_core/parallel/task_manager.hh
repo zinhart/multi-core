@@ -29,6 +29,7 @@ namespace zinhart
 			{
 			  safe_wait_impl();
 			}
+			// no longer needed
 			HOST void clear()
 			{
 			  clear_impl();
@@ -50,21 +51,22 @@ namespace zinhart
 		};
 		//immediate does not save args deffered does
 		template<class return_type, class ... parameters>
-		  class task<task_type::immediate, return_type, parameters...> : public task_interface// nearly finished, need to find a way to get the return value using task_interface
+		  class task<task_type::immediate, return_type, parameters...> : public task_interface
 		  {
 			public:
-			  task(){};
 			  explicit task(std::function<return_type(parameters...)> func)
-				:function(std::move(func)){}
+				:function(std::move(func)), pending_future(nullptr){}
 			  explicit task(std::function<return_type(parameters...)> func, parameters &&... params)
 			  {
 				function = std::move(func);
+				pending_future = nullptr;
 				push_back(std::forward<parameters>(params)...);
 			  }
 			  template <typename... Args>
 				void push_back(Args&&... args) 
 				{
-				  pending_futures.push_back(thread_pool.add_task(0, function, std::forward<Args>(args)...));
+				  //pending_futures.push_back(thread_pool.add_task(0, function, std::forward<Args>(args)...));
+  				  pending_future = std::make_shared<thread_pool::tasks::task_future<return_type>>(thread_pool.add_task(0, function, std::forward<Args>(args)...));
 				}
 			  return_type result()
 			  {
@@ -74,35 +76,25 @@ namespace zinhart
 			{ safe_wait_impl(); }
 			private:
 			  std::function<return_type(parameters...)> function;
+			  std::shared_ptr<thread_pool::tasks::task_future<return_type>> pending_future;
 			  return_type return_val;
-			  std::tuple<parameters...> stored_parameters;
-			  std::vector< thread_pool::tasks::task_future<return_type> > pending_futures;
-			  HOST void add_future(thread_pool::tasks::task_future<return_type> && task_future)
-			  { pending_futures.push_back(task_future); }
 			  HOST void wait_impl() override
-			  {
-				for(std::uint32_t i{0}; i < pending_futures.size(); ++i)
-				  return_val = pending_futures[i].get();
-			  }
+			  {	return_val = pending_future->get(); }
 			  HOST void safe_wait_impl() override
-			  {
-				for(std::uint32_t i{0}; i < pending_futures.size(); ++i)
-				  if(pending_futures.at(i).valid())
-				  {
-					return_val = pending_futures.at(i).get();
-				  }				
-			  }
+			  {	if(pending_future->valid()) return_val = pending_future->get(); }
 			  HOST void clear_impl() override
 			  {
-				safe_wait();
-				pending_futures.clear();
+//				safe_wait();
+			//	pending_futures.clear();
 			  }
 		  };
 		template<class return_type, class ... parameters>
-		  class task<task_type::deffered, return_type(parameters...)> : public task_interface
+		  class task<task_type::deffered, return_type, parameters...> : public task_interface
 		  {
-		  // 	stored_parameters = std::make_tuple(std::forward<Args>(args)...);
-
+			public:
+			  explicit task(std::function<return_type(parameters...)> func, parameters &&... params)
+			  {
+			  }
 			private:
 			  std::function<return_type(parameters...)> function;
 			  return_type result;
