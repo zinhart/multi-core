@@ -254,14 +254,14 @@ TEST(task_manager, task_type_immediate)
 TEST(task_manager, task_type_deffered)
 {
   using namespace zinhart::multi_core;
-  typedef task_manager::task< task_manager::task_exec_type::deffered, double, double> task_type;
+  typedef task_manager::task< task_manager::task_exec_type::deffered, double, double, double> task_type;
   double result{0};
   {
-    std::shared_ptr<task_manager::task_interface> test1 = std::make_shared<task_type>([](double x){return x;}, 24.0);
+    std::shared_ptr<task_manager::task_interface> test1 = std::make_shared<task_type>([](double x, double y){return x + y;}, 24.0, 6.0);
 	test1->execute();
 	test1->safe_wait();
 	task_type * pt;
-	ASSERT_DOUBLE_EQ(test1->result(pt), 24.0);
+	ASSERT_DOUBLE_EQ(test1->result(pt), 30.0);
 	
   }
 
