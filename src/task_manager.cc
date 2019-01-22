@@ -54,11 +54,12 @@ namespace zinhart
 	}
 	HOST void task_manager::clear()
 	{
+	  // have to look at this
 	  for(std::uint32_t i = 0; i < pending_tasks.size(); ++i)
 	  {
 	  	auto task = std::move(pending_tasks.front());
-		if(task != nullptr)
-		  task->clear();
+	//	if(task != nullptr)
+	//	  task->clear();
 		pending_tasks.pop();
 	  }
 	}

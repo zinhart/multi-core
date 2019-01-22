@@ -10,8 +10,8 @@ namespace zinhart
 	{
 	  public:
 
-		enum class task_type : std::uint8_t {deffered = 0, immediate};
-		template<task_type, class return_type, class ... parameters>
+		enum class task_exec_type : std::uint8_t {deffered = 0, immediate};
+		template<task_exec_type, class return_type, class ... parameters>
 		  class task{};
 		class task_interface
 		{
@@ -29,29 +29,34 @@ namespace zinhart
 			{
 			  safe_wait_impl();
 			}
-			// no longer needed
-			HOST void clear()
+			HOST void execute()
 			{
-			  clear_impl();
+			  execute_impl();
 			}
 			virtual ~task_interface()
 			{ }
 
 			template<class return_type, class ... parameters>
-			  return_type result( task<task_type::immediate, return_type, parameters...> * t = nullptr)
+			  return_type result( task<task_exec_type::immediate, return_type, parameters...> * t = nullptr)
 			  {
-				t = dynamic_cast<task<task_type::immediate, return_type, parameters...>*>(this);
+				t = dynamic_cast<task<task_exec_type::immediate, return_type, parameters...>*>(this);
+				return (t != nullptr) ? t->result(): throw std::bad_cast();
+			  }
+			template<class return_type, class ... parameters>
+			  return_type result( task<task_exec_type::deffered, return_type, parameters...> * t = nullptr)
+			  {
+				t = dynamic_cast<task<task_exec_type::deffered, return_type, parameters...>*>(this);
 				return (t != nullptr) ? t->result(): throw std::bad_cast();
 			  }
 		  private:
 			HOST virtual void wait_impl() = 0;
 			HOST virtual void safe_wait_impl() = 0;
-			HOST virtual void clear_impl() = 0;
+			HOST virtual void execute_impl() = 0;
 
 		};
 		//immediate does not save args deffered does
 		template<class return_type, class ... parameters>
-		  class task<task_type::immediate, return_type, parameters...> : public task_interface
+		  class task<task_exec_type::immediate, return_type, parameters...> : public task_interface
 		  {
 			public:
 			  explicit task(std::function<return_type(parameters...)> func)
@@ -82,36 +87,57 @@ namespace zinhart
 			  {	return_val = pending_future->get(); }
 			  HOST void safe_wait_impl() override
 			  {	if(pending_future->valid()) return_val = pending_future->get(); }
-			  HOST void clear_impl() override
+			  HOST void execute_impl() override
 			  {
 //				safe_wait();
 			//	pending_futures.clear();
 			  }
 		  };
 		template<class return_type, class ... parameters>
-		  class task<task_type::deffered, return_type, parameters...> : public task_interface
+		  class task<task_exec_type::deffered, return_type, parameters...> : public task_interface
 		  {
 			public:
 			  explicit task(std::function<return_type(parameters...)> func, parameters &&... params)
+				:function(std::move(func)), stored_parameters(std::make_tuple(params...)), pending_future(nullptr)
+			  {}
+			  return_type result()
 			  {
+				return return_val;
 			  }
 			private:
 			  std::function<return_type(parameters...)> function;
-			  return_type result;
 			  std::tuple<parameters...> stored_parameters;
-			  std::vector< thread_pool::tasks::task_future<return_type> > pending_futures;
+			  std::shared_ptr<thread_pool::tasks::task_future<return_type>> pending_future;
+			  return_type return_val;
+			  // For iterating over the function args
+			  template<int ...> struct seq {};
+			  template<int N, int ...S> struct gens : gens<N-1, N-1, S...> {};
+			  template<int ...S> struct gens<0, S...>{ typedef seq<S...> type; };
+			  template<int ...S>
+				std::shared_ptr<thread_pool::tasks::task_future<return_type>> called_stored(seq<S...>)
+				{
+				  return std::make_shared<thread_pool::tasks::task_future<return_type>>(thread_pool.add_task(0, function, std::get<S>(stored_parameters)...));
+//				  return function(std::get<S>(stored_parameters)...);
+				}
 			  HOST virtual void wait_impl() override
 			  {
+			   	return_val = pending_future->get();
 			  }
 			  HOST virtual void safe_wait_impl() override
 			  {
+				if(pending_future->valid()) return_val = pending_future->get();
 			  }
-			  HOST virtual void clear_impl() override
+			  HOST virtual void execute_impl() override
 			  {
+				// need to put function and args onto thread pool
+				//thread_pool.add_task(0, function, called_stored)
+  				//pending_future = std::make_shared<thread_pool::tasks::task_future<return_type>>(thread_pool.add_task(0, function, std::forward<Args>(args)...));
+				pending_future = called_stored(typename gens<sizeof...(parameters)>::type());
 			  }
 		  };
+		/* void specializations
 		template<class ... parameters>
-		  class task<task_type::immediate, void(parameters...)> : public task_interface
+		  class task<task_exec_type::immediate, void(parameters...)> : public task_interface
 		  {
 			private:
 			  HOST virtual void wait_impl() override
@@ -125,7 +151,7 @@ namespace zinhart
 			  }
 		  };
 		template<class ... parameters>
-		  class task<task_type::deffered, void(parameters...)> : public task_interface
+		  class task<task_exec_type::deffered, void(parameters...)> : public task_interface
 		  {
 			private:
 			  HOST virtual void wait_impl() override
@@ -137,7 +163,7 @@ namespace zinhart
 			  HOST virtual void clear_impl() override
 			  {
 			  }
-		  };
+		  };*/
 		// just a wrapper over 1 or more futures
 	/*	template<class T>
 		  class task : public task_interface
