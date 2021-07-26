@@ -1,6 +1,5 @@
 # Multi_Core
-[![Build Status](https://travis-ci.com/zinhart/multi_core.svg?branch=testing)](https://travis-ci.com/zinhart/multi_core)
-[![Coverage Status](https://coveralls.io/repos/github/zinhart/multi_core/badge.svg?branch=testing)](https://coveralls.io/github/zinhart/multi_core?branch=testing)
+[![Build Status](https://travis-ci.com/zinhart/multi_core.svg?branch=testing)](https://travis-ci.com/zinhart/multi_core) [![Coverage Status](https://coveralls.io/repos/github/zinhart/multi_core/badge.svg?branch=testing)](https://coveralls.io/github/zinhart/multi_core?branch=testing)
 # A Library of Cpu and Gpu Multi-Core Routines.
 
 On the cpu side provides synchronous and asynchronous methods with a native thread pool.
