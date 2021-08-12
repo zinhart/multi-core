@@ -1,5 +1,6 @@
 <h1>Using the thread pool:</h1>
-```
+
+```cpp
   std::random_device rd;
   std::mt19937 mt(rd());
   std::uniform_int_distribution<std::uint32_t> thread_dist(1, MAX_CPU_THREADS);
